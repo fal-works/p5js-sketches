@@ -1,0 +1,9 @@
+.rpt2_cache/
+.vscode/
+node_modules/
+package-lock.json
+dist/
+memo.txt
+index.html
+tmp/
+assets/
