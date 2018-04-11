@@ -9,6 +9,7 @@ new (p5 as any)();
 const sketch = (p: p5ex.p5exClass) => {
   // ---- constants
   const backgroundColor = p.color(248);
+  const canvasRegion = new p5ex.RectangleRegion(0, 0, 640, 640);
   const worldRegion = new p5ex.RectangleRegion(40, 120, 600, 600);
   const regionColor = new p5ex.ShapeColor(p, p.color(0, 24), p.color(252));
   const cursorColor = new p5ex.ShapeColor(p, null, p.color(0, 64));
@@ -16,7 +17,8 @@ const sketch = (p: p5ex.p5exClass) => {
   const cursorTransformFactor = 0.3;
 
   // ---- variables
-  const entities = new p5ex.SpriteArray<Entity>(256);
+  const entityPool = new p5ex.SpriteArray<Entity>(256);
+  const aliveEntities = new p5ex.CleanableSpriteArray<Entity>(256);
   const mousePosition = p.createVector();
   const globalTimer = new p5ex.LoopedFrameCounter(60);
 
@@ -24,18 +26,11 @@ const sketch = (p: p5ex.p5exClass) => {
   function reviveEntity(position: p5.Vector): void {
     if (!worldRegion.contains(position)) return;
 
-    let newEntity: Entity | null = null;
+    if (entityPool.length === 0) return;
 
-    for (let i = 0; i < entities.length; i += 1) {
-      if (!entities.get(i).isAlive) {
-        newEntity = entities.get(i);
-        break;
-      }
-    }
-
-    if (newEntity == null) return;
-
+    const newEntity: Entity = entityPool.pop();
     newEntity.revive(position);
+    aliveEntities.push(newEntity);
   }
 
   function drawRegion(p: p5ex.p5exClass): void {
@@ -73,25 +68,21 @@ const sketch = (p: p5ex.p5exClass) => {
     );
 
     Entity.initialize(
+      entityPool,
       worldRegion,
       new p5ex.ShapeColor(p, null, p.color(64), true),
       new p5ex.ShapeColor(p, p.color(128), null, true),
     );
 
-    const maxX = 32;
-    const maxY = 4;
-    const entityInterval = (p.nonScaledWidth / (maxX + 1));
-
-    for (let y = 0; y < maxY; y += 1) {
-      for (let x = 0; x < maxX; x += 1) {
-        entities.push(
-          new Entity(p, p.createVector((1 + x) * entityInterval, (1 + y) * entityInterval)),
-        );
-      }
+    for (let i = 0; i < 128; i += 1) {
+      entityPool.push(
+        new Entity(p),
+      );
     }
 
     p.rectMode(p.CORNERS);
     p.ellipseMode(p.CENTER);
+    p.strokeWeight(1.5);
 
     p.background(255);
   };
@@ -113,8 +104,11 @@ const sketch = (p: p5ex.p5exClass) => {
     drawRegion(p);
     drawCursor(p);
 
-    entities.step();
-    entities.draw();
+    entityPool.step();
+    entityPool.draw();
+    aliveEntities.step();
+    aliveEntities.clean();
+    aliveEntities.draw();
   };
 
   p.windowResized = () => {
@@ -124,29 +118,39 @@ const sketch = (p: p5ex.p5exClass) => {
 
   p.mousePressed = () => {
   };
+
+  p.touchMoved = () => {
+    if (canvasRegion.contains(mousePosition)) return false;
+  };
 };
 
 new p5ex.p5exClass(sketch, SKETCH_NAME);
 
 
-class Entity implements p5ex.Sprite {
+class Entity implements p5ex.CleanableSprite {
+  private static pool: p5ex.SpriteArray<Entity>;
+  private static waitingColumnCount = 32;
   private static size = 12;
   private static region: p5ex.RectangleRegion;
   private static deadShapeColor: p5ex.ShapeColor;
   private static deadLineColor: p5ex.ShapeColor;
 
   static initialize(
+    pool: p5ex.SpriteArray<Entity>,
     region: p5ex.RectangleRegion,
     deadShapeColor: p5ex.ShapeColor,
     deadLineColor: p5ex.ShapeColor,
   ): void {
+    this.pool = pool;
     this.region = region;
     this.deadShapeColor = deadShapeColor;
     this.deadLineColor = deadLineColor;
   }
 
+  public isToBeRemoved: boolean = false;
   public isAlive: boolean = false;
   private readonly position: p5.Vector;
+  private readonly waitingPosition: p5.Vector;
   private readonly velocity: p5.Vector;
   private readonly deathPosition: p5.Vector;
 
@@ -159,10 +163,11 @@ class Entity implements p5ex.Sprite {
 
   constructor(
     protected readonly p: p5ex.p5exClass,
-    private readonly waitingPosition: p5.Vector,
   ) {
+    this.waitingPosition = p.createVector();
+    this.resetWaitingPosition();
     this.position = p.createVector();
-    this.position.set(waitingPosition);
+    this.position.set(this.waitingPosition);
     this.velocity = p.createVector();
     this.deathPosition = p.createVector();
 
@@ -191,8 +196,11 @@ class Entity implements p5ex.Sprite {
     if (this.isAlive) {
       this.position.add(this.velocity);
 
-      if (!Entity.region.contains(this.position)) this.kill();
     }
+  }
+
+  clean(): void {
+    if (this.isAlive && !Entity.region.contains(this.position)) this.kill();
   }
 
   draw(): void {
@@ -211,6 +219,7 @@ class Entity implements p5ex.Sprite {
   }
 
   revive(position: p5.Vector): void {
+    this.isToBeRemoved = false;
     this.position.set(position);
     const angle = this.p.random(this.p.TWO_PI);
     this.velocity.set(Math.cos(angle), Math.sin(angle));
@@ -219,11 +228,25 @@ class Entity implements p5ex.Sprite {
   }
 
   kill(): void {
+    this.isToBeRemoved = true;
     this.isAlive = false;
     this.deathPosition.set(this.position);
+    this.resetWaitingPosition();
     this.position.set(this.waitingPosition);
     this.deathTimer.resetCount().on();
     this.coolingTimer.resetCount().on();
+
+    Entity.pool.push(this);
+  }
+
+  private resetWaitingPosition(): void {
+    const index = Entity.pool.length;
+    const maxX = Entity.waitingColumnCount;
+    const entityInterval = this.p.nonScaledWidth / (maxX + 1);
+    this.waitingPosition.set(
+      (1 + index % maxX) * entityInterval,
+      (1 + Math.floor(index / maxX)) * entityInterval,
+    );
   }
 
   private drawShape(): void {
