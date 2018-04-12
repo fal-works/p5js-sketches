@@ -14,14 +14,13 @@ const additionalBanner = `/**
 const myBanner = `/**
  * ${title}.
  * Website => https://www.fal-works.com/
+ * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
  * @copyright 2018 FAL
  * @author FAL <falworks.contact@gmail.com>
  * @version ${version}
  * @license CC-BY-SA-3.0
  */
 ` + (hasAdditionalBanner ? ('\n' + additionalBanner) : "");
-
-// * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
 
 
 export default {
@@ -31,16 +30,16 @@ export default {
     format: 'iife',
     sourcemap: true,
     globals: {
-      'p5ex': 'p5ex'
+      // 'p5ex': 'p5ex'
     },
     banner: myBanner
   },
   external: [
-    'p5ex'
+    // 'p5ex'
   ],
   plugins: [
     resolve({
-      extensions: [ '.mjs' ],
+      extensions: ['.mjs'],
       modulesOnly: true
     }),
     typescript({
