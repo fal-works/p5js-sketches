@@ -2,8 +2,6 @@
 .vscode/
 node_modules/
 package-lock.json
-dist/
-memo.txt
-index.html
+note.txt
 tmp/
-assets/
+private-assets/

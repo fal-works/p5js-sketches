@@ -1,7 +1,7 @@
 {
   "name": "none",
   "description": "none",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "FAL",
   "devDependencies": {
     "p5": "^0.6.0",
@@ -24,8 +24,7 @@
   "scripts": {
     "build": "npm-run-all rollup uglify",
     "rollup": "rollup -c",
-    "browserify": "browserify ./src/main.ts -p [tsify] -e ./node_modules/p5/lib/p5.js > ./dist/sketch.js",
-    "uglify": "uglifyjs ./dist/sketch.js -c ecma=6 -m --screw-ie8 -o ../../public-files/javascript/object-pool/sketch.min.js --comments --ecma 6 --safari10",
+    "uglify": "uglifyjs ./dist/sketch.js -c ecma=6 -m --screw-ie8 -o ./dist/sketch.min.js --comments --ecma 6 --safari10",
     "test": ""
   }
 }
