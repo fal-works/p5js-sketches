@@ -45,6 +45,8 @@ const sketch = (p: p5ex.p5exClass) => {
       p5ex.ScalableCanvasTypes.SQUARE640x640,
     );
 
+    p.pixelDensity(1);
+
     camera = new Camera(p, 0.8);
     kanjiGraph = new KanjiGraph(p, kanjiData, currentFont, camera);
 
