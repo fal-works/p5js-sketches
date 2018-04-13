@@ -1,11 +1,18 @@
 /**
- * Object Pool.
+ * Kanji Network.
  * Website => https://www.fal-works.com/
  * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
  * @copyright 2018 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.1
+ * @version 0.1.0
  * @license CC-BY-SA-3.0
+ */
+
+/**
+ * What you might do if you're clever:
+ * Use Cytoscape.js rather than reinventing the wheel.
+ * 
+ * The font is downloaded from http://mplus-fonts.osdn.jp/ (free software).
  */
 
 (function () {
@@ -197,6 +204,11 @@ class ShapeColor {
  * @static
  */
 ShapeColor.UNDEFINED = new ShapeColor(undefined, undefined, undefined);
+
+/**
+ * An empty function.
+ */
+const EMPTY_FUNCTION = () => { };
 /**
  * 1.5 * PI
  */
@@ -216,9 +228,47 @@ function distSq(v1, v2) {
     return Math.pow(v2.x - v1.x, 2) + Math.pow(v2.y - v1.y, 2) + Math.pow(v2.z - v1.z, 2);
 }
 const TWO_PI = 2 * Math.PI;
+/**
+ * Calculates the difference between two angles in range of -PI to PI.
+ * @param angleA - the angle to subtract from
+ * @param angleB - the angle to subtract
+ */
+function angleDifference(angleA, angleB) {
+    let diff = (angleA - angleB) % TWO_PI;
+    if (diff < -Math.PI)
+        diff += TWO_PI;
+    else if (diff > Math.PI)
+        diff -= TWO_PI;
+    return diff;
+}
 // Temporal vectors for calculation use in getClosestPositionOnLineSegment()
 const tmpVectorAP = dummyP5.createVector();
 const tmpVectorAB = dummyP5.createVector();
+
+/**
+ * Spatial region.
+ */
+class Region {
+}
+/**
+ * Rectangle-shaped spatial region.
+ */
+class RectangleRegion extends Region {
+    get width() { return this.rightPositionX - this.leftPositionX; }
+    get height() { return this.bottomPositionY - this.topPositionY; }
+    get area() { return this.width * this.height; }
+    constructor(x1, y1, x2, y2, margin = 0) {
+        super();
+        this.leftPositionX = x1 - margin;
+        this.topPositionY = y1 - margin;
+        this.rightPositionX = x2 + margin;
+        this.bottomPositionY = y2 + margin;
+    }
+    contains(position) {
+        return (position.x >= this.leftPositionX && position.x <= this.rightPositionX &&
+            position.y >= this.topPositionY && position.y <= this.bottomPositionY);
+    }
+}
 
 function loopArrayLimited(array, callback, arrayLength) {
     let i = 0;
@@ -490,6 +540,55 @@ class CleanableSpriteArray extends CleanableArray {
 CleanableSpriteArray.prototype.draw = SpriteArray.prototype.draw;
 CleanableSpriteArray.prototype.step = SpriteArray.prototype.step;
 
+/**
+ * (To be filled)
+ */
+class ScaleFactor {
+    /**
+     *
+     * @param p - p5ex instance.
+     * @param { number } [value = 1]
+     */
+    constructor(p, value = 1) {
+        this.p = p;
+        this.internalValue = value;
+        this.internalReciprocalValue = 1 / value;
+    }
+    /**
+     * The numeric value of the scale factor.
+     */
+    get value() {
+        return this.internalValue;
+    }
+    set value(v) {
+        if (v === 0) {
+            this.internalValue = 0.0001;
+            this.internalReciprocalValue = 10000;
+            return;
+        }
+        this.internalValue = v;
+        this.internalReciprocalValue = 1 / v;
+    }
+    /**
+     * The reciprocal value of the scale factor.
+     */
+    get reciprocalValue() {
+        return this.internalReciprocalValue;
+    }
+    /**
+     * Calls scale().
+     */
+    applyScale() {
+        this.p.currentRenderer.scale(this.internalValue);
+    }
+    /**
+     * Calls scale() with the reciprocal value.
+     */
+    cancel() {
+        this.p.currentRenderer.scale(this.internalReciprocalValue);
+    }
+}
+
 // temporal vectors for use in QuadraticBezierCurve.
 const tmpMidPoint1 = dummyP5.createVector();
 const tmpMidPoint2 = dummyP5.createVector();
@@ -708,6 +807,163 @@ class PhysicsBody {
 }
 
 /**
+ * Returns the 2D force vector which is to be applied to the load.
+ * @param loadDirectionAngle - the direction angle from the fulcrum to the load
+ * @param loadDistance - the distance between the fulcrum and the load
+ * @param effortDistance - the distance between the fulcrum and the effort
+ * @param effortForceMagnitude - the effort force magnitude
+ * @param rotateClockwise - true if the load is to be rotated clockwise, otherwise false
+ * @param target - the vector to receive the result. Will be newly created if not specified
+ */
+function calculateLeverageForce(loadDirectionAngle, loadDistance, effortDistance, effortForceMagnitude, rotateClockwise, target) {
+    const force = target || dummyP5.createVector();
+    const forceDirectionAngle = loadDirectionAngle + (rotateClockwise ? -dummyP5.HALF_PI : dummyP5.HALF_PI);
+    force.set(Math.cos(forceDirectionAngle), Math.sin(forceDirectionAngle));
+    force.setMag(effortForceMagnitude * effortDistance / loadDistance); // load force
+    return force;
+}
+
+/**
+ * (To be filled)
+ */
+class FrameCounter {
+    constructor() {
+        this.count = 0;
+    }
+    /**
+     * Resets the counter.
+     * @param count
+     */
+    resetCount(count = 0) {
+        this.count = count;
+        return this;
+    }
+    /**
+     * Increments the frame count.
+     */
+    step() {
+        this.count += 1;
+    }
+    /**
+     * Returns the mod.
+     * @param divisor
+     */
+    mod(divisor) {
+        return this.count % divisor;
+    }
+}
+
+/**
+ * (To be filled)
+ */
+class TimedFrameCounter extends FrameCounter {
+    /**
+     * True if this counter is activated.
+     */
+    get isOn() { return this._isOn; }
+
+    /**
+     *
+     * @param durationFrameCount
+     * @param completeBehavior
+     */
+    constructor(durationFrameCount, completeBehavior = EMPTY_FUNCTION) {
+        super();
+        this._isOn = true;
+        this.completeBehavior = completeBehavior;
+        this.durationFrameCount = durationFrameCount;
+    }
+    /**
+     * Activate this counter.
+     * @param duration
+     * @chainable
+     */
+    on(duration) {
+        this._isOn = true;
+        if (duration)
+            this.durationFrameCount = duration;
+        return this;
+    }
+    /**
+     * Deactivate this counter.
+     * @chainable
+     */
+    off() {
+        this._isOn = false;
+        return this;
+    }
+    /**
+     * @override
+     */
+    step() {
+        if (!this._isOn)
+            return;
+        this.count += 1;
+        if (this.count > this.durationFrameCount) {
+            this.completeCycle();
+        }
+    }
+}
+
+/**
+ * (To be filled)
+ */
+class NonLoopedFrameCounter extends TimedFrameCounter {
+    /**
+     * True if the given frame count duration has ellapsed already.
+     */
+    get isCompleted() { return this._isCompleted; }
+
+    /**
+     *
+     * @param durationFrameCount
+     * @param completeBehavior
+     */
+    constructor(durationFrameCount, completeBehavior) {
+        super(durationFrameCount, completeBehavior);
+        this._isCompleted = false;
+    }
+    /**
+     * @override
+     * @chainable
+     */
+    on(duration) {
+        super.on(duration);
+        return this;
+    }
+    /**
+     * @override
+     * @chainable
+     */
+    off() {
+        super.off();
+        return this;
+    }
+    /**
+     * @override
+     */
+    resetCount() {
+        super.resetCount();
+        this._isCompleted = false;
+        return this;
+    }
+    /**
+     * @override
+     */
+    getProgressRatio() {
+        return this._isCompleted ? 1 : this.count / this.durationFrameCount;
+    }
+    /**
+     * @override
+     */
+    completeCycle() {
+        this._isCompleted = true;
+        this._isOn = false;
+        this.completeBehavior();
+    }
+}
+
+/**
  * Extension of p5 class.
  */
 class p5exClass extends p5 {
@@ -852,30 +1108,46 @@ class KanjiNode extends PhysicsBody {
         this.p = p;
         this.character = character;
         this.position.set(p.random(-320, 320), p.random(-320, 320));
-        this.setFriction(0.07);
-        this.graphics = p.createGraphics(40, 40);
+        this.setFriction(1); // !!?!?!?!???
+        const graphicsSize = 40;
+        this.graphics = p.createGraphics(graphicsSize, graphicsSize);
         const g = this.graphics;
         g.strokeWeight(2);
-        g.stroke(128, 128, 128);
+        g.stroke(32, 32, 32);
+        g.fill(255);
         g.rectMode(p.CENTER);
         g.rect(0.5 * g.width, 0.5 * g.height, g.width - 2, g.height - 2, 4);
+        // g.ellipseMode(p.CENTER);
+        // g.noStroke();
+        // g.fill(255, 1024 / graphicsSize);
+        // for (let i = 0; i < graphicsSize; i += 1) {
+        //   g.ellipse(0.5 * g.width, 0.5 * g.height, i, i);
+        // }
         g.textAlign(p.CENTER, p.CENTER);
-        g.textFont(font, 0.75 * g.height);
+        g.textFont(font, 0.7 * g.height);
         g.noStroke();
-        g.fill(32, 32, 32);
-        g.text(character, 0.5 * g.width, 0.4 * g.height);
+        g.fill(0, 0, 0);
+        g.text(character, 0.5 * g.width, 0.38 * g.height);
     }
     step() {
         super.step();
+        if (this.velocity.magSq() < 10000)
+            this.position.sub(this.velocity);
     }
     draw() {
+        this.p.image(this.graphics, this.position.x, this.position.y);
+        // this.render();
+    }
+    render() {
         // this.p.stroke(0, 0, 0);
         // this.p.fill(255, 255, 255);
         // this.p.rect(this.position.x, this.position.y, 30, 30, 4);
-        // this.p.noStroke();
-        // this.p.fill(0, 0, 0);
-        // this.p.text(this.character, this.position.x, this.position.y);
-        this.p.image(this.graphics, this.position.x, this.position.y);
+        this.p.noStroke();
+        this.p.fill(0, 0, 0);
+        this.p.text(this.character, this.position.x, this.position.y);
+    }
+    drawHud() {
+        this.p.rect(this.position.x, this.position.y, 30, 30);
     }
     toString() {
         return this.character;
@@ -941,7 +1213,7 @@ PhysicsSpring.isInitialized = false;
 
 class KanjiEdge extends PhysicsSpring {
     constructor(p, nodeA, nodeB) {
-        super(p, nodeA, nodeB, 70, 0.001);
+        super(p, nodeA, nodeB, 20, 0.001);
     }
     step() {
         super.step();
@@ -949,22 +1221,76 @@ class KanjiEdge extends PhysicsSpring {
     draw() {
         this.p.line(this.nodeA.position.x, this.nodeA.position.y, this.nodeB.position.x, this.nodeB.position.y);
     }
+    drawHud() {
+        this.draw();
+    }
     toString() {
         return this.nodeA + ' -> ' + this.nodeB;
     }
 }
 
 class KanjiGraph {
-    constructor(p, lines, font) {
+    constructor(p, lines, font, camera) {
         this.p = p;
+        this.font = font;
+        this.camera = camera;
         this.nodes = new SpriteArray();
         this.edges = new SpriteArray();
         this.nodeMap = new Map();
+        this.incomingEdgesMap = new Map();
+        this.outgoingEdgesMap = new Map();
         this.applyRepulsion = (element, otherElement) => {
-            // Maybe not correct, but works for now
-            element.attractEachOther(otherElement, -7000000 * this.p.unitAccelerationMagnitude, 0, 10000 * this.p.unitAccelerationMagnitude, 200 * this.p.unitAccelerationMagnitude);
+            if (distSq(element.position, otherElement.position) > 160000)
+                return;
+            const degreeA = this.getIncomingEdges(element).length + this.getOutgoingEdges(element).length;
+            const degreeB = this.getIncomingEdges(otherElement).length + this.getOutgoingEdges(otherElement).length;
+            const totalDegree = degreeA + degreeB;
+            // May not be correct, but works for now
+            element.attractEachOther(otherElement, -20000000 * this.p.unitAccelerationMagnitude * this.repulsionRatio * totalDegree, 0, 50000 * this.p.unitAccelerationMagnitude * this.repulsionRatio, 500 * this.p.unitAccelerationMagnitude);
         };
-        this.font = font;
+        this.updateMass = (node) => {
+            node.mass *= 1.001;
+        };
+        this.keepAwayEdgePair = (node, edgeA, edgeB, magnitudeFactor) => {
+            const directionAngleA = edgeA.getDirectionAngle(node);
+            const directionAngleB = edgeB.getDirectionAngle(node);
+            const angleDifferenceAB = angleDifference(directionAngleB, directionAngleA);
+            const angleDifferenceRatio = this.p.abs(angleDifferenceAB) / this.p.PI;
+            const effortForceMagnitude = magnitudeFactor / this.p.sq(Math.max(angleDifferenceRatio, 0.05));
+            const tmpVec = KanjiGraph.temporalVector;
+            const aIsLeft = angleDifferenceAB > 0;
+            const edgeADistanceSquared = edgeA.distanceSquared;
+            if (edgeADistanceSquared > 1) {
+                const forceA = calculateLeverageForce(directionAngleA, this.p.sqrt(edgeADistanceSquared), 1, effortForceMagnitude, aIsLeft, tmpVec);
+                edgeA.getAdjacentNode(node).applyForce(forceA);
+            }
+            const edgeBDistanceSquared = edgeB.distanceSquared;
+            if (edgeBDistanceSquared > 1) {
+                const forceB = calculateLeverageForce(directionAngleB, this.p.sqrt(edgeBDistanceSquared), 1, effortForceMagnitude, !aIsLeft, tmpVec);
+                edgeB.getAdjacentNode(node).applyForce(forceB);
+            }
+        };
+        this.drawNode = (node) => {
+            if (this.camera.region.contains(node.position))
+                node.draw();
+        };
+        this.drawEdge = (edge) => {
+            if (this.camera.region.contains(edge.nodeA.position) ||
+                this.camera.region.contains(edge.nodeB.position))
+                edge.draw();
+        };
+        this.keepAwayIncidentEdges = (node) => {
+            const edges = KanjiGraph.temporalEdgeArray;
+            edges.clear();
+            edges.pushAll(this.getIncomingEdges(node));
+            edges.pushAll(this.getOutgoingEdges(node));
+            const edgeCount = edges.length;
+            for (let i = 0; i < edgeCount; i += 1) {
+                const nextIndex = (i + 1) % edgeCount;
+                this.keepAwayEdgePair(node, edges.get(i), edges.get(nextIndex), 0.3);
+            }
+        };
+        KanjiGraph.temporalVector = p.createVector();
         for (const line of lines) {
             const characters = p.split(line, '\t');
             const lastIndex = characters.length - 1;
@@ -973,7 +1299,23 @@ class KanjiGraph {
                 this.addEdge(characters[i], lastCharacter);
             }
         }
+        this.edges.loop((edge) => {
+            const predecessorNodeDegree = this.getIncomingEdges(edge.nodeA).length + this.getOutgoingEdges(edge.nodeA).length;
+            const successorNodeDegree = this.getIncomingEdges(edge.nodeB).length + this.getOutgoingEdges(edge.nodeB).length;
+            // edge.springConstant =
+            //   (predecessorNodeDegree === 1 || successorNodeDegree === 1) ?
+            //   0.1 :
+            //   0.1 / p.sq(1 * (predecessorNodeDegree + successorNodeDegree));
+            const difference = p.abs(predecessorNodeDegree - successorNodeDegree);
+            edge.springConstant = 0.005 * (1 + difference);
+        });
+        this.repulsionTimer = new NonLoopedFrameCounter(420);
         this.averagePosition = p.createVector();
+        this.edgeColor = new ShapeColor(p, p.color(64), undefined);
+        this.hudBackgroundColor = new ShapeColor(p, null, p.color(0, 192));
+        this.hudNodeColor = new ShapeColor(p, null, p.color(255, 64));
+        this.hudEdgeColor = new ShapeColor(p, p.color(255, 32), undefined);
+        this.hudCameraColor = new ShapeColor(p, p.color(255, 0, 0, 192), null);
     }
     toString() {
         let s = '';
@@ -983,14 +1325,35 @@ class KanjiGraph {
         return s;
     }
     step() {
+        this.repulsionTimer.step();
+        this.repulsionRatio = this.p.sq(this.repulsionTimer.getProgressRatio());
+        this.nodes.loop(this.updateMass);
         this.edges.step();
         this.nodes.step();
+        // this.nodes.loop(this.keepAwayIncidentEdges);
         this.nodes.roundRobin(this.applyRepulsion);
     }
     draw() {
-        this.p.stroke(0, 0, 0);
-        this.edges.draw();
-        this.nodes.draw();
+        this.p.strokeWeight(1);
+        this.edgeColor.applyColor();
+        this.edges.loop(this.drawEdge);
+        this.nodes.loop(this.drawNode);
+    }
+    drawHud() {
+        this.hudBackgroundColor.applyColor();
+        this.p.rect(0, 0, this.p.nonScaledWidth, this.p.nonScaledHeight);
+        this.p.scale(0.28);
+        this.p.blendMode(this.p.ADD);
+        this.p.strokeWeight(16);
+        this.hudEdgeColor.applyColor();
+        this.edges.loop(this.drawHudEdge);
+        this.hudNodeColor.applyColor();
+        this.nodes.loop(this.drawHudNode);
+        this.p.strokeWeight(10);
+        this.hudCameraColor.applyColor();
+        this.p.rect(this.camera.scaleFactor.reciprocalValue * this.camera.position.x, this.camera.scaleFactor.reciprocalValue * this.camera.position.y, this.camera.scaleFactor.reciprocalValue * this.p.nonScaledWidth, this.camera.scaleFactor.reciprocalValue * this.p.nonScaledHeight);
+        this.p.blendMode(this.p.BLEND);
+        this.p.scale(1 / 0.28);
     }
     addEdge(predecessorCharacter, successorCharacter) {
         const predecessorKanji = this.getOrCreateNode(predecessorCharacter);
@@ -998,10 +1361,27 @@ class KanjiGraph {
         // Check if already added
         for (let i = 0; i < this.edges.length; i += 1) {
             const copmaringEdge = this.edges.get(i);
-            if (predecessorKanji === copmaringEdge.nodeA && successorKanji === copmaringEdge.nodeB)
+            if (predecessorKanji === copmaringEdge.nodeA && successorKanji === copmaringEdge.nodeB) {
                 return;
+            }
         }
-        this.edges.push(new KanjiEdge(this.p, predecessorKanji, successorKanji));
+        const newEdge = new KanjiEdge(this.p, predecessorKanji, successorKanji);
+        this.edges.push(newEdge);
+        this.getOutgoingEdges(predecessorKanji).push(newEdge);
+        predecessorKanji.mass += 2;
+        this.getIncomingEdges(successorKanji).push(newEdge);
+    }
+    getIncomingEdges(node) {
+        const edges = this.incomingEdgesMap.get(node);
+        if (!edges)
+            throw 'Passed unregistered node to getIncomingEdges().';
+        return edges;
+    }
+    getOutgoingEdges(node) {
+        const edges = this.outgoingEdgesMap.get(node);
+        if (!edges)
+            throw 'Passed unregistered node to getOutgoingEdges().';
+        return edges;
     }
     getAveragePosition() {
         this.averagePosition.set(0, 0);
@@ -1018,7 +1398,49 @@ class KanjiGraph {
         const kanji = new KanjiNode(this.p, character, this.font);
         this.nodeMap.set(character, kanji);
         this.nodes.push(kanji);
+        this.incomingEdgesMap.set(kanji, new SpriteArray());
+        this.outgoingEdgesMap.set(kanji, new SpriteArray());
         return kanji;
+    }
+    drawHudNode(node) {
+        node.drawHud();
+    }
+    drawHudEdge(edge) {
+        edge.drawHud();
+    }
+}
+KanjiGraph.temporalEdgeArray = new LoopableArray();
+
+class Camera {
+    constructor(p, scaleFactorValue = 0.8) {
+        this.p = p;
+        this.position = p.createVector();
+        this.scaleFactor = new ScaleFactor(p, scaleFactorValue);
+        this.updateRegion();
+    }
+    apply() {
+        this.p.translate(-this.position.x, -this.position.y);
+        this.scaleFactor.applyScale();
+    }
+    cancel() {
+        this.scaleFactor.cancel();
+        this.p.translate(this.position.x, this.position.y);
+    }
+    updatePosition() {
+        const displacementX = 2 * this.scaleFactor.reciprocalValue *
+            this.p.scalableCanvas.getNonScaledValueOf(this.p.mouseX - this.p.pmouseX);
+        const displacementY = 2 * this.scaleFactor.reciprocalValue *
+            this.p.scalableCanvas.getNonScaledValueOf(this.p.mouseY - this.p.pmouseY);
+        this.position.sub(displacementX, displacementY);
+        this.updateRegion();
+    }
+    updateRegion() {
+        const factor = this.scaleFactor.reciprocalValue;
+        const halfWidth = 0.5 * factor * this.p.nonScaledWidth;
+        const halfHeight = 0.5 * factor * this.p.nonScaledHeight;
+        const x = factor * this.position.x;
+        const y = factor * this.position.y;
+        this.region = new RectangleRegion(x - halfWidth, y - halfHeight, x + halfWidth, y + halfHeight, factor * 32);
     }
 }
 
@@ -1030,8 +1452,8 @@ const sketch = (p) => {
     const backgroundColor = p.color(248);
     // ---- variables
     let currentFont;
-    const mousePosition = p.createVector();
     let kanjiData;
+    let camera;
     let kanjiGraph;
     // ---- Setup & Draw etc.
     p.preload = () => {
@@ -1042,7 +1464,8 @@ const sketch = (p) => {
     p.setup = () => {
         window.noCanvas();
         p.createScalableCanvas(ScalableCanvasTypes.SQUARE640x640);
-        kanjiGraph = new KanjiGraph(p, kanjiData, currentFont);
+        camera = new Camera(p, 0.8);
+        kanjiGraph = new KanjiGraph(p, kanjiData, currentFont, camera);
         p.rectMode(p.CENTER);
         p.textFont(currentFont, 20);
         p.textAlign(p.CENTER, p.CENTER);
@@ -1051,21 +1474,23 @@ const sketch = (p) => {
         p.frameRate(30);
     };
     p.draw = () => {
+        kanjiGraph.step();
         p.background(backgroundColor);
         p.scalableCanvas.scale();
         p.translate(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
-        p.scale(0.5);
-        kanjiGraph.step();
+        camera.apply();
         kanjiGraph.draw();
+        camera.cancel();
+        p.translate((-0.5 + 5 / 6) * p.nonScaledWidth, (-0.5 + 5 / 6) * p.nonScaledHeight);
+        p.scale(1 / 3);
+        kanjiGraph.drawHud();
     };
     p.windowResized = () => {
         p.resizeScalableCanvas();
         p.background(255);
     };
-    p.mouseMoved = () => {
-        if (!p.scalableCanvas)
-            return;
-        mousePosition.set(p.scalableCanvas.getNonScaledValueOf(p.mouseX), p.scalableCanvas.getNonScaledValueOf(p.mouseY));
+    p.mouseDragged = () => {
+        camera.updatePosition();
     };
     p.mousePressed = () => {
     };

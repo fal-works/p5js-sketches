@@ -5,8 +5,8 @@ export default class PhysicsSpring<T extends p5ex.PhysicsBody> extends PhysicsBo
   private static temporalVector: p5.Vector;
   private static isInitialized = false;
 
-  private readonly equilibriumLength: number;
-  private readonly springConstant: number;
+  public equilibriumLength: number;
+  public springConstant: number;
 
   constructor(
     p: p5ex.p5exClass,

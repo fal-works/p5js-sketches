@@ -4,8 +4,9 @@ import PhysicsSpring from './PhysicsSpring';
 
 export default class KanjiEdge extends PhysicsSpring<KanjiNode> implements p5ex.Sprite {
   constructor(p: p5ex.p5exClass, nodeA: KanjiNode, nodeB: KanjiNode) {
-    super(p, nodeA, nodeB, 70, 0.001);
+    super(p, nodeA, nodeB, 20, 0.001);
   }
+
   step(): void {
     super.step();
   }
@@ -17,6 +18,10 @@ export default class KanjiEdge extends PhysicsSpring<KanjiNode> implements p5ex.
       this.nodeB.position.x,
       this.nodeB.position.y,
     );
+  }
+
+  drawHud(): void {
+    this.draw();
   }
 
   toString(): string {

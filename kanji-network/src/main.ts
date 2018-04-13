@@ -1,5 +1,6 @@
 import * as p5ex from 'p5ex';
 import KanjiGraph from './KanjiGraph';
+import Camera from './Camera';
 
 (p5 as any).disableFriendlyErrors = true;
 
@@ -13,8 +14,8 @@ const sketch = (p: p5ex.p5exClass) => {
 
   // ---- variables
   let currentFont: p5.Font;
-  const mousePosition = p.createVector();
   let kanjiData: string[];
+  let camera: Camera;
   let kanjiGraph: KanjiGraph;
 
 
@@ -31,7 +32,8 @@ const sketch = (p: p5ex.p5exClass) => {
       p5ex.ScalableCanvasTypes.SQUARE640x640,
     );
 
-    kanjiGraph = new KanjiGraph(p, kanjiData, currentFont);
+    camera = new Camera(p, 0.8);
+    kanjiGraph = new KanjiGraph(p, kanjiData, currentFont, camera);
 
     p.rectMode(p.CENTER);
     p.textFont(currentFont, 20);
@@ -43,13 +45,20 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.draw = () => {
+    kanjiGraph.step();
+
     p.background(backgroundColor);
     p.scalableCanvas.scale();
     p.translate(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
-    p.scale(0.5);
+    camera.apply();
 
-    kanjiGraph.step();
     kanjiGraph.draw();
+
+    camera.cancel();
+
+    p.translate((-0.5 + 5 / 6) * p.nonScaledWidth, (-0.5 + 5 / 6) * p.nonScaledHeight);
+    p.scale(1 / 3);
+    kanjiGraph.drawHud();
   };
 
   p.windowResized = () => {
@@ -57,13 +66,8 @@ const sketch = (p: p5ex.p5exClass) => {
     p.background(255);
   };
 
-  p.mouseMoved = () => {
-    if (!p.scalableCanvas) return;
-
-    mousePosition.set(
-      p.scalableCanvas.getNonScaledValueOf(p.mouseX),
-      p.scalableCanvas.getNonScaledValueOf(p.mouseY),
-    );
+  p.mouseDragged = () => {
+    camera.updatePosition();
   };
 
   p.mousePressed = () => {

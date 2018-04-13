@@ -2,12 +2,15 @@ import resolve from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import cleanup from 'rollup-plugin-cleanup';
 
-const title = 'Object Pool';
-const version = '0.1.1';
+const title = 'Kanji Network';
+const version = '0.1.0';
 
-const hasAdditionalBanner = false;
+const hasAdditionalBanner = true;
 const additionalBanner = `/**
+ * What you might do if you're clever:
+ * Use Cytoscape.js rather than reinventing the wheel.
  * 
+ * The font is downloaded from http://mplus-fonts.osdn.jp/ (free software).
  */
 `;
 
