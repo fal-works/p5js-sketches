@@ -1112,6 +1112,7 @@ class KanjiNode extends PhysicsBody {
         const graphicsSize = 40;
         this.graphics = p.createGraphics(graphicsSize, graphicsSize);
         const g = this.graphics;
+        g.pixelDensity(1); // Not sure if this works
         g.strokeWeight(2);
         g.stroke(32, 32, 32);
         g.fill(255);
@@ -1480,7 +1481,7 @@ const sketch = (p) => {
     p.setup = () => {
         window.noCanvas();
         p.createScalableCanvas(ScalableCanvasTypes.SQUARE640x640);
-        p.pixelDensity(1);
+        p.pixelDensity(1); // Not sure if this works
         camera = new Camera(p, 0.8);
         kanjiGraph = new KanjiGraph(p, kanjiData, currentFont, camera);
         p.rectMode(p.CENTER);

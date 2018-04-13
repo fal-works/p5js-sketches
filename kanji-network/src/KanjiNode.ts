@@ -15,6 +15,7 @@ export default class KanjiNode extends p5ex.PhysicsBody implements p5ex.Sprite {
     const graphicsSize = 40;
     this.graphics = p.createGraphics(graphicsSize, graphicsSize);
     const g = this.graphics as any;
+    g.pixelDensity(1);  // Not sure if this works
     g.strokeWeight(2);
     g.stroke(32, 32, 32);
     g.fill(255);
