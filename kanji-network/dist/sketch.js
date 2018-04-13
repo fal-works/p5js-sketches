@@ -1112,6 +1112,7 @@ class KanjiNode extends PhysicsBody {
         const graphicsSize = 40;
         this.graphics = p.createGraphics(graphicsSize, graphicsSize);
         const g = this.graphics;
+        g.pixelDensity(p.pixelDensity()); // Not sure if this works
         g.strokeWeight(2);
         g.stroke(32, 32, 32);
         g.fill(255);
@@ -1459,6 +1460,18 @@ const sketch = (p) => {
     let kanjiData;
     let camera;
     let kanjiGraph;
+    // ---- functions
+    function mouseIsInCanvas() {
+        if (p.mouseX < 0)
+            return false;
+        if (p.mouseY > p.width)
+            return false;
+        if (p.mouseY < 0)
+            return false;
+        if (p.mouseY > p.height)
+            return false;
+        return true;
+    }
     // ---- Setup & Draw etc.
     p.preload = () => {
         // currentFont = p.loadFont('./assets/mplus-1p-regular.ttf');
@@ -1494,19 +1507,16 @@ const sketch = (p) => {
         p.background(255);
     };
     p.mouseDragged = () => {
+        if (!mouseIsInCanvas())
+            return;
         camera.updatePosition();
     };
     p.mousePressed = () => {
     };
     p.touchMoved = () => {
-        if (p.mouseX < 0)
+        if (!mouseIsInCanvas())
             return;
-        if (p.mouseY > p.width)
-            return;
-        if (p.mouseY < 0)
-            return;
-        if (p.mouseY > p.height)
-            return;
+        camera.updatePosition();
         return false;
     };
 };

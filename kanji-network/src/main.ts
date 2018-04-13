@@ -22,6 +22,15 @@ const sketch = (p: p5ex.p5exClass) => {
   let camera: Camera;
   let kanjiGraph: KanjiGraph;
 
+  // ---- functions
+  function mouseIsInCanvas(): boolean {
+    if (p.mouseX < 0) return false;
+    if (p.mouseY > p.width) return false;
+    if (p.mouseY < 0) return false;
+    if (p.mouseY > p.height) return false;
+
+    return true;
+  }
 
   // ---- Setup & Draw etc.
   p.preload = () => {
@@ -71,6 +80,8 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.mouseDragged = () => {
+    if (!mouseIsInCanvas()) return;
+
     camera.updatePosition();
   };
 
@@ -78,10 +89,9 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.touchMoved = () => {
-    if (p.mouseX < 0) return;
-    if (p.mouseY > p.width) return;
-    if (p.mouseY < 0) return;
-    if (p.mouseY > p.height) return;
+    if (!mouseIsInCanvas()) return;
+
+    camera.updatePosition();
 
     return false;
   };
