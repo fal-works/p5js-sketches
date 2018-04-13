@@ -1464,7 +1464,7 @@ const sketch = (p) => {
     function mouseIsInCanvas() {
         if (p.mouseX < 0)
             return false;
-        if (p.mouseY > p.width)
+        if (p.mouseX > p.width)
             return false;
         if (p.mouseY < 0)
             return false;

@@ -25,7 +25,7 @@ const sketch = (p: p5ex.p5exClass) => {
   // ---- functions
   function mouseIsInCanvas(): boolean {
     if (p.mouseX < 0) return false;
-    if (p.mouseY > p.width) return false;
+    if (p.mouseX > p.width) return false;
     if (p.mouseY < 0) return false;
     if (p.mouseY > p.height) return false;
 
