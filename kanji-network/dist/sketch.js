@@ -1446,10 +1446,14 @@ class Camera {
 
 p5.disableFriendlyErrors = true;
 const SKETCH_NAME = 'KanjiNetwork';
+const ASSETS_VIA_NETWORK = true;
 new p5();
 const sketch = (p) => {
     // ---- constants
     const backgroundColor = p.color(248);
+    const assetsPath = ASSETS_VIA_NETWORK ?
+        'https://cdn.rawgit.com/fal-works/p5js-sketches/c0e40b5a/kanji-network/assets/' :
+        './assets/';
     // ---- variables
     let currentFont;
     let kanjiData;
@@ -1458,8 +1462,8 @@ const sketch = (p) => {
     // ---- Setup & Draw etc.
     p.preload = () => {
         // currentFont = p.loadFont('./assets/mplus-1p-regular.ttf');
-        currentFont = p.loadFont('./assets/mplus-1p-light.ttf');
-        kanjiData = p.loadStrings('./assets/kanji-data.txt');
+        currentFont = p.loadFont(assetsPath + 'mplus-1p-light.ttf');
+        kanjiData = p.loadStrings(assetsPath + 'kanji-data.txt');
     };
     p.setup = () => {
         window.noCanvas();
