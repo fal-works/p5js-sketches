@@ -169,7 +169,7 @@ export default class Graph implements p5ex.Sprite {
       Graph.isInitialized = true;
     }
 
-    this.region = new p5ex.RectangleRegion(0, 0, p.nonScaledWidth, p.nonScaledHeight, -50);
+    this.region = new p5ex.RectangleRegion(0, 0, p.nonScaledWidth, p.nonScaledHeight, -80);
 
     this.oneStrokeDelayTimer = new p5ex.NonLoopedFrameCounter(
       1 * p.idealFrameRate,

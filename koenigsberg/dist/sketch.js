@@ -1640,7 +1640,7 @@ class Graph {
             Graph.temporalVector = p.createVector();
             Graph.isInitialized = true;
         }
-        this.region = new RectangleRegion(0, 0, p.nonScaledWidth, p.nonScaledHeight, -50);
+        this.region = new RectangleRegion(0, 0, p.nonScaledWidth, p.nonScaledHeight, -80);
         this.oneStrokeDelayTimer = new NonLoopedFrameCounter(1 * p.idealFrameRate, () => {
             this.firstEdge.fire(this.firstNode);
         });
