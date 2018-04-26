@@ -939,12 +939,16 @@ const SKETCH_NAME = 'RectangleMicrobes';
 new p5();
 const sketch = (p) => {
     // ---- constants
-    let backgroundGraphics;
+    let backgroundPixels;
     // ---- variables
+    let timeoutId = -1;
     let microbes;
     // ---- functions
-    function createBackgroundGraphics() {
-        return createGradationRectangle(p, p.width, p.height, p.color(255, 255, 255), p.color(248, 248, 248), p.color(240, 240, 255));
+    function createBackgroundPixels() {
+        const g = createGradationRectangle(p, p.width, p.height, p.color(255, 255, 255), p.color(248, 248, 248), p.color(240, 240, 255));
+        p.image(g, 0, 0);
+        p.loadPixels();
+        return p.pixels;
     }
     function mouseIsInCanvas() {
         if (p.mouseX < 0)
@@ -969,12 +973,13 @@ const sketch = (p) => {
     p.setup = () => {
         window.noCanvas();
         p.createScalableCanvas(ScalableCanvasTypes.FULL);
-        backgroundGraphics = createBackgroundGraphics();
+        backgroundPixels = createBackgroundPixels();
         p.rectMode(p.CENTER);
         microbes = new CleanableSpriteArray(256);
     };
     p.draw = () => {
-        p.image(backgroundGraphics, 0, 0);
+        p.pixels = backgroundPixels;
+        p.updatePixels();
         p.scalableCanvas.scale();
         spawn();
         microbes.step();
@@ -983,8 +988,9 @@ const sketch = (p) => {
     };
     p.windowResized = () => {
         p.resizeScalableCanvas();
-        // p.background(backgroundColor);
-        backgroundGraphics = createBackgroundGraphics();
+        if (timeoutId !== -1)
+            clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => { backgroundPixels = createBackgroundPixels(); }, 200);
         Microbe.resetRegion(p);
     };
     p.mousePressed = () => {

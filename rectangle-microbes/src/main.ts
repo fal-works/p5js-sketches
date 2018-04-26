@@ -10,14 +10,15 @@ new (p5 as any)();
 
 const sketch = (p: p5ex.p5exClass) => {
   // ---- constants
-  let backgroundGraphics: p5.Graphics;
+  let backgroundPixels: number[];
 
   // ---- variables
+  let timeoutId = -1;
   let microbes: p5ex.CleanableSpriteArray<Microbe>;
 
   // ---- functions
-  function createBackgroundGraphics(): p5.Graphics {
-    return createGradationRectangle(
+  function createBackgroundPixels(): number[] {
+    const g = createGradationRectangle(
       p,
       p.width,
       p.height,
@@ -25,6 +26,10 @@ const sketch = (p: p5ex.p5exClass) => {
       p.color(248, 248, 248),
       p.color(240, 240, 255),
     );
+    p.image(g, 0, 0);
+    p.loadPixels();
+
+    return p.pixels;
   }
 
   function mouseIsInCanvas(): boolean {
@@ -53,14 +58,15 @@ const sketch = (p: p5ex.p5exClass) => {
       p5ex.ScalableCanvasTypes.FULL,
     );
 
-    backgroundGraphics = createBackgroundGraphics();
+    backgroundPixels = createBackgroundPixels();
     p.rectMode(p.CENTER);
 
     microbes = new p5ex.CleanableSpriteArray<Microbe>(256);
   };
 
   p.draw = () => {
-    p.image(backgroundGraphics, 0, 0);
+    p.pixels = backgroundPixels;
+    p.updatePixels();
     p.scalableCanvas.scale();
 
     spawn();
@@ -72,8 +78,13 @@ const sketch = (p: p5ex.p5exClass) => {
 
   p.windowResized = () => {
     p.resizeScalableCanvas();
-    // p.background(backgroundColor);
-    backgroundGraphics = createBackgroundGraphics();
+
+    if (timeoutId !== -1) clearTimeout(timeoutId);
+    timeoutId = setTimeout(
+      () => { backgroundPixels = createBackgroundPixels(); },
+      200,
+    );
+
     Microbe.resetRegion(p);
   };
 
