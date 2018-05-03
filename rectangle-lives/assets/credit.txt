@@ -8,7 +8,7 @@ http://golly.sourceforge.net/
 "vacuum-cleaner.rle"
   Dean Hickerson, 2/21/97; from Jason Summers' "jslife" collection
 
-See below for the copy of the license.
+See below for the copy of the license of Golly.
 
 ------------------------------------------------------------------------------------------------
 
