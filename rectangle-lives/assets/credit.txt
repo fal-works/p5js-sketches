@@ -1,4 +1,4 @@
-The RLE files is a copy from a free software "Golly" without modification.
+The RLE files below are copied from a free software "Golly" without modification.
 http://golly.sourceforge.net/
 
 "queen-bee-turn.rle"
