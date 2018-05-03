@@ -206,7 +206,7 @@ const rectangleLives = (
   htmlElementId: string = 'RectangleLives',
 ) => {
   // const SKETCH_NAME = 'RectangleLives';
-  const OPENPROCESSING = true;
+  const OPENPROCESSING = false;
 
   if (OPENPROCESSING) new (p5 as any)();
 

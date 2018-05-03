@@ -1155,7 +1155,7 @@ class LifeCell extends NaiveCell {
 }
 const rectangleLives = (rlePath, marginCellCount = 1, htmlElementId = 'RectangleLives') => {
     // const SKETCH_NAME = 'RectangleLives';
-    const OPENPROCESSING = true;
+    const OPENPROCESSING = false;
     if (OPENPROCESSING)
         new p5();
     const sketch = (p) => {
