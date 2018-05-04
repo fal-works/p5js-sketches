@@ -1059,22 +1059,25 @@ class LifeGrid extends Grid {
         this.generationIntervalFrameCount = 1;
         this.generationPreparationFrameCount = 0;
         this.drawBornCell = (cell) => {
-            const index = this.getCellIndex(cell);
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.alive;
-            setPixelRange(this.p, index.x * pixelSize, index.y * pixelSize, pixelSize, color.red, color.green, color.blue);
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red, color.green, color.blue);
         };
         this.drawDyingCell = (cell) => {
-            const index = this.getCellIndex(cell);
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.dying;
             const ratio = cell.deathTimer.getProgressRatio();
-            setPixelRange(this.p, index.x * pixelSize, index.y * pixelSize, pixelSize, color.red(ratio), color.green(ratio), color.blue(ratio));
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(ratio), color.green(ratio), color.blue(ratio));
         };
         this.cellsToChange = new LoopableArray(data.cellCountX * data.cellCountY);
         this.bornCells = new LoopableArray(data.cellCountX * data.cellCountY);
         this.dyingCells = new LoopableArray(data.cellCountX * data.cellCountY);
-        this.cell2DArray.loop((cell) => { cell.grid = this; });
+        this.cell2DArray.loop((cell) => {
+            cell.grid = this;
+            const index = this.getCellIndex(cell);
+            cell.xIndex = index.x;
+            cell.yIndex = index.y;
+        });
         this.updateSize();
         for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
             const cell = this.getCell(data.initialCells[i], data.initialCells[i + 1]);
