@@ -21,9 +21,9 @@ export interface LifeAliveColor {
 }
 
 export interface LifeDyingColor {
-  red: (ratio: number) => number;
-  green: (ratio: number) => number;
-  blue: (ratio: number) => number;
+  red: (deathRatio: number) => number;
+  green: (deathRatio: number) => number;
+  blue: (deathRatio: number) => number;
 }
 
 export interface LifeColor {
@@ -39,9 +39,9 @@ const defaultLifeColor: LifeColor = {
     blue: 48,
   },
   dying: {
-    red: (ratio: number) => { return 192 + ratio * 60; },
-    green: (ratio: number) => { return 192 + ratio * 60; },
-    blue: (ratio: number) => { return 255; },
+    red: (deathRatio: number) => { return 192 + deathRatio * 60; },
+    green: (deathRatio: number) => { return 192 + deathRatio * 60; },
+    blue: (deathRatio: number) => { return 255; },
   },
   background: [252, 252, 255],
 };
@@ -176,15 +176,15 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   protected drawDyingCell = (cell: LifeCell) => {
     const pixelSize = this.cellPixelSize.value;
     const color = this.color.dying;
-    const ratio = cell.deathTimer.getProgressRatio();
+    const deathRatio = cell.deathTimer.getProgressRatio();
     setPixelRange(
       this.p,
       cell.xIndex * pixelSize,
       cell.yIndex * pixelSize,
       pixelSize,
-      color.red(ratio),
-      color.green(ratio),
-      color.blue(ratio),
+      color.red(deathRatio),
+      color.green(deathRatio),
+      color.blue(deathRatio),
     );
   }
 

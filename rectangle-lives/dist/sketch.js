@@ -1043,9 +1043,9 @@ const defaultLifeColor = {
         blue: 48,
     },
     dying: {
-        red: (ratio) => { return 192 + ratio * 60; },
-        green: (ratio) => { return 192 + ratio * 60; },
-        blue: (ratio) => { return 255; },
+        red: (deathRatio) => { return 192 + deathRatio * 60; },
+        green: (deathRatio) => { return 192 + deathRatio * 60; },
+        blue: (deathRatio) => { return 255; },
     },
     background: [252, 252, 255],
 };
@@ -1066,8 +1066,8 @@ class LifeGrid extends Grid {
         this.drawDyingCell = (cell) => {
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.dying;
-            const ratio = cell.deathTimer.getProgressRatio();
-            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(ratio), color.green(ratio), color.blue(ratio));
+            const deathRatio = cell.deathTimer.getProgressRatio();
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio), color.green(deathRatio), color.blue(deathRatio));
         };
         this.cellsToChange = new LoopableArray(data.cellCountX * data.cellCountY);
         this.bornCells = new LoopableArray(data.cellCountX * data.cellCountY);
