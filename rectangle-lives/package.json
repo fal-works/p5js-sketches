@@ -1,14 +1,9 @@
 {
   "name": "none",
   "description": "none",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "FAL",
-  "dependencies": {
-    "@thi.ng/rle-pack": "^0.2.16",
-    "ca-formats": "0.0.0",
-    "life": "^1.0.0",
-    "rle": "^1.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "p5": "^0.6.1",
     "p5ex": "^0.5.3",

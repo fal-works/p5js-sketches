@@ -3,7 +3,7 @@ import typescript from 'rollup-plugin-typescript2';
 import cleanup from 'rollup-plugin-cleanup';
 
 const title = 'Rectangle Lives';
-const version = '0.1.0';
+const version = '0.2.0';
 
 const hasAdditionalBanner = true;
 const additionalBanner = `/**
