@@ -14,6 +14,38 @@ export interface LifeRule {
   survival: boolean[];
 }
 
+export interface LifeAliveColor {
+  red: number;
+  green: number;
+  blue: number;
+}
+
+export interface LifeDyingColor {
+  red: (ratio: number) => number;
+  green: (ratio: number) => number;
+  blue: (ratio: number) => number;
+}
+
+export interface LifeColor {
+  alive: LifeAliveColor;
+  dying: LifeDyingColor;
+  background: [number, number, number];
+}
+
+const defaultLifeColor: LifeColor = {
+  alive: {
+    red: 48,
+    green: 48,
+    blue: 48,
+  },
+  dying: {
+    red: (ratio: number) => { return 192 + ratio * 60; },
+    green: (ratio: number) => { return 192 + ratio * 60; },
+    blue: (ratio: number) => { return 255; },
+  },
+  background: [252, 252, 255],
+};
+
 export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   readonly cellPixelSize = new p5ex.NumberContainer(1);
   generationIntervalFrameCount = 1;
@@ -29,13 +61,15 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   constructor(
     protected readonly p: p5ex.p5exClass,
     public readonly data: LifePattern,
+    public readonly color: LifeColor = defaultLifeColor,
+    afterImageFrameCount: number = 10,
   ) {
     super(
       data.cellCountX,
       data.cellCountY,
       1,
       false,
-      (neighborRange: number) => { return new LifeCell(p); },
+      (neighborRange: number) => { return new LifeCell(p, afterImageFrameCount); },
       new LifeCell(p),
     );
 
@@ -120,22 +154,34 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
     this.bornCells.clear();
   }
 
-
   protected drawBornCell = (cell: LifeCell) => {
     const index = this.getCellIndex(cell);
-    cell.drawBorn(
-      index.x,
-      index.y,
-      this.cellPixelSize.value,
+    const pixelSize = this.cellPixelSize.value;
+    const color = this.color.alive;
+    setPixelRange(
+      this.p,
+      index.x * pixelSize,
+      index.y * pixelSize,
+      pixelSize,
+      color.red,
+      color.green,
+      color.blue,
     );
   }
 
   protected drawDyingCell = (cell: LifeCell) => {
     const index = this.getCellIndex(cell);
-    cell.drawDying(
-      index.x,
-      index.y,
-      this.cellPixelSize.value,
+    const pixelSize = this.cellPixelSize.value;
+    const color = this.color.dying;
+    const ratio = cell.deathTimer.getProgressRatio();
+    setPixelRange(
+      this.p,
+      index.x * pixelSize,
+      index.y * pixelSize,
+      pixelSize,
+      color.red(ratio),
+      color.green(ratio),
+      color.blue(ratio),
     );
   }
 
@@ -153,13 +199,11 @@ export class LifeCell extends p5ex.NaiveCell implements p5ex.Steppable {
 
   constructor(
     protected readonly p: p5ex.p5exClass,
-    afterImage: boolean = true,
+    afterImageFrameCount: number = 10,
   ) {
     super(1);
     this.position = p.createVector();
-    this.deathTimer = new p5ex.NonLoopedFrameCounter(
-      afterImage ? Math.floor(p.idealFrameRate / 3) : 1,
-    ).off();
+    this.deathTimer = new p5ex.NonLoopedFrameCounter(afterImageFrameCount).off();
   }
 
   step(): void {
@@ -192,32 +236,6 @@ export class LifeCell extends p5ex.NaiveCell implements p5ex.Steppable {
   gotoNextState(): void {
     if (this.willBeAlive) this.setAlive();
     else this.setDead();
-  }
-
-  drawBorn(xIndex: number, yIndex: number, pixelSize: number): void {
-    setPixelRange(
-      this.p,
-      xIndex * pixelSize,
-      yIndex * pixelSize,
-      pixelSize,
-      48,
-      48,
-      48,
-    );
-  }
-
-  drawDying(xIndex: number, yIndex: number, pixelSize: number): void {
-    const ratio = this.deathTimer.getProgressRatio();
-
-    setPixelRange(
-      this.p,
-      xIndex * pixelSize,
-      yIndex * pixelSize,
-      pixelSize,
-      192 + ratio * 60,
-      192 + ratio * 60,
-      255,
-    );
   }
 
   private countAliveNeighbors(): number {

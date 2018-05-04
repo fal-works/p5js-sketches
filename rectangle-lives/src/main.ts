@@ -6,6 +6,8 @@ import * as Life from './Life';
 const rectangleLives = (
   rlePath: string,
   htmlElementId: string = 'RectangleLives',
+  color?: Life.LifeColor,
+  afterImageFrameCount?: number,
 ) => {
   // const SKETCH_NAME = 'RectangleLives';
   const OPENPROCESSING = false;
@@ -41,9 +43,10 @@ const rectangleLives = (
 
       p.noStroke();
 
-      grid = new Life.LifeGrid(p, lifeGameData);
+      grid = new Life.LifeGrid(p, lifeGameData, color, afterImageFrameCount);
 
-      p.background(252, 252, 255);
+      const backgrounColor = grid.color.background;
+      p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
       p.loadPixels();
     };
 

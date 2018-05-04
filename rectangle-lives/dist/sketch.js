@@ -1036,21 +1036,40 @@ function parseRle(s) {
     return cells;
 }
 
+const defaultLifeColor = {
+    alive: {
+        red: 48,
+        green: 48,
+        blue: 48,
+    },
+    dying: {
+        red: (ratio) => { return 192 + ratio * 60; },
+        green: (ratio) => { return 192 + ratio * 60; },
+        blue: (ratio) => { return 255; },
+    },
+    background: [252, 252, 255],
+};
 class LifeGrid extends Grid {
-    constructor(p, data) {
-        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p); }, new LifeCell(p));
+    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10) {
+        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
         this.p = p;
         this.data = data;
+        this.color = color;
         this.cellPixelSize = new NumberContainer(1);
         this.generationIntervalFrameCount = 1;
         this.generationPreparationFrameCount = 0;
         this.drawBornCell = (cell) => {
             const index = this.getCellIndex(cell);
-            cell.drawBorn(index.x, index.y, this.cellPixelSize.value);
+            const pixelSize = this.cellPixelSize.value;
+            const color = this.color.alive;
+            setPixelRange(this.p, index.x * pixelSize, index.y * pixelSize, pixelSize, color.red, color.green, color.blue);
         };
         this.drawDyingCell = (cell) => {
             const index = this.getCellIndex(cell);
-            cell.drawDying(index.x, index.y, this.cellPixelSize.value);
+            const pixelSize = this.cellPixelSize.value;
+            const color = this.color.dying;
+            const ratio = cell.deathTimer.getProgressRatio();
+            setPixelRange(this.p, index.x * pixelSize, index.y * pixelSize, pixelSize, color.red(ratio), color.green(ratio), color.blue(ratio));
         };
         this.cellsToChange = new LoopableArray(data.cellCountX * data.cellCountY);
         this.bornCells = new LoopableArray(data.cellCountX * data.cellCountY);
@@ -1113,13 +1132,13 @@ class LifeGrid extends Grid {
     }
 }
 class LifeCell extends NaiveCell {
-    constructor(p, afterImage = true) {
+    constructor(p, afterImageFrameCount = 10) {
         super(1);
         this.p = p;
         this.isAlive = false;
         this.willBeAlive = false;
         this.position = p.createVector();
-        this.deathTimer = new NonLoopedFrameCounter(afterImage ? Math.floor(p.idealFrameRate / 3) : 1).off();
+        this.deathTimer = new NonLoopedFrameCounter(afterImageFrameCount).off();
     }
     step() {
         if (!this.deathTimer.isOn)
@@ -1149,13 +1168,6 @@ class LifeCell extends NaiveCell {
             this.setAlive();
         else
             this.setDead();
-    }
-    drawBorn(xIndex, yIndex, pixelSize) {
-        setPixelRange(this.p, xIndex * pixelSize, yIndex * pixelSize, pixelSize, 48, 48, 48);
-    }
-    drawDying(xIndex, yIndex, pixelSize) {
-        const ratio = this.deathTimer.getProgressRatio();
-        setPixelRange(this.p, xIndex * pixelSize, yIndex * pixelSize, pixelSize, 192 + ratio * 60, 192 + ratio * 60, 255);
     }
     countAliveNeighbors() {
         let aliveNeighborCells = 0;
@@ -1245,7 +1257,7 @@ function parseLifeRle(strArray) {
 }
 
 p5.disableFriendlyErrors = true;
-const rectangleLives = (rlePath, htmlElementId = 'RectangleLives') => {
+const rectangleLives = (rlePath, htmlElementId = 'RectangleLives', color, afterImageFrameCount) => {
     // const SKETCH_NAME = 'RectangleLives';
     const OPENPROCESSING = false;
     if (OPENPROCESSING)
@@ -1271,8 +1283,9 @@ const rectangleLives = (rlePath, htmlElementId = 'RectangleLives') => {
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
             p.setFrameRate(30);
             p.noStroke();
-            grid = new LifeGrid(p, lifeGameData);
-            p.background(252, 252, 255);
+            grid = new LifeGrid(p, lifeGameData, color, afterImageFrameCount);
+            const backgrounColor = grid.color.background;
+            p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
             p.loadPixels();
         };
         p.draw = () => {
