@@ -14,15 +14,21 @@ export interface LifeRule {
   survival: boolean[];
 }
 
-export class LifeGrid extends p5ex.Grid<LifeCell> {
+export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   readonly cellPixelSize = new p5ex.NumberContainer(1);
   generationIntervalFrameCount = 1;
   generationPreparationFrameCount = 0;
   generationPreparationCellsPerFrame: number;
+  cellsToChange: p5ex.LoopableArray<LifeCell>;
+  bornCells: p5ex.LoopableArray<LifeCell>;
+  dyingCells: p5ex.LoopableArray<LifeCell>;
+
+  protected stepCell: (cell: LifeCell) => void;
+  protected prepareNextGeneration: () => void;
 
   constructor(
     protected readonly p: p5ex.p5exClass,
-    protected readonly data: LifePattern,
+    public readonly data: LifePattern,
   ) {
     super(
       data.cellCountX,
@@ -32,6 +38,12 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
       (neighborRange: number) => { return new LifeCell(p); },
       new LifeCell(p),
     );
+
+    this.cellsToChange = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
+    this.bornCells = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
+    this.dyingCells = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
+
+    this.cell2DArray.loop((cell: LifeCell) => { cell.grid = this; });
 
     this.updateSize();
 
@@ -45,6 +57,46 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
 
     this.generationPreparationCellsPerFrame =
       Math.ceil(this.cell2DArray.length / this.generationIntervalFrameCount);
+
+    if (this.generationIntervalFrameCount > 1) {
+      this.stepCell = (cell: LifeCell) => {
+        cell.step();
+      };
+
+      this.prepareNextGeneration = () => {
+        const cellArray = this.cell2DArray.array;
+        const startIndex =
+          this.generationPreparationCellsPerFrame * this.generationPreparationFrameCount;
+        const endIndex =
+          Math.min(
+            this.generationPreparationCellsPerFrame *
+            (this.generationPreparationFrameCount + 1),
+            this.cell2DArray.length,
+          );
+
+        for (let i = startIndex; i < endIndex; i += 1) {
+          cellArray[i].determineNextState();
+        }
+
+        this.generationPreparationFrameCount += 1;
+
+        if (this.generationPreparationFrameCount >= this.generationIntervalFrameCount) {
+          this.cellsToChange.loop(this.gotoNextState);
+          this.cellsToChange.clear();
+          this.generationPreparationFrameCount = 0;
+        }
+      };
+    } else {
+      this.stepCell = (cell: LifeCell) => {
+        cell.step();
+        cell.determineNextState();
+      };
+
+      this.prepareNextGeneration = () => {
+        this.cellsToChange.loop(this.gotoNextState);
+        this.cellsToChange.clear();
+      };
+    }
   }
 
   updateSize(): void {
@@ -58,42 +110,29 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
 
   step(): void {
     this.cell2DArray.loop(this.stepCell);
-
     this.prepareNextGeneration();
   }
 
-  protected prepareNextGeneration(): void {
-    for (
-      let i = this.generationPreparationCellsPerFrame * this.generationPreparationFrameCount,
-        len = Math.min(
-        this.generationPreparationCellsPerFrame * (this.generationPreparationFrameCount + 1),
-        this.cell2DArray.length,
-      );
-      i < len;
-      i += 1
-    ) {
-      this.cell2DArray.get(i).determineNextState(this.data.rule);
-    }
-
-    this.generationPreparationFrameCount += 1;
-
-    if (this.generationPreparationFrameCount >= this.generationIntervalFrameCount) {
-      this.cell2DArray.loop(this.gotoNextState);
-      this.generationPreparationFrameCount = 0;
-    }
-  }
-
   draw(): void {
-    this.cell2DArray.loop(this.drawCell);
+    this.dyingCells.loop(this.drawDyingCell);
+    this.dyingCells.clear();
+    this.bornCells.loop(this.drawBornCell);
+    this.bornCells.clear();
   }
 
-  private stepCell(cell: LifeCell): void {
-    cell.step();
-  }
 
-  drawCell = (cell: LifeCell) => {
+  protected drawBornCell = (cell: LifeCell) => {
     const index = this.getCellIndex(cell);
-    cell.draw(
+    cell.drawBorn(
+      index.x,
+      index.y,
+      this.cellPixelSize.value,
+    );
+  }
+
+  protected drawDyingCell = (cell: LifeCell) => {
+    const index = this.getCellIndex(cell);
+    cell.drawDying(
       index.x,
       index.y,
       this.cellPixelSize.value,
@@ -105,12 +144,12 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
   }
 }
 
-export class LifeCell extends p5ex.NaiveCell {
+export class LifeCell extends p5ex.NaiveCell implements p5ex.Steppable {
   readonly position: p5.Vector;
   readonly deathTimer: p5ex.NonLoopedFrameCounter;
   isAlive: boolean = false;
   protected willBeAlive: boolean = false;
-  protected birthIndicator: boolean = false;
+  grid: LifeGrid;
 
   constructor(
     protected readonly p: p5ex.p5exClass,
@@ -124,17 +163,30 @@ export class LifeCell extends p5ex.NaiveCell {
   }
 
   step(): void {
+    if (!this.deathTimer.isOn) return;
+
     this.deathTimer.step();
+    this.grid.dyingCells.push(this);
   }
 
-  determineNextState(rule: LifeRule): void {
-    const aliveNeighborsCount = this.countAliveNeighbors();
-
+  /**
+   * Determines the state of this cell in the next generation.
+   * @param rule
+   */
+  determineNextState(): void {
+    // Check birth
     if (!this.isAlive) {
-      this.willBeAlive = rule.birth[aliveNeighborsCount];
-    } else {
-      this.willBeAlive = rule.survival[aliveNeighborsCount];
+      this.willBeAlive = this.grid.data.rule.birth[this.countAliveNeighbors()];
+
+      if (this.willBeAlive) this.grid.cellsToChange.push(this);
+
+      return;
     }
+
+    // Check survival
+    this.willBeAlive = this.grid.data.rule.survival[this.countAliveNeighbors()];
+
+    if (!this.willBeAlive) this.grid.cellsToChange.push(this);
   }
 
   gotoNextState(): void {
@@ -142,39 +194,41 @@ export class LifeCell extends p5ex.NaiveCell {
     else this.setDead();
   }
 
-  draw(xIndex: number, yIndex: number, pixelSize: number): void {
-    let colorValue: number[];
+  drawBorn(xIndex: number, yIndex: number, pixelSize: number): void {
+    setPixelRange(
+      this.p,
+      xIndex * pixelSize,
+      yIndex * pixelSize,
+      pixelSize,
+      48,
+      48,
+      48,
+    );
+  }
 
-    if (this.birthIndicator) colorValue = [48, 48, 48];
-    else if (this.deathTimer.isOn) {
-      const ratio = this.deathTimer.getProgressRatio();
-      colorValue = [
-        224 + Math.floor(ratio * 28),
-        224 + Math.floor(ratio * 28),
-        255,
-      ];
-    }
-    else return;
+  drawDying(xIndex: number, yIndex: number, pixelSize: number): void {
+    const ratio = this.deathTimer.getProgressRatio();
 
     setPixelRange(
       this.p,
       xIndex * pixelSize,
       yIndex * pixelSize,
       pixelSize,
-      colorValue[0],
-      colorValue[1],
-      colorValue[2],
+      192 + ratio * 60,
+      192 + ratio * 60,
+      255,
     );
-
-    this.birthIndicator = false;
   }
 
   private countAliveNeighbors(): number {
     let aliveNeighborCells = 0;
+    const neighborCells = this.neighborCells.array;
 
-    for (let i = 0, len = this.neighborCells.length; i < len; i += 1) {
-      if (this.neighborCells.get(i) === this) continue;
-      if ((this.neighborCells.get(i) as LifeCell).isAlive) aliveNeighborCells += 1;
+    // for (let i = 0, len = this.neighborCells.length; i < len; i += 1) {
+    for (let i = 0; i < 9; i += 1) {
+      // if (neighborCells[i] === this) continue;
+      if (i === 4) continue;
+      if ((neighborCells[i] as LifeCell).isAlive) aliveNeighborCells += 1;
     }
 
     return aliveNeighborCells;
@@ -185,7 +239,7 @@ export class LifeCell extends p5ex.NaiveCell {
 
     this.deathTimer.resetCount().off();
     this.isAlive = true;
-    this.birthIndicator = true;
+    this.grid.bornCells.push(this);
   }
 
   setDead(): void {
