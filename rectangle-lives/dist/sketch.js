@@ -1067,7 +1067,7 @@ class LifeGrid extends Grid {
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.dying;
             const deathRatio = cell.deathTimer.getProgressRatio();
-            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio), color.green(deathRatio), color.blue(deathRatio));
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio, cell.yIndex, this.data.cellCountY), color.green(deathRatio, cell.yIndex, this.data.cellCountY), color.blue(deathRatio, cell.yIndex, this.data.cellCountY));
         };
         this.cellsToChange = new LoopableArray(data.cellCountX * data.cellCountY);
         this.bornCells = new LoopableArray(data.cellCountX * data.cellCountY);
