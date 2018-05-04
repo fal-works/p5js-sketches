@@ -8,6 +8,10 @@ http://golly.sourceforge.net/
 "vacuum-cleaner.rle"
   Dean Hickerson, 2/21/97; from Jason Summers' "jslife" collection
 
+"p59-gun-with-Snark-reflectors"
+  By Dave Greene, 2 May 2013, using Mike Playle's Snark reflector.
+  Based on an earlier p59 gun by Adam P. Goucher and Jason Summers.
+
 See below for the copy of the license of Golly.
 
 ------------------------------------------------------------------------------------------------
