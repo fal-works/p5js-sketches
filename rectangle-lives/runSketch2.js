@@ -1,6 +1,6 @@
 rectangleLives(
   "./assets/vacuum-cleaner.rle",
-  "",
+  undefined,
   {
     alive: {
       red: 240,
