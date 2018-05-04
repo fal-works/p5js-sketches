@@ -1038,7 +1038,7 @@ function parseRle(s) {
 
 class LifeGrid extends Grid {
     constructor(p, data) {
-        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, data.rule); }, new LifeCell(p, { birth: [], survival: [] }));
+        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p); }, new LifeCell(p));
         this.p = p;
         this.data = data;
         this.cellPixelSize = new NumberContainer(1);
@@ -1066,7 +1066,7 @@ class LifeGrid extends Grid {
     }
     prepareNextGeneration() {
         for (let i = this.generationPreparationCellsPerFrame * this.generationPreparationFrameCount, len = Math.min(this.generationPreparationCellsPerFrame * (this.generationPreparationFrameCount + 1), this.cell2DArray.length); i < len; i += 1) {
-            this.cell2DArray.get(i).determineNextState();
+            this.cell2DArray.get(i).determineNextState(this.data.rule);
         }
         this.generationPreparationFrameCount += 1;
         if (this.generationPreparationFrameCount >= this.generationIntervalFrameCount) {
@@ -1085,10 +1085,9 @@ class LifeGrid extends Grid {
     }
 }
 class LifeCell extends NaiveCell {
-    constructor(p, rule, afterImage = true) {
+    constructor(p, afterImage = true) {
         super(1);
         this.p = p;
-        this.rule = rule;
         this.isAlive = false;
         this.willBeAlive = false;
         this.birthIndicator = false;
@@ -1098,13 +1097,13 @@ class LifeCell extends NaiveCell {
     step() {
         this.deathTimer.step();
     }
-    determineNextState() {
+    determineNextState(rule) {
         const aliveNeighborsCount = this.countAliveNeighbors();
         if (!this.isAlive) {
-            this.willBeAlive = this.rule.birth[aliveNeighborsCount];
+            this.willBeAlive = rule.birth[aliveNeighborsCount];
         }
         else {
-            this.willBeAlive = this.rule.survival[aliveNeighborsCount];
+            this.willBeAlive = rule.survival[aliveNeighborsCount];
         }
     }
     gotoNextState() {

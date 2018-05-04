@@ -29,8 +29,8 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
       data.cellCountY,
       1,
       false,
-      (neighborRange: number) => { return new LifeCell(p, data.rule); },
-      new LifeCell(p, { birth: [], survival: [] }),
+      (neighborRange: number) => { return new LifeCell(p); },
+      new LifeCell(p),
     );
 
     this.updateSize();
@@ -72,7 +72,7 @@ export class LifeGrid extends p5ex.Grid<LifeCell> {
       i < len;
       i += 1
     ) {
-      this.cell2DArray.get(i).determineNextState();
+      this.cell2DArray.get(i).determineNextState(this.data.rule);
     }
 
     this.generationPreparationFrameCount += 1;
@@ -114,7 +114,6 @@ export class LifeCell extends p5ex.NaiveCell {
 
   constructor(
     protected readonly p: p5ex.p5exClass,
-    protected readonly rule: LifeRule,
     afterImage: boolean = true,
   ) {
     super(1);
@@ -128,13 +127,13 @@ export class LifeCell extends p5ex.NaiveCell {
     this.deathTimer.step();
   }
 
-  determineNextState(): void {
+  determineNextState(rule: LifeRule): void {
     const aliveNeighborsCount = this.countAliveNeighbors();
 
     if (!this.isAlive) {
-      this.willBeAlive = this.rule.birth[aliveNeighborsCount];
+      this.willBeAlive = rule.birth[aliveNeighborsCount];
     } else {
-      this.willBeAlive = this.rule.survival[aliveNeighborsCount];
+      this.willBeAlive = rule.survival[aliveNeighborsCount];
     }
   }
 
