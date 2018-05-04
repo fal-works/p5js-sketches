@@ -1023,7 +1023,6 @@ function parseRle(s) {
     return cells;
 }
 
-p5.disableFriendlyErrors = true;
 function setPixelRange(graphics, x, y, size, red, green, blue) {
     const g = graphics;
     const w = g.width * g.pixelDensity();
@@ -1036,10 +1035,13 @@ function setPixelRange(graphics, x, y, size, red, green, blue) {
         }
     }
 }
+
+p5.disableFriendlyErrors = true;
 class LifeGrid extends Grid {
-    constructor(p, cellsData, marginCellCount) {
-        super(Math.max(...cellsData) + 1 + 2 * marginCellCount, Math.max(...cellsData) + 1 + 2 * marginCellCount, 1, false, (neighborRange) => { return new LifeCell(p); }, new LifeCell(p));
+    constructor(p, data) {
+        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, data.rule); }, new LifeCell(p, { birth: [0], survival: [0] }));
         this.p = p;
+        this.data = data;
         this.cellPixelSize = new NumberContainer(1);
         this.generationIntervalFrameCount = 1;
         this.generationPreparationFrameCount = 0;
@@ -1047,10 +1049,9 @@ class LifeGrid extends Grid {
             const index = this.getCellIndex(cell);
             cell.draw(index.x, index.y, this.cellPixelSize.value);
         };
-        this.cellCountLevel = Math.max(...cellsData) + 1 + 2 * marginCellCount;
         this.updateSize();
-        for (let i = 0, len = cellsData.length; i < len; i += 2) {
-            const cell = this.getCell(cellsData[i] + marginCellCount, cellsData[i + 1] + marginCellCount);
+        for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
+            const cell = this.getCell(data.initialCells[i], data.initialCells[i + 1]);
             if (cell)
                 cell.setAlive();
         }
@@ -1058,7 +1059,7 @@ class LifeGrid extends Grid {
             Math.ceil(this.cell2DArray.length / this.generationIntervalFrameCount);
     }
     updateSize() {
-        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width, this.p.height) / this.cellCountLevel);
+        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.data.cellCountX, this.p.height / this.data.cellCountY));
     }
     step() {
         this.cell2DArray.loop(this.stepCell);
@@ -1085,9 +1086,10 @@ class LifeGrid extends Grid {
     }
 }
 class LifeCell extends NaiveCell {
-    constructor(p) {
+    constructor(p, rule) {
         super(1);
         this.p = p;
+        this.rule = rule;
         this.birthIndicator = false;
         this.isAlive = false;
         this.willBeAlive = false;
@@ -1100,10 +1102,10 @@ class LifeCell extends NaiveCell {
     determineNextState() {
         const aliveNeighborsCount = this.countAliveNeighbors();
         if (!this.isAlive) {
-            this.willBeAlive = (aliveNeighborsCount === 3);
+            this.willBeAlive = (this.rule.birth.indexOf(aliveNeighborsCount) >= 0);
         }
         else {
-            this.willBeAlive = (aliveNeighborsCount === 2 || aliveNeighborsCount === 3);
+            this.willBeAlive = (this.rule.survival.indexOf(aliveNeighborsCount) >= 0);
         }
     }
     gotoNextState() {
@@ -1153,7 +1155,7 @@ class LifeCell extends NaiveCell {
         this.isAlive = false;
     }
 }
-const rectangleLives = (rlePath, marginCellCount = 1, htmlElementId = 'RectangleLives') => {
+const rectangleLives = (rlePath, htmlElementId = 'RectangleLives') => {
     // const SKETCH_NAME = 'RectangleLives';
     const OPENPROCESSING = false;
     if (OPENPROCESSING)
@@ -1161,18 +1163,57 @@ const rectangleLives = (rlePath, marginCellCount = 1, htmlElementId = 'Rectangle
     const sketch = (p) => {
         // ---- constants
         // ---- variables
-        let initialCellsData;
+        let lifeGameData;
         let grid;
         // ---- functions
+        function parseDigitArray(str) {
+            return str.replace(/[^\d]/g, '').split('').map(Number);
+        }
         function parse(strArray) {
             let rawData = '';
-            for (const strLine of strArray) {
-                const firstChar = strLine.charAt(0);
-                if (firstChar === '#' || firstChar === 'x')
+            let parsedHeader = false;
+            let xValue = undefined;
+            let yValue = undefined;
+            const ruleValue = { birth: [3], survival: [2, 3] };
+            for (let i = 0, len = strArray.length; i < len; i += 1) {
+                const strLine = strArray[i];
+                if (strLine.charAt(0) === '#')
                     continue;
-                rawData += strLine;
+                if (parsedHeader) {
+                    rawData += strLine;
+                    continue;
+                }
+                const xExpression = strLine.match(/x\s*=\s*\d+/);
+                if (xExpression) {
+                    const matchedValue = xExpression[0].match(/\d+/);
+                    if (matchedValue)
+                        xValue = parseInt(matchedValue[0], 10);
+                }
+                const yExpression = strLine.match(/y\s*=\s*\d+/);
+                if (yExpression) {
+                    const matchedValue = yExpression[0].match(/\d+/);
+                    if (matchedValue)
+                        yValue = parseInt(matchedValue[0], 10);
+                }
+                const ruleExpression = strLine.match(/rule\s*=.*/);
+                if (ruleExpression) {
+                    const birth = ruleExpression[0].match(/B[\s\d]+/);
+                    if (birth) {
+                        ruleValue.birth = parseDigitArray(birth[0]);
+                    }
+                    const survival = ruleExpression[0].match(/S[\s\d]+/);
+                    if (survival) {
+                        ruleValue.survival = parseDigitArray(survival[0]);
+                    }
+                }
+                parsedHeader = true;
             }
-            initialCellsData = parseRle(rawData);
+            return {
+                initialCells: parseRle(rawData),
+                cellCountX: xValue || 100,
+                cellCountY: yValue || 100,
+                rule: ruleValue,
+            };
         }
         // ---- Setup & Draw etc.
         p.preload = () => {
@@ -1180,7 +1221,7 @@ const rectangleLives = (rlePath, marginCellCount = 1, htmlElementId = 'Rectangle
             p.loadStrings(rlePath, (strArray) => {
                 console.log('Loaded.');
                 console.log('Parsing ' + rlePath + ' ...');
-                parse(strArray);
+                lifeGameData = parse(strArray);
                 console.log('Parsed.');
             });
         };
@@ -1190,7 +1231,7 @@ const rectangleLives = (rlePath, marginCellCount = 1, htmlElementId = 'Rectangle
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
             p.setFrameRate(30);
             p.noStroke();
-            grid = new LifeGrid(p, initialCellsData, marginCellCount);
+            grid = new LifeGrid(p, lifeGameData);
             p.background(252, 252, 255);
             p.loadPixels();
         };

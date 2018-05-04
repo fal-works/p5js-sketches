@@ -1,28 +1,19 @@
 import * as p5ex from 'p5ex';
 import parseRle from './parseRle';
+import { setPixelRange } from './functions';
 
 (p5 as any).disableFriendlyErrors = true;
 
-function setPixelRange(
-  graphics: p5 | p5.Graphics,
-  x: number,
-  y: number,
-  size: number,
-  red: number,
-  green: number,
-  blue: number,
-) {
-  const g = graphics as any;
-  const w = g.width * g.pixelDensity();
+interface LifeGameData {
+  initialCells: number[];
+  cellCountX: number;
+  cellCountY: number;
+  rule: LifeGameRule;
+}
 
-  for (let i = 0; i < size; i += 1) {
-    for (let j = 0; j < size; j += 1) {
-      const idx = 4 * ((y + j) * w + (x + i));
-      g.pixels[idx] = red;
-      g.pixels[idx + 1] = green;
-      g.pixels[idx + 2] = blue;
-    }
-  }
+interface LifeGameRule {
+  birth: number[];
+  survival: number[];
 }
 
 class LifeGrid extends p5ex.Grid<LifeCell> {
@@ -30,25 +21,26 @@ class LifeGrid extends p5ex.Grid<LifeCell> {
   generationIntervalFrameCount = 1;
   generationPreparationFrameCount = 0;
   generationPreparationCellsPerFrame: number;
-  cellCountLevel: number;
 
-  constructor(protected readonly p: p5ex.p5exClass, cellsData: number[], marginCellCount: number) {
+  constructor(
+    protected readonly p: p5ex.p5exClass,
+    protected readonly data: LifeGameData,
+  ) {
     super(
-      Math.max(...cellsData) + 1 + 2 * marginCellCount,
-      Math.max(...cellsData) + 1 + 2 * marginCellCount,
+      data.cellCountX,
+      data.cellCountY,
       1,
       false,
-      (neighborRange: number) => { return new LifeCell(p); },
-      new LifeCell(p),
+      (neighborRange: number) => { return new LifeCell(p, data.rule); },
+      new LifeCell(p, { birth: [0], survival: [0] }),
     );
 
-    this.cellCountLevel = Math.max(...cellsData) + 1 + 2 * marginCellCount;
     this.updateSize();
 
-    for (let i = 0, len = cellsData.length; i < len; i += 2) {
+    for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
       const cell = this.getCell(
-        cellsData[i] + marginCellCount,
-        cellsData[i + 1] + marginCellCount,
+        data.initialCells[i],
+        data.initialCells[i + 1],
       );
       if (cell) cell.setAlive();
     }
@@ -59,7 +51,10 @@ class LifeGrid extends p5ex.Grid<LifeCell> {
 
   updateSize(): void {
     this.cellPixelSize.value = Math.floor(
-      this.p.pixelDensity() * Math.min(this.p.width, this.p.height) / this.cellCountLevel,
+      this.p.pixelDensity() * Math.min(
+        this.p.width / this.data.cellCountX,
+        this.p.height / this.data.cellCountY,
+      ),
     );
   }
 
@@ -121,6 +116,7 @@ class LifeCell extends p5ex.NaiveCell {
 
   constructor(
     protected readonly p: p5ex.p5exClass,
+    protected readonly rule: LifeGameRule,
   ) {
     super(1);
     this.position = p.createVector();
@@ -135,9 +131,9 @@ class LifeCell extends p5ex.NaiveCell {
     const aliveNeighborsCount = this.countAliveNeighbors();
 
     if (!this.isAlive) {
-      this.willBeAlive = (aliveNeighborsCount === 3);
+      this.willBeAlive = (this.rule.birth.indexOf(aliveNeighborsCount) >= 0);
     } else {
-      this.willBeAlive = (aliveNeighborsCount === 2 || aliveNeighborsCount === 3);
+      this.willBeAlive = (this.rule.survival.indexOf(aliveNeighborsCount) >= 0);
     }
   }
 
@@ -202,7 +198,6 @@ class LifeCell extends p5ex.NaiveCell {
 
 const rectangleLives = (
   rlePath: string,
-  marginCellCount: number = 1,
   htmlElementId: string = 'RectangleLives',
 ) => {
   // const SKETCH_NAME = 'RectangleLives';
@@ -214,22 +209,65 @@ const rectangleLives = (
     // ---- constants
 
     // ---- variables
-    let initialCellsData: number[];
+    let lifeGameData: LifeGameData;
     let grid: LifeGrid;
 
     // ---- functions
-    function parse(strArray: string[]) {
+    function parseDigitArray(str: string): number[] {
+      return str.replace(/[^\d]/g, '').split('').map(Number);
+    }
+
+    function parseLifeRle(strArray: string[]): LifeGameData {
       let rawData = '';
 
-      for (const strLine of strArray) {
-        const firstChar = strLine.charAt(0);
+      let headerIsParsed = false;
+      let xValue = 100;
+      let yValue = 100;
+      const ruleValue: LifeGameRule = { birth: [3], survival: [2, 3] };
 
-        if (firstChar === '#' || firstChar === 'x') continue;
+      for (let i = 0, len = strArray.length; i < len; i += 1) {
+        const strLine = strArray[i];
 
-        rawData += strLine;
+        if (strLine.charAt(0) === '#') continue;
+
+        if (headerIsParsed) {
+          rawData += strLine;
+          continue;
+        }
+
+        const xExpression = strLine.match(/x\s*=\s*\d+/);
+        if (xExpression) {
+          const matchedValue = xExpression[0].match(/\d+/);
+          if (matchedValue) xValue = parseInt(matchedValue[0], 10);
+        }
+
+        const yExpression = strLine.match(/y\s*=\s*\d+/);
+        if (yExpression) {
+          const matchedValue = yExpression[0].match(/\d+/);
+          if (matchedValue) yValue = parseInt(matchedValue[0], 10);
+        }
+
+        const ruleExpression = strLine.match(/rule\s*=.*/);
+        if (ruleExpression) {
+          const birth = ruleExpression[0].match(/B[\s\d]+/);
+          if (birth) {
+            ruleValue.birth = parseDigitArray(birth[0]);
+          }
+          const survival = ruleExpression[0].match(/S[\s\d]+/);
+          if (survival) {
+            ruleValue.survival = parseDigitArray(survival[0]);
+          }
+        }
+
+        headerIsParsed = true;
       }
 
-      initialCellsData = parseRle(rawData);
+      return {
+        initialCells: parseRle(rawData),
+        cellCountX: xValue,
+        cellCountY: yValue,
+        rule: ruleValue,
+      };
     }
 
     // ---- Setup & Draw etc.
@@ -239,7 +277,7 @@ const rectangleLives = (
       p.loadStrings(rlePath, (strArray: string[]) => {
         console.log('Loaded.');
         console.log('Parsing ' + rlePath + ' ...');
-        parse(strArray);
+        lifeGameData = parseLifeRle(strArray);
         console.log('Parsed.');
       });
     };
@@ -254,7 +292,7 @@ const rectangleLives = (
 
       p.noStroke();
 
-      grid = new LifeGrid(p, initialCellsData, marginCellCount);
+      grid = new LifeGrid(p, lifeGameData);
 
       p.background(252, 252, 255);
       p.loadPixels();
