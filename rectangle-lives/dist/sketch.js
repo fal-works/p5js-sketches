@@ -977,6 +977,19 @@ class p5exClass extends p5 {
     }
 }
 
+function setPixelRange(graphics, x, y, size, red, green, blue) {
+    const g = graphics;
+    const w = g.width * g.pixelDensity();
+    for (let i = 0; i < size; i += 1) {
+        for (let j = 0; j < size; j += 1) {
+            const idx = 4 * ((y + j) * w + (x + i));
+            g.pixels[idx] = red;
+            g.pixels[idx + 1] = green;
+            g.pixels[idx + 2] = blue;
+        }
+    }
+}
+
 /**
  * function parseRle()
  *
@@ -1023,23 +1036,9 @@ function parseRle(s) {
     return cells;
 }
 
-function setPixelRange(graphics, x, y, size, red, green, blue) {
-    const g = graphics;
-    const w = g.width * g.pixelDensity();
-    for (let i = 0; i < size; i += 1) {
-        for (let j = 0; j < size; j += 1) {
-            const idx = 4 * ((y + j) * w + (x + i));
-            g.pixels[idx] = red;
-            g.pixels[idx + 1] = green;
-            g.pixels[idx + 2] = blue;
-        }
-    }
-}
-
-p5.disableFriendlyErrors = true;
 class LifeGrid extends Grid {
     constructor(p, data) {
-        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, data.rule); }, new LifeCell(p, { birth: [0], survival: [0] }));
+        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, data.rule); }, new LifeCell(p, { birth: [], survival: [] }));
         this.p = p;
         this.data = data;
         this.cellPixelSize = new NumberContainer(1);
@@ -1086,15 +1085,15 @@ class LifeGrid extends Grid {
     }
 }
 class LifeCell extends NaiveCell {
-    constructor(p, rule) {
+    constructor(p, rule, afterImage = true) {
         super(1);
         this.p = p;
         this.rule = rule;
-        this.birthIndicator = false;
         this.isAlive = false;
         this.willBeAlive = false;
+        this.birthIndicator = false;
         this.position = p.createVector();
-        this.deathTimer = new NonLoopedFrameCounter(Math.floor(p.idealFrameRate / 3)).off();
+        this.deathTimer = new NonLoopedFrameCounter(afterImage ? Math.floor(p.idealFrameRate / 3) : 1).off();
     }
     step() {
         this.deathTimer.step();
@@ -1102,10 +1101,10 @@ class LifeCell extends NaiveCell {
     determineNextState() {
         const aliveNeighborsCount = this.countAliveNeighbors();
         if (!this.isAlive) {
-            this.willBeAlive = (this.rule.birth.indexOf(aliveNeighborsCount) >= 0);
+            this.willBeAlive = this.rule.birth[aliveNeighborsCount];
         }
         else {
-            this.willBeAlive = (this.rule.survival.indexOf(aliveNeighborsCount) >= 0);
+            this.willBeAlive = this.rule.survival[aliveNeighborsCount];
         }
     }
     gotoNextState() {
@@ -1155,6 +1154,67 @@ class LifeCell extends NaiveCell {
         this.isAlive = false;
     }
 }
+function parseDigitArray(str) {
+    return str.replace(/[^\d]/g, '').split('').map(Number);
+}
+function digitArrayToBooleanArray(digitArray, maxInt) {
+    const booleanArray = Array(maxInt);
+    for (let i = 0; i <= maxInt; i += 1) {
+        booleanArray[i] = digitArray.indexOf(i) >= 0;
+    }
+    return booleanArray;
+}
+function parseLifeRle(strArray) {
+    let rawData = '';
+    let headerIsParsed = false;
+    let xValue = 100;
+    let yValue = 100;
+    const ruleValue = {
+        birth: digitArrayToBooleanArray([3], 8),
+        survival: digitArrayToBooleanArray([2, 3], 8),
+    };
+    for (let i = 0, len = strArray.length; i < len; i += 1) {
+        const strLine = strArray[i];
+        if (strLine.charAt(0) === '#')
+            continue;
+        if (headerIsParsed) {
+            rawData += strLine;
+            continue;
+        }
+        const xExpression = strLine.match(/x\s*=\s*\d+/);
+        if (xExpression) {
+            const matchedValue = xExpression[0].match(/\d+/);
+            if (matchedValue)
+                xValue = parseInt(matchedValue[0], 10);
+        }
+        const yExpression = strLine.match(/y\s*=\s*\d+/);
+        if (yExpression) {
+            const matchedValue = yExpression[0].match(/\d+/);
+            if (matchedValue)
+                yValue = parseInt(matchedValue[0], 10);
+        }
+        const ruleExpression = strLine.match(/rule\s*=.*/);
+        if (ruleExpression) {
+            const birth = ruleExpression[0].match(/B[\s\d]+/);
+            if (birth) {
+                ruleValue.birth = digitArrayToBooleanArray(parseDigitArray(birth[0]), 8);
+            }
+            const survival = ruleExpression[0].match(/S[\s\d]+/);
+            if (survival) {
+                ruleValue.survival = digitArrayToBooleanArray(parseDigitArray(survival[0]), 8);
+            }
+        }
+        headerIsParsed = true;
+    }
+    return {
+        initialCells: parseRle(rawData),
+        cellCountX: xValue,
+        cellCountY: yValue,
+        rule: ruleValue,
+    };
+}
+
+p5.disableFriendlyErrors = true;
 const rectangleLives = (rlePath, htmlElementId = 'RectangleLives') => {
     // const SKETCH_NAME = 'RectangleLives';
     const OPENPROCESSING = false;
@@ -1165,63 +1225,13 @@ const rectangleLives = (rlePath, htmlElementId = 'RectangleLives') => {
         // ---- variables
         let lifeGameData;
         let grid;
-        // ---- functions
-        function parseDigitArray(str) {
-            return str.replace(/[^\d]/g, '').split('').map(Number);
-        }
-        function parse(strArray) {
-            let rawData = '';
-            let parsedHeader = false;
-            let xValue = undefined;
-            let yValue = undefined;
-            const ruleValue = { birth: [3], survival: [2, 3] };
-            for (let i = 0, len = strArray.length; i < len; i += 1) {
-                const strLine = strArray[i];
-                if (strLine.charAt(0) === '#')
-                    continue;
-                if (parsedHeader) {
-                    rawData += strLine;
-                    continue;
-                }
-                const xExpression = strLine.match(/x\s*=\s*\d+/);
-                if (xExpression) {
-                    const matchedValue = xExpression[0].match(/\d+/);
-                    if (matchedValue)
-                        xValue = parseInt(matchedValue[0], 10);
-                }
-                const yExpression = strLine.match(/y\s*=\s*\d+/);
-                if (yExpression) {
-                    const matchedValue = yExpression[0].match(/\d+/);
-                    if (matchedValue)
-                        yValue = parseInt(matchedValue[0], 10);
-                }
-                const ruleExpression = strLine.match(/rule\s*=.*/);
-                if (ruleExpression) {
-                    const birth = ruleExpression[0].match(/B[\s\d]+/);
-                    if (birth) {
-                        ruleValue.birth = parseDigitArray(birth[0]);
-                    }
-                    const survival = ruleExpression[0].match(/S[\s\d]+/);
-                    if (survival) {
-                        ruleValue.survival = parseDigitArray(survival[0]);
-                    }
-                }
-                parsedHeader = true;
-            }
-            return {
-                initialCells: parseRle(rawData),
-                cellCountX: xValue || 100,
-                cellCountY: yValue || 100,
-                rule: ruleValue,
-            };
-        }
         // ---- Setup & Draw etc.
         p.preload = () => {
             console.log('Loading ' + rlePath + ' ...');
             p.loadStrings(rlePath, (strArray) => {
                 console.log('Loaded.');
                 console.log('Parsing ' + rlePath + ' ...');
-                lifeGameData = parse(strArray);
+                lifeGameData = parseLifeRle(strArray);
                 console.log('Parsed.');
             });
         };
