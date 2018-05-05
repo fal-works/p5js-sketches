@@ -10,6 +10,7 @@ const rectangleLives = (
     color?: Life.LifeColor;
     afterImageFrameCount?: number;
     marginCells?: number;
+    torusMode?: boolean;
   },
 ) => {
   const SKETCH_NAME = 'RectangleLives';
@@ -52,6 +53,7 @@ const rectangleLives = (
         param.color,
         param.afterImageFrameCount,
         param.marginCells,
+        param.torusMode,
       );
 
       const backgrounColor = grid.color.background;

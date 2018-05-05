@@ -64,12 +64,13 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
     public readonly color: LifeColor = defaultLifeColor,
     afterImageFrameCount: number = 10,
     marginCells: number = 0,
+    torusMode: boolean = false,
   ) {
     super(
       data.cellCountX + 2 * marginCells,
       data.cellCountY + 2 * marginCells,
       1,
-      false,
+      torusMode,
       (neighborRange: number) => { return new LifeCell(p, afterImageFrameCount); },
       new LifeCell(p),
     );

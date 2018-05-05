@@ -1050,8 +1050,8 @@ const defaultLifeColor = {
     background: [252, 252, 255],
 };
 class LifeGrid extends Grid {
-    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10, marginCells = 0) {
-        super(data.cellCountX + 2 * marginCells, data.cellCountY + 2 * marginCells, 1, false, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
+    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10, marginCells = 0, torusMode = false) {
+        super(data.cellCountX + 2 * marginCells, data.cellCountY + 2 * marginCells, 1, torusMode, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
         this.p = p;
         this.data = data;
         this.color = color;
@@ -1286,7 +1286,7 @@ const rectangleLives = (param) => {
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
             p.setFrameRate(30);
             p.noStroke();
-            grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount, param.marginCells);
+            grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount, param.marginCells, param.torusMode);
             const backgrounColor = grid.color.background;
             p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
             p.loadPixels();
