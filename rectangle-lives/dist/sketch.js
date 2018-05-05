@@ -1284,7 +1284,7 @@ const rectangleLives = (param) => {
             if (OPENPROCESSING)
                 window.noCanvas();
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
-            p.setFrameRate(30);
+            p.setFrameRate(param.frameRate || 30);
             p.noStroke();
             grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount, param.marginCells, param.torusMode);
             const backgrounColor = grid.color.background;

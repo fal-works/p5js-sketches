@@ -11,6 +11,7 @@ const rectangleLives = (
     afterImageFrameCount?: number;
     marginCells?: number;
     torusMode?: boolean;
+    frameRate?: number;
   },
 ) => {
   const SKETCH_NAME = 'RectangleLives';
@@ -43,7 +44,7 @@ const rectangleLives = (
         p5ex.ScalableCanvasTypes.FULL,
       );
 
-      p.setFrameRate(30);
+      p.setFrameRate(param.frameRate || 30);
 
       p.noStroke();
 
