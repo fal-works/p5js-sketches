@@ -1171,6 +1171,7 @@ class LifeCell extends NaiveCell {
             return;
         this.deathTimer.on();
         this.isAlive = false;
+        this.grid.dyingCells.push(this);
     }
 }
 function parseDigitArray(str) {

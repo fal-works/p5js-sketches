@@ -236,6 +236,7 @@ export class LifeCell extends p5ex.NaiveCell implements p5ex.Steppable {
 
     this.deathTimer.on();
     this.isAlive = false;
+    this.grid.dyingCells.push(this);
   }
 }
 
