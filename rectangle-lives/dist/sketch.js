@@ -977,137 +977,6 @@ class p5exClass extends p5 {
     }
 }
 
-function setPixelRange(graphics, x, y, size, red, green, blue) {
-    const g = graphics;
-    const w = g.width * g.pixelDensity();
-    for (let i = 0; i < size; i += 1) {
-        for (let j = 0; j < size; j += 1) {
-            const idx = 4 * ((y + j) * w + (x + i));
-            g.pixels[idx] = red;
-            g.pixels[idx + 1] = green;
-            g.pixels[idx + 2] = blue;
-        }
-    }
-}
-
-/**
- * function parseRle()
- *
- * Original code:
- *   "ca-formats" v0.0.0
- *   © 2018 Jamen Marz
- *   MIT license
- *   https://github.com/jamen/ca-formats
- *
- * Modification by FAL.
- *
- * @param s - The string value to be parsed.
- */
-function parseRle(s) {
-    const str = s.replace(/^#.*$/g, '');
-    const cells = [];
-    let b = 0;
-    let x = 0;
-    let y = 0;
-    for (let i = 0; i < str.length; i += 1) {
-        const char = str[i];
-        const rs = b < i && str.slice(b, i);
-        const r = rs ? parseInt(rs, 10) : 1;
-        if (char === 'o') {
-            for (let p = 0; p < r; p += 1) {
-                cells.push(x, y);
-                x += 1;
-            }
-        }
-        else if (char === 'b') {
-            x += r;
-        }
-        else if (char === '$') {
-            y += r;
-            x = 0;
-        }
-        else if (char === 'x' || char === 'y') {
-            i = str.indexOf('\n', i);
-        }
-        if (char === 'o' || char === 'b' || char === '$' || char === 'x' || char === 'y') {
-            b = i + 1;
-        }
-    }
-    return cells;
-}
-
-const defaultLifeColor = {
-    alive: {
-        red: 48,
-        green: 48,
-        blue: 48,
-    },
-    dying: {
-        red: (deathRatio) => { return 192 + deathRatio * 60; },
-        green: (deathRatio) => { return 192 + deathRatio * 60; },
-        blue: (deathRatio) => { return 255; },
-    },
-    background: [252, 252, 255],
-};
-class LifeGrid extends Grid {
-    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10, marginCells = 0, torusMode = false) {
-        super(data.cellCountX + 2 * marginCells, data.cellCountY + 2 * marginCells, 1, torusMode, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
-        this.p = p;
-        this.data = data;
-        this.color = color;
-        this.cellPixelSize = new NumberContainer(1);
-        this.drawBornCell = (cell) => {
-            const pixelSize = this.cellPixelSize.value;
-            const color = this.color.alive;
-            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red, color.green, color.blue);
-        };
-        this.drawDyingCell = (cell) => {
-            const pixelSize = this.cellPixelSize.value;
-            const color = this.color.dying;
-            const deathRatio = cell.deathTimer.getProgressRatio();
-            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.green(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.blue(deathRatio, cell.yIndex, this.cell2DArray.yCount));
-        };
-        this.cellsToChange = new LoopableArray(this.cell2DArray.length);
-        this.bornCells = new LoopableArray(this.cell2DArray.length);
-        this.dyingCells = new LoopableArray(this.cell2DArray.length);
-        this.cell2DArray.loop((cell) => {
-            cell.grid = this;
-            const index = this.getCellIndex(cell);
-            cell.xIndex = index.x;
-            cell.yIndex = index.y;
-        });
-        this.updateSize();
-        for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
-            const cell = this.getCell(data.initialCells[i] + marginCells, data.initialCells[i + 1] + marginCells);
-            if (cell)
-                cell.setAlive();
-        }
-        this.stepCell = (cell) => {
-            cell.step();
-            cell.determineNextState();
-        };
-        this.gotoNextGeneration = () => {
-            this.cellsToChange.loop(this.gotoNextState);
-            this.cellsToChange.clear();
-        };
-    }
-    updateSize() {
-        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.cell2DArray.xCount, this.p.height / this.cell2DArray.yCount));
-    }
-    step() {
-        this.cell2DArray.loop(this.stepCell);
-        this.gotoNextGeneration();
-    }
-    draw() {
-        this.dyingCells.loop(this.drawDyingCell);
-        this.dyingCells.clear();
-        this.bornCells.loop(this.drawBornCell);
-        this.bornCells.clear();
-    }
-    gotoNextState(cell) {
-        cell.gotoNextState();
-    }
-}
 class LifeCell extends NaiveCell {
     constructor(p, afterImageFrameCount = 10) {
         super(1);
@@ -1174,6 +1043,66 @@ class LifeCell extends NaiveCell {
         this.grid.dyingCells.push(this);
     }
 }
+
+/**
+ * function parseRle()
+ *
+ * Original code:
+ *   "ca-formats" v0.0.0
+ *   © 2018 Jamen Marz
+ *   MIT license
+ *   https://github.com/jamen/ca-formats
+ *
+ * Modification by FAL.
+ *
+ * @param s - The string value to be parsed.
+ */
+function parseRle(s) {
+    const str = s.replace(/^#.*$/g, '');
+    const cells = [];
+    let b = 0;
+    let x = 0;
+    let y = 0;
+    for (let i = 0; i < str.length; i += 1) {
+        const char = str[i];
+        const rs = b < i && str.slice(b, i);
+        const r = rs ? parseInt(rs, 10) : 1;
+        if (char === 'o') {
+            for (let p = 0; p < r; p += 1) {
+                cells.push(x, y);
+                x += 1;
+            }
+        }
+        else if (char === 'b') {
+            x += r;
+        }
+        else if (char === '$') {
+            y += r;
+            x = 0;
+        }
+        else if (char === 'x' || char === 'y') {
+            i = str.indexOf('\n', i);
+        }
+        if (char === 'o' || char === 'b' || char === '$' || char === 'x' || char === 'y') {
+            b = i + 1;
+        }
+    }
+    return cells;
+}
+
+const defaultLifeColor = {
+    alive: {
+        red: 48,
+        green: 48,
+        blue: 48,
+    },
+    dying: {
+        red: (deathRatio) => { return 192 + deathRatio * 60; },
+        green: (deathRatio) => { return 192 + deathRatio * 60; },
+        blue: (deathRatio) => { return 255; },
+    },
+    background: [252, 252, 255],
+};
 function parseDigitArray(str) {
     return str.replace(/[^\d]/g, '').split('').map(Number);
 }
@@ -1232,6 +1161,79 @@ function parseLifeRle(strArray) {
         cellCountY: yValue,
         rule: ruleValue,
     };
+}
+
+function setPixelRange(graphics, x, y, size, red, green, blue) {
+    const g = graphics;
+    const w = g.width * g.pixelDensity();
+    for (let i = 0; i < size; i += 1) {
+        for (let j = 0; j < size; j += 1) {
+            const idx = 4 * ((y + j) * w + (x + i));
+            g.pixels[idx] = red;
+            g.pixels[idx + 1] = green;
+            g.pixels[idx + 2] = blue;
+        }
+    }
+}
+
+class LifeGrid extends Grid {
+    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10, marginCells = 0, torusMode = false) {
+        super(data.cellCountX + 2 * marginCells, data.cellCountY + 2 * marginCells, 1, torusMode, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
+        this.p = p;
+        this.data = data;
+        this.color = color;
+        this.cellPixelSize = new NumberContainer(1);
+        this.drawBornCell = (cell) => {
+            const pixelSize = this.cellPixelSize.value;
+            const color = this.color.alive;
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red, color.green, color.blue);
+        };
+        this.drawDyingCell = (cell) => {
+            const pixelSize = this.cellPixelSize.value;
+            const color = this.color.dying;
+            const deathRatio = cell.deathTimer.getProgressRatio();
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.green(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.blue(deathRatio, cell.yIndex, this.cell2DArray.yCount));
+        };
+        this.cellsToChange = new LoopableArray(this.cell2DArray.length);
+        this.bornCells = new LoopableArray(this.cell2DArray.length);
+        this.dyingCells = new LoopableArray(this.cell2DArray.length);
+        this.cell2DArray.loop((cell) => {
+            cell.grid = this;
+            const index = this.getCellIndex(cell);
+            cell.xIndex = index.x;
+            cell.yIndex = index.y;
+        });
+        this.updateSize();
+        for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
+            const cell = this.getCell(data.initialCells[i] + marginCells, data.initialCells[i + 1] + marginCells);
+            if (cell)
+                cell.setAlive();
+        }
+        this.stepCell = (cell) => {
+            cell.step();
+            cell.determineNextState();
+        };
+        this.gotoNextGeneration = () => {
+            this.cellsToChange.loop(this.gotoNextState);
+            this.cellsToChange.clear();
+        };
+    }
+    updateSize() {
+        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.cell2DArray.xCount, this.p.height / this.cell2DArray.yCount));
+    }
+    step() {
+        this.cell2DArray.loop(this.stepCell);
+        this.gotoNextGeneration();
+    }
+    draw() {
+        this.dyingCells.loop(this.drawDyingCell);
+        this.dyingCells.clear();
+        this.bornCells.loop(this.drawBornCell);
+        this.bornCells.clear();
+    }
+    gotoNextState(cell) {
+        cell.gotoNextState();
+    }
 }
 
 p5.disableFriendlyErrors = true;
