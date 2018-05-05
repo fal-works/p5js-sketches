@@ -1,7 +1,6 @@
-rectangleLives(
-  "./assets/queen-bee-turn.rle",
-  undefined,
-  {
+rectangleLives({
+  rlePath: "./assets/queen-bee-turn.rle",
+  color: {
     alive: {
       red: 240,
       green: 240,
@@ -14,5 +13,5 @@ rectangleLives(
     },
     background: [4, 4, 4],
   },
-  20
-);
+  afterImageFrameCount: 20
+});

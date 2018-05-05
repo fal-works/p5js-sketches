@@ -1260,8 +1260,8 @@ function parseLifeRle(strArray) {
 }
 
 p5.disableFriendlyErrors = true;
-const rectangleLives = (rlePath, htmlElementId = 'RectangleLives', color, afterImageFrameCount) => {
-    // const SKETCH_NAME = 'RectangleLives';
+const rectangleLives = (param) => {
+    const SKETCH_NAME = 'RectangleLives';
     const OPENPROCESSING = false;
     if (OPENPROCESSING)
         new p5();
@@ -1272,10 +1272,10 @@ const rectangleLives = (rlePath, htmlElementId = 'RectangleLives', color, afterI
         let grid;
         // ---- Setup & Draw etc.
         p.preload = () => {
-            console.log('Loading ' + rlePath + ' ...');
-            p.loadStrings(rlePath, (strArray) => {
+            console.log('Loading ' + param.rlePath + ' ...');
+            p.loadStrings(param.rlePath, (strArray) => {
                 console.log('Loaded.');
-                console.log('Parsing ' + rlePath + ' ...');
+                console.log('Parsing ' + param.rlePath + ' ...');
                 lifeGameData = parseLifeRle(strArray);
                 console.log('Parsed.');
             });
@@ -1286,7 +1286,7 @@ const rectangleLives = (rlePath, htmlElementId = 'RectangleLives', color, afterI
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
             p.setFrameRate(30);
             p.noStroke();
-            grid = new LifeGrid(p, lifeGameData, color, afterImageFrameCount);
+            grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount);
             const backgrounColor = grid.color.background;
             p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
             p.loadPixels();
@@ -1307,7 +1307,7 @@ const rectangleLives = (rlePath, htmlElementId = 'RectangleLives', color, afterI
             // return false;
         };
     };
-    new p5exClass(sketch, htmlElementId);
+    new p5exClass(sketch, param.htmlElementId || SKETCH_NAME);
 };
 
 return rectangleLives;

@@ -1,1 +1,3 @@
-rectangleLives("./assets/vacuum-cleaner.rle");
+rectangleLives({
+  rlePath: "./assets/vacuum-cleaner.rle"
+});

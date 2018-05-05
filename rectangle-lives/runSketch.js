@@ -1,1 +1,3 @@
-rectangleLives("./assets/queen-bee-turn.rle");
+rectangleLives({
+  rlePath: "./assets/queen-bee-turn.rle"
+});

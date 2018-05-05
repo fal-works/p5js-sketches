@@ -4,12 +4,14 @@ import * as Life from './Life';
 (p5 as any).disableFriendlyErrors = true;
 
 const rectangleLives = (
-  rlePath: string,
-  htmlElementId: string = 'RectangleLives',
-  color?: Life.LifeColor,
-  afterImageFrameCount?: number,
+  param: {
+    rlePath: string;
+    htmlElementId?: string;
+    color?: Life.LifeColor;
+    afterImageFrameCount?: number;
+  },
 ) => {
-  // const SKETCH_NAME = 'RectangleLives';
+  const SKETCH_NAME = 'RectangleLives';
   const OPENPROCESSING = false;
 
   if (OPENPROCESSING) new (p5 as any)();
@@ -23,11 +25,11 @@ const rectangleLives = (
 
     // ---- Setup & Draw etc.
     p.preload = () => {
-      console.log('Loading ' + rlePath + ' ...');
+      console.log('Loading ' + param.rlePath + ' ...');
 
-      p.loadStrings(rlePath, (strArray: string[]) => {
+      p.loadStrings(param.rlePath, (strArray: string[]) => {
         console.log('Loaded.');
-        console.log('Parsing ' + rlePath + ' ...');
+        console.log('Parsing ' + param.rlePath + ' ...');
         lifeGameData = Life.parseLifeRle(strArray);
         console.log('Parsed.');
       });
@@ -43,7 +45,7 @@ const rectangleLives = (
 
       p.noStroke();
 
-      grid = new Life.LifeGrid(p, lifeGameData, color, afterImageFrameCount);
+      grid = new Life.LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount);
 
       const backgrounColor = grid.color.background;
       p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
@@ -72,7 +74,7 @@ const rectangleLives = (
     };
   };
 
-  new p5ex.p5exClass(sketch, htmlElementId);
+  new p5ex.p5exClass(sketch, param.htmlElementId || SKETCH_NAME);
 
 };
 
