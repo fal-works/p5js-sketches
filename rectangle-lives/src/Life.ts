@@ -48,15 +48,12 @@ const defaultLifeColor: LifeColor = {
 
 export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   readonly cellPixelSize = new p5ex.NumberContainer(1);
-  generationIntervalFrameCount = 1;
-  generationPreparationFrameCount = 0;
-  generationPreparationCellsPerFrame: number;
   cellsToChange: p5ex.LoopableArray<LifeCell>;
   bornCells: p5ex.LoopableArray<LifeCell>;
   dyingCells: p5ex.LoopableArray<LifeCell>;
 
   protected stepCell: (cell: LifeCell) => void;
-  protected prepareNextGeneration: () => void;
+  protected gotoNextGeneration: () => void;
 
   constructor(
     protected readonly p: p5ex.p5exClass,
@@ -96,48 +93,15 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
       if (cell) cell.setAlive();
     }
 
-    this.generationPreparationCellsPerFrame =
-      Math.ceil(this.cell2DArray.length / this.generationIntervalFrameCount);
+    this.stepCell = (cell: LifeCell) => {
+      cell.step();
+      cell.determineNextState();
+    };
 
-    if (this.generationIntervalFrameCount > 1) {
-      this.stepCell = (cell: LifeCell) => {
-        cell.step();
-      };
-
-      this.prepareNextGeneration = () => {
-        const cellArray = this.cell2DArray.array;
-        const startIndex =
-          this.generationPreparationCellsPerFrame * this.generationPreparationFrameCount;
-        const endIndex =
-          Math.min(
-            this.generationPreparationCellsPerFrame *
-            (this.generationPreparationFrameCount + 1),
-            this.cell2DArray.length,
-          );
-
-        for (let i = startIndex; i < endIndex; i += 1) {
-          cellArray[i].determineNextState();
-        }
-
-        this.generationPreparationFrameCount += 1;
-
-        if (this.generationPreparationFrameCount >= this.generationIntervalFrameCount) {
-          this.cellsToChange.loop(this.gotoNextState);
-          this.cellsToChange.clear();
-          this.generationPreparationFrameCount = 0;
-        }
-      };
-    } else {
-      this.stepCell = (cell: LifeCell) => {
-        cell.step();
-        cell.determineNextState();
-      };
-
-      this.prepareNextGeneration = () => {
-        this.cellsToChange.loop(this.gotoNextState);
-        this.cellsToChange.clear();
-      };
-    }
+    this.gotoNextGeneration = () => {
+      this.cellsToChange.loop(this.gotoNextState);
+      this.cellsToChange.clear();
+    };
   }
 
   updateSize(): void {
@@ -151,7 +115,7 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
 
   step(): void {
     this.cell2DArray.loop(this.stepCell);
-    this.prepareNextGeneration();
+    this.gotoNextGeneration();
   }
 
   draw(): void {

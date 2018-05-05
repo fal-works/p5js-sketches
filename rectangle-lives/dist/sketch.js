@@ -1056,8 +1056,6 @@ class LifeGrid extends Grid {
         this.data = data;
         this.color = color;
         this.cellPixelSize = new NumberContainer(1);
-        this.generationIntervalFrameCount = 1;
-        this.generationPreparationFrameCount = 0;
         this.drawBornCell = (cell) => {
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.alive;
@@ -1084,45 +1082,21 @@ class LifeGrid extends Grid {
             if (cell)
                 cell.setAlive();
         }
-        this.generationPreparationCellsPerFrame =
-            Math.ceil(this.cell2DArray.length / this.generationIntervalFrameCount);
-        if (this.generationIntervalFrameCount > 1) {
-            this.stepCell = (cell) => {
-                cell.step();
-            };
-            this.prepareNextGeneration = () => {
-                const cellArray = this.cell2DArray.array;
-                const startIndex = this.generationPreparationCellsPerFrame * this.generationPreparationFrameCount;
-                const endIndex = Math.min(this.generationPreparationCellsPerFrame *
-                    (this.generationPreparationFrameCount + 1), this.cell2DArray.length);
-                for (let i = startIndex; i < endIndex; i += 1) {
-                    cellArray[i].determineNextState();
-                }
-                this.generationPreparationFrameCount += 1;
-                if (this.generationPreparationFrameCount >= this.generationIntervalFrameCount) {
-                    this.cellsToChange.loop(this.gotoNextState);
-                    this.cellsToChange.clear();
-                    this.generationPreparationFrameCount = 0;
-                }
-            };
-        }
-        else {
-            this.stepCell = (cell) => {
-                cell.step();
-                cell.determineNextState();
-            };
-            this.prepareNextGeneration = () => {
-                this.cellsToChange.loop(this.gotoNextState);
-                this.cellsToChange.clear();
-            };
-        }
+        this.stepCell = (cell) => {
+            cell.step();
+            cell.determineNextState();
+        };
+        this.gotoNextGeneration = () => {
+            this.cellsToChange.loop(this.gotoNextState);
+            this.cellsToChange.clear();
+        };
     }
     updateSize() {
         this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.cell2DArray.xCount, this.p.height / this.cell2DArray.yCount));
     }
     step() {
         this.cell2DArray.loop(this.stepCell);
-        this.prepareNextGeneration();
+        this.gotoNextGeneration();
     }
     draw() {
         this.dyingCells.loop(this.drawDyingCell);
