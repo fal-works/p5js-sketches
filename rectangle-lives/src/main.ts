@@ -9,6 +9,7 @@ const rectangleLives = (
     htmlElementId?: string;
     color?: Life.LifeColor;
     afterImageFrameCount?: number;
+    marginCells?: number;
   },
 ) => {
   const SKETCH_NAME = 'RectangleLives';
@@ -45,7 +46,13 @@ const rectangleLives = (
 
       p.noStroke();
 
-      grid = new Life.LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount);
+      grid = new Life.LifeGrid(
+        p,
+        lifeGameData,
+        param.color,
+        param.afterImageFrameCount,
+        param.marginCells,
+      );
 
       const backgrounColor = grid.color.background;
       p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);

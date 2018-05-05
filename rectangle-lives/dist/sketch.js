@@ -1050,8 +1050,8 @@ const defaultLifeColor = {
     background: [252, 252, 255],
 };
 class LifeGrid extends Grid {
-    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10) {
-        super(data.cellCountX, data.cellCountY, 1, false, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
+    constructor(p, data, color = defaultLifeColor, afterImageFrameCount = 10, marginCells = 0) {
+        super(data.cellCountX + 2 * marginCells, data.cellCountY + 2 * marginCells, 1, false, (neighborRange) => { return new LifeCell(p, afterImageFrameCount); }, new LifeCell(p));
         this.p = p;
         this.data = data;
         this.color = color;
@@ -1067,11 +1067,11 @@ class LifeGrid extends Grid {
             const pixelSize = this.cellPixelSize.value;
             const color = this.color.dying;
             const deathRatio = cell.deathTimer.getProgressRatio();
-            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio, cell.yIndex, this.data.cellCountY), color.green(deathRatio, cell.yIndex, this.data.cellCountY), color.blue(deathRatio, cell.yIndex, this.data.cellCountY));
+            setPixelRange(this.p, cell.xIndex * pixelSize, cell.yIndex * pixelSize, pixelSize, color.red(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.green(deathRatio, cell.yIndex, this.cell2DArray.yCount), color.blue(deathRatio, cell.yIndex, this.cell2DArray.yCount));
         };
-        this.cellsToChange = new LoopableArray(data.cellCountX * data.cellCountY);
-        this.bornCells = new LoopableArray(data.cellCountX * data.cellCountY);
-        this.dyingCells = new LoopableArray(data.cellCountX * data.cellCountY);
+        this.cellsToChange = new LoopableArray(this.cell2DArray.length);
+        this.bornCells = new LoopableArray(this.cell2DArray.length);
+        this.dyingCells = new LoopableArray(this.cell2DArray.length);
         this.cell2DArray.loop((cell) => {
             cell.grid = this;
             const index = this.getCellIndex(cell);
@@ -1080,7 +1080,7 @@ class LifeGrid extends Grid {
         });
         this.updateSize();
         for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
-            const cell = this.getCell(data.initialCells[i], data.initialCells[i + 1]);
+            const cell = this.getCell(data.initialCells[i] + marginCells, data.initialCells[i + 1] + marginCells);
             if (cell)
                 cell.setAlive();
         }
@@ -1118,7 +1118,7 @@ class LifeGrid extends Grid {
         }
     }
     updateSize() {
-        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.data.cellCountX, this.p.height / this.data.cellCountY));
+        this.cellPixelSize.value = Math.floor(this.p.pixelDensity() * Math.min(this.p.width / this.cell2DArray.xCount, this.p.height / this.cell2DArray.yCount));
     }
     step() {
         this.cell2DArray.loop(this.stepCell);
@@ -1286,7 +1286,7 @@ const rectangleLives = (param) => {
             p.createScalableCanvas(ScalableCanvasTypes.FULL);
             p.setFrameRate(30);
             p.noStroke();
-            grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount);
+            grid = new LifeGrid(p, lifeGameData, param.color, param.afterImageFrameCount, param.marginCells);
             const backgrounColor = grid.color.background;
             p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
             p.loadPixels();

@@ -63,19 +63,20 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
     public readonly data: LifePattern,
     public readonly color: LifeColor = defaultLifeColor,
     afterImageFrameCount: number = 10,
+    marginCells: number = 0,
   ) {
     super(
-      data.cellCountX,
-      data.cellCountY,
+      data.cellCountX + 2 * marginCells,
+      data.cellCountY + 2 * marginCells,
       1,
       false,
       (neighborRange: number) => { return new LifeCell(p, afterImageFrameCount); },
       new LifeCell(p),
     );
 
-    this.cellsToChange = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
-    this.bornCells = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
-    this.dyingCells = new p5ex.LoopableArray<LifeCell>(data.cellCountX * data.cellCountY);
+    this.cellsToChange = new p5ex.LoopableArray<LifeCell>(this.cell2DArray.length);
+    this.bornCells = new p5ex.LoopableArray<LifeCell>(this.cell2DArray.length);
+    this.dyingCells = new p5ex.LoopableArray<LifeCell>(this.cell2DArray.length);
 
     this.cell2DArray.loop((cell: LifeCell) => {
       cell.grid = this;
@@ -88,8 +89,8 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
 
     for (let i = 0, len = data.initialCells.length; i < len; i += 2) {
       const cell = this.getCell(
-        data.initialCells[i],
-        data.initialCells[i + 1],
+        data.initialCells[i] + marginCells,
+        data.initialCells[i + 1] + marginCells,
       );
       if (cell) cell.setAlive();
     }
@@ -141,8 +142,8 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
   updateSize(): void {
     this.cellPixelSize.value = Math.floor(
       this.p.pixelDensity() * Math.min(
-        this.p.width / this.data.cellCountX,
-        this.p.height / this.data.cellCountY,
+        this.p.width / this.cell2DArray.xCount,
+        this.p.height / this.cell2DArray.yCount,
       ),
     );
   }
@@ -182,9 +183,9 @@ export class LifeGrid extends p5ex.Grid<LifeCell> implements p5ex.Sprite {
       cell.xIndex * pixelSize,
       cell.yIndex * pixelSize,
       pixelSize,
-      color.red(deathRatio, cell.yIndex, this.data.cellCountY),
-      color.green(deathRatio, cell.yIndex, this.data.cellCountY),
-      color.blue(deathRatio, cell.yIndex, this.data.cellCountY),
+      color.red(deathRatio, cell.yIndex, this.cell2DArray.yCount),
+      color.green(deathRatio, cell.yIndex, this.cell2DArray.yCount),
+      color.blue(deathRatio, cell.yIndex, this.cell2DArray.yCount),
     );
   }
 
