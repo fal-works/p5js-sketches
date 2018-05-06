@@ -16,6 +16,9 @@ http://golly.sourceforge.net/
 "unique-high-period.rle"
   From Alan Hensel's "lifebc" pattern collection.
 
+"ark2.rle"
+  Found by Nick Gotts.
+
 
 See below for the copy of the license of Golly.
 
