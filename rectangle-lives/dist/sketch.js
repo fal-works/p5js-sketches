@@ -1267,12 +1267,13 @@ const rectangleLives = (param) => {
             const backgrounColor = grid.color.background;
             p.background(backgrounColor[0], backgrounColor[1], backgrounColor[2]);
             p.loadPixels();
+            grid.draw();
         };
         p.draw = () => {
             // p.scalableCanvas.scale();
+            p.updatePixels();
             grid.step();
             grid.draw();
-            p.updatePixels();
             // p.scalableCanvas.cancelScale();
         };
         p.windowResized = () => {

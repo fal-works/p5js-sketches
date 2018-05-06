@@ -65,9 +65,10 @@ const rectangleLives = (
     p.draw = () => {
       // p.scalableCanvas.scale();
 
-      grid.step();
       grid.draw();
       p.updatePixels();
+
+      grid.step();
 
       // p.scalableCanvas.cancelScale();
     };
