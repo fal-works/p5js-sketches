@@ -13,6 +13,7 @@ http://golly.sourceforge.net/
   Based on an earlier p59 gun by Adam P. Goucher and Jason Summers.
 
 "low-period.rle"
+"unique-high-period.rle"
   From Alan Hensel's "lifebc" pattern collection.
 
 
