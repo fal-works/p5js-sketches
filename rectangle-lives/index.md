@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Rectangle Lives
 
 An implementation of Conway's Game of Life.
