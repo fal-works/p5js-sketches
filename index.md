@@ -4,4 +4,4 @@ layout: default
 
 # Home
 
-Nothing here.
+nothing here
