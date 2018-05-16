@@ -88,13 +88,11 @@ class Logo implements p5ex.Sprite {
     if (scaleFactor < 0.001) return;
 
     p.translate(this.position.x, this.position.y);
-    p.scale(scaleFactor);
     p.rotate(-p.QUARTER_PI);
     for (let i = 0, len = this.data.length; i < len; i += 1) {
-      p.rect(this.data[i].x, this.data[i].y, this.data[i].w, this.data[i].h);
+      p.rect(this.data[i].x, this.data[i].y, scaleFactor * this.data[i].w, this.data[i].h);
     }
     p.rotate(p.QUARTER_PI);
-    p.scale(1 / scaleFactor);
     p.translate(-this.position.x, -this.position.y);
   }
 }
