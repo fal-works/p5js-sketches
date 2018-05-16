@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2018 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.0
+ * @version 0.1.1
  * @license CC-BY-SA-3.0
  */
 
