@@ -1,0 +1,19 @@
+{
+  "name": "none",
+  "description": "none",
+  "version": "0.1.0",
+  "author": "FAL",
+  "devDependencies": {
+    "uglify-es": "3.3.7"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "CC-BY-SA-3.0",
+  "main": "dist/sketch.js",
+  "private": true,
+  "scripts": {
+    "test": "",
+    "uglify": "uglifyjs ./dist/sketch.js -c ecma=6 -m --screw-ie8 -o ./dist/sketch.min.js --comments --ecma 6 --safari10"
+  }
+}
