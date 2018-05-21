@@ -238,7 +238,6 @@ const sketch = (p: p5ex.p5exClass) => {
       sound.setVolume(soundVolume);
       sound.loop();
       sound.pause();
-      p.background(255);
       squareGenerator.isActive = true;
     });
   };
