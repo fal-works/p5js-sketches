@@ -957,7 +957,6 @@ const sketch = (p) => {
     function drawMessage() {
         if (squareGenerator.isActive && sound.isPlaying())
             return;
-        p.background(p.color(255));
         p.noStroke();
         p.fill(textColor);
         const textString = squareGenerator.isActive ?
@@ -969,6 +968,7 @@ const sketch = (p) => {
         sound = new p5.SoundFile(filePath, () => {
             sound.setVolume(soundVolume);
             sound.loop();
+            sound.pause();
             p.background(255);
             squareGenerator.isActive = true;
         });
@@ -998,7 +998,7 @@ const sketch = (p) => {
             clearTimeout(timeoutId);
         timeoutId = setTimeout(() => { backgroundPixels = createBackgroundPixels(); }, 200);
     };
-    p.mousePressed = () => {
+    p.mouseClicked = () => {
         if (sound.isPlaying())
             sound.pause();
         else
