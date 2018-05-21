@@ -922,7 +922,7 @@ class SquareGenerator {
 }
 const sketch = (p) => {
     // ---- constants
-    const filePath = './private-assets/bgml060.mp3';
+    const filePath = './assets/bgml060.mp3';
     const soundVolume = 1.0;
     const textColor = p.color(96);
     // const waveformAmplitudeProcessor = (n: number) => {

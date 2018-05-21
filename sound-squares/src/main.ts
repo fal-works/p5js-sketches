@@ -166,7 +166,7 @@ class SquareGenerator implements p5ex.CleanableSprite {
 
 const sketch = (p: p5ex.p5exClass) => {
   // ---- constants
-  const filePath = './private-assets/bgml060.mp3';
+  const filePath = './assets/bgml060.mp3';
   const soundVolume = 1.0;
 
   const textColor = p.color(96);
