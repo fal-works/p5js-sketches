@@ -225,7 +225,6 @@ const sketch = (p: p5ex.p5exClass) => {
   function drawMessage(): void {
     if (squareGenerator.isActive && sound.isPlaying()) return;
 
-    p.background(p.color(255));
     p.noStroke();
     p.fill(textColor);
     const textString = squareGenerator.isActive ?
