@@ -223,12 +223,14 @@ const sketch = (p: p5ex.p5exClass) => {
   }
 
   function drawMessage(): void {
-    if (squareGenerator.isActive) return;
+    if (squareGenerator.isActive && sound.isPlaying()) return;
 
     p.background(p.color(255));
     p.noStroke();
     p.fill(textColor);
-    p.text('Please wait a few seconds for loading music...', 100, 60);
+    const textString = squareGenerator.isActive ?
+      'Click to play...' : 'Please wait a few seconds for loading music...';
+    p.text(textString, 100, 60);
   }
 
   // ---- Setup & Draw etc.
@@ -281,7 +283,7 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.mousePressed = () => {
-    // if (sound.isPlaying()) sound.pause(); else sound.play();
+    if (sound.isPlaying()) sound.pause(); else sound.play();
   };
 };
 

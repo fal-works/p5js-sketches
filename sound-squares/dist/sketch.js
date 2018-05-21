@@ -955,12 +955,14 @@ const sketch = (p) => {
         return p.pixels;
     }
     function drawMessage() {
-        if (squareGenerator.isActive)
+        if (squareGenerator.isActive && sound.isPlaying())
             return;
         p.background(p.color(255));
         p.noStroke();
         p.fill(textColor);
-        p.text('Please wait a few seconds for loading music...', 100, 60);
+        const textString = squareGenerator.isActive ?
+            'Click to play...' : 'Please wait a few seconds for loading music...';
+        p.text(textString, 100, 60);
     }
     // ---- Setup & Draw etc.
     p.preload = () => {
@@ -997,7 +999,10 @@ const sketch = (p) => {
         timeoutId = setTimeout(() => { backgroundPixels = createBackgroundPixels(); }, 200);
     };
     p.mousePressed = () => {
-        // if (sound.isPlaying()) sound.pause(); else sound.play();
+        if (sound.isPlaying())
+            sound.pause();
+        else
+            sound.play();
     };
 };
 new p5exClass(sketch, SKETCH_NAME);
