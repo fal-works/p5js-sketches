@@ -237,7 +237,7 @@ const sketch = (p: p5ex.p5exClass) => {
     sound = new p5.SoundFile(filePath, () => {
       sound.setVolume(soundVolume);
       sound.loop();
-      sound.pause();
+      // sound.pause();
       squareGenerator.isActive = true;
     });
   };
