@@ -281,7 +281,7 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.mousePressed = () => {
-    if (sound.isPlaying()) sound.pause(); else sound.play();
+    // if (sound.isPlaying()) sound.pause(); else sound.play();
   };
 };
 

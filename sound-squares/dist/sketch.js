@@ -997,10 +997,7 @@ const sketch = (p) => {
         timeoutId = setTimeout(() => { backgroundPixels = createBackgroundPixels(); }, 200);
     };
     p.mousePressed = () => {
-        if (sound.isPlaying())
-            sound.pause();
-        else
-            sound.play();
+        // if (sound.isPlaying()) sound.pause(); else sound.play();
     };
 };
 new p5exClass(sketch, SKETCH_NAME);
