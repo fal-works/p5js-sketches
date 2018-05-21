@@ -282,7 +282,7 @@ const sketch = (p: p5ex.p5exClass) => {
     );
   };
 
-  p.mousePressed = () => {
+  p.mouseClicked = () => {
     if (sound.isPlaying()) sound.pause(); else sound.play();
   };
 };
