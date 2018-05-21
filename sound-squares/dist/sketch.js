@@ -968,7 +968,7 @@ const sketch = (p) => {
         sound = new p5.SoundFile(filePath, () => {
             sound.setVolume(soundVolume);
             sound.loop();
-            sound.pause();
+            // sound.pause();
             squareGenerator.isActive = true;
         });
     };
