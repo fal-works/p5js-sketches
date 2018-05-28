@@ -819,7 +819,9 @@ class Attractor {
         this.disappearanceDelayTimer = new NonLoopedFrameCounter(Math.floor(p.random(7, 9) * p.idealFrameRate), () => { this.disappearanceTimer.on(); }).off();
         this.disappearanceTimer.resetCount().off();
         this.graphics = p.createGraphics(this.size, this.size);
+        this.graphics.pixelDensity(1);
         this.layeredGraphics = p.createGraphics(this.size, this.size);
+        this.layeredGraphics.pixelDensity(1);
         this.layeredGraphics.noStroke();
         const g = this.graphics;
         g.textFont('Georgia', this.size / 30);
@@ -940,6 +942,7 @@ const createDeJongAttractor = (pieceCountLevel, htmlElementId) => {
                 window.noCanvas();
             p.createScalableCanvas(ScalableCanvasTypes.SQUARE640x640);
             p.setFrameRate(30);
+            p.pixelDensity(1);
             Attractor.pieceCountLevel = pieceCountLevel;
             reset();
         };

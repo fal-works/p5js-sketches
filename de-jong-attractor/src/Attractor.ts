@@ -49,7 +49,9 @@ export default class Attractor {
     this.disappearanceTimer.resetCount().off();
 
     this.graphics = p.createGraphics(this.size, this.size);
+    (this.graphics as any).pixelDensity(1);
     this.layeredGraphics = p.createGraphics(this.size, this.size);
+    (this.layeredGraphics as any).pixelDensity(1);
     (this.layeredGraphics as any).noStroke();
 
     const g = this.graphics as any;
