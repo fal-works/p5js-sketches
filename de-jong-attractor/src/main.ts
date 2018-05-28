@@ -56,7 +56,7 @@ const createDeJongAttractor = (
       );
 
       p.setFrameRate(30);
-      p.pixelDensity(p.displayDensity());
+      p.pixelDensity(1);
       Attractor.pieceCountLevel = pieceCountLevel;
 
       reset();
