@@ -78,7 +78,7 @@ const createDeJongAttractor = (
     };
 
     p.mouseClicked = () => {
-      p.saveCanvas('de-jong-attractor', 'png');
+      // p.saveCanvas('de-jong-attractor', 'png');
     };
   };
 

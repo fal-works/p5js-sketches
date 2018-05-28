@@ -955,7 +955,7 @@ const createDeJongAttractor = (pieceCountLevel, htmlElementId) => {
             timeoutId = setTimeout(() => { reset(); }, 200);
         };
         p.mouseClicked = () => {
-            p.saveCanvas('de-jong-attractor', 'png');
+            // p.saveCanvas('de-jong-attractor', 'png');
         };
     };
     new p5exClass(sketch, htmlElementId || SKETCH_NAME);
