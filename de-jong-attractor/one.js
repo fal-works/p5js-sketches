@@ -1,1 +1,1 @@
-createDeJongAttractor(1);
+createDeJongAttractor(1, 'DeJongAttractorOne');
