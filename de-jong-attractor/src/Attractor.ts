@@ -24,11 +24,6 @@ export default class Attractor {
     this.checkTimer = new p5ex.NonLoopedFrameCounter(
       0.1 * p.idealFrameRate,
       () => {
-        if (!this.checkParameters()) {
-          this.reset();
-          return;
-        }
-
         if (this.check() || this.retryCount > 10) {
           this.retryCount = 0;
           this.disappearanceDelayTimer.on();
@@ -83,17 +78,6 @@ export default class Attractor {
     g.rectMode(p.CENTER);
 
     this.particle = new Particle(this.p, 0.22 * this.size);
-  }
-
-  checkParameters(): boolean {
-    const particle = this.particle;
-    return (
-      Math.abs(particle.a) +
-      Math.abs(particle.b) +
-      Math.abs(particle.c) +
-      Math.abs(particle.d)
-      > 4
-    );
   }
 
   check(): boolean {
@@ -160,17 +144,15 @@ class Particle {
   ) {
     this.position = p5.Vector.random2D().mult(p.random(0.01));
     this.previousPosition = p.createVector();
-    this.a = p5ex.randomSign(p.random(0.1, 2.5));
-    this.b = p5ex.randomSign(p.random(0.1, 2.5));
-    this.c = p5ex.randomSign(p.random(0.1, 2.5));
-    this.d = p5ex.randomSign(p.random(0.1, 2.5));
 
-    console.log(
-      Math.round(this.a * 100) / 100 + ',\n' +
-      Math.round(this.b * 100) / 100 + ',\n' +
-      Math.round(this.c * 100) / 100 + ',\n' +
-      Math.round(this.d * 100) / 100,
-    );
+    do {
+      this.a = p5ex.randomSign(p.random(0.1, 2.5));
+      this.b = p5ex.randomSign(p.random(0.1, 2.5));
+      this.c = p5ex.randomSign(p.random(0.1, 2.5));
+      this.d = p5ex.randomSign(p.random(0.1, 2.5));
+    } while (!this.checkParameters());
+
+    // this.printParameters();
 
     // this.a = -2;
     // this.b = -2;
@@ -189,5 +171,24 @@ class Particle {
     const y = this.scaleFactor * this.position.y;
 
     this.p.currentRenderer.point(x, y);
+  }
+
+  checkParameters(): boolean {
+    return (
+      Math.abs(this.a) +
+      Math.abs(this.b) +
+      Math.abs(this.c) +
+      Math.abs(this.d)
+      > 4
+    );
+  }
+
+  printParameters(): void {
+    console.log(
+      Math.round(this.a * 100) / 100 + ',\n' +
+      Math.round(this.b * 100) / 100 + ',\n' +
+      Math.round(this.c * 100) / 100 + ',\n' +
+      Math.round(this.d * 100) / 100,
+    );
   }
 }

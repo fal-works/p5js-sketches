@@ -813,10 +813,6 @@ class Attractor {
         this.retryCount = 0;
         this.position = p.createVector(x, y);
         this.checkTimer = new NonLoopedFrameCounter(0.1 * p.idealFrameRate, () => {
-            if (!this.checkParameters()) {
-                this.reset();
-                return;
-            }
             if (this.check() || this.retryCount > 10) {
                 this.retryCount = 0;
                 this.disappearanceDelayTimer.on();
@@ -858,14 +854,6 @@ class Attractor {
         g.translate(this.size / 2, this.size / 2);
         g.rectMode(p.CENTER);
         this.particle = new Particle(this.p, 0.22 * this.size);
-    }
-    checkParameters() {
-        const particle = this.particle;
-        return (Math.abs(particle.a) +
-            Math.abs(particle.b) +
-            Math.abs(particle.c) +
-            Math.abs(particle.d)
-            > 4);
     }
     check() {
         const g = this.graphics;
@@ -914,14 +902,13 @@ class Particle {
         this.scaleFactor = scaleFactor;
         this.position = p5.Vector.random2D().mult(p.random(0.01));
         this.previousPosition = p.createVector();
-        this.a = randomSign(p.random(0.1, 2.5));
-        this.b = randomSign(p.random(0.1, 2.5));
-        this.c = randomSign(p.random(0.1, 2.5));
-        this.d = randomSign(p.random(0.1, 2.5));
-        console.log(Math.round(this.a * 100) / 100 + ',\n' +
-            Math.round(this.b * 100) / 100 + ',\n' +
-            Math.round(this.c * 100) / 100 + ',\n' +
-            Math.round(this.d * 100) / 100);
+        do {
+            this.a = randomSign(p.random(0.1, 2.5));
+            this.b = randomSign(p.random(0.1, 2.5));
+            this.c = randomSign(p.random(0.1, 2.5));
+            this.d = randomSign(p.random(0.1, 2.5));
+        } while (!this.checkParameters());
+        // this.printParameters();
         // this.a = -2;
         // this.b = -2;
         // this.c = -1.2;
@@ -933,6 +920,19 @@ class Particle {
         const x = this.scaleFactor * this.position.x;
         const y = this.scaleFactor * this.position.y;
         this.p.currentRenderer.point(x, y);
+    }
+    checkParameters() {
+        return (Math.abs(this.a) +
+            Math.abs(this.b) +
+            Math.abs(this.c) +
+            Math.abs(this.d)
+            > 4);
+    }
+    printParameters() {
+        console.log(Math.round(this.a * 100) / 100 + ',\n' +
+            Math.round(this.b * 100) / 100 + ',\n' +
+            Math.round(this.c * 100) / 100 + ',\n' +
+            Math.round(this.d * 100) / 100);
     }
 }
 
