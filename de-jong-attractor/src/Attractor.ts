@@ -12,6 +12,7 @@ export default class Attractor {
   protected repetitionPerFrame: number;
   protected color: p5.Color;
   protected layeredGraphics: p5.Graphics;
+  protected retryCount: number = 0;
 
   constructor(
     protected readonly p: p5ex.p5exClass,
@@ -23,10 +24,18 @@ export default class Attractor {
     this.checkTimer = new p5ex.NonLoopedFrameCounter(
       0.1 * p.idealFrameRate,
       () => {
-        if (this.check()) {
-          this.disappearanceDelayTimer.on();
+        if (!this.checkParameters()) {
+          this.reset();
+          return;
         }
-        else this.reset();
+
+        if (this.check() || this.retryCount > 10) {
+          this.retryCount = 0;
+          this.disappearanceDelayTimer.on();
+        } else {
+          this.retryCount += 1;
+          this.reset();
+        }
       },
     );
     this.disappearanceTimer = new p5ex.NonLoopedFrameCounter(
@@ -76,6 +85,17 @@ export default class Attractor {
     this.particle = new Particle(this.p, 0.22 * this.size);
   }
 
+  checkParameters(): boolean {
+    const particle = this.particle;
+    return (
+      Math.abs(particle.a) +
+      Math.abs(particle.b) +
+      Math.abs(particle.c) +
+      Math.abs(particle.d)
+      > 4
+    );
+  }
+
   check(): boolean {
     const g: any = this.graphics;
     g.loadPixels();
@@ -94,7 +114,7 @@ export default class Attractor {
     const alphaValueRatio = totalAlpha / (this.size * 255);
     alphaValueRatio;
 
-    return pixelPopulationRatio > 0.003 && alphaValueRatio > 0.0005;
+    return pixelPopulationRatio > 0.002 && alphaValueRatio > 0.00025;
   }
 
   draw(): void {
@@ -140,12 +160,17 @@ class Particle {
   ) {
     this.position = p5.Vector.random2D().mult(p.random(0.01));
     this.previousPosition = p.createVector();
-    this.a = p.random(-2.5, 2.5);
-    this.b = p.random(-2.5, 2.5);
-    this.c = p.random(-2.5, 2.5);
-    this.d = p.random(-2.5, 2.5);
+    this.a = p5ex.randomSign(p.random(0.1, 2.5));
+    this.b = p5ex.randomSign(p.random(0.1, 2.5));
+    this.c = p5ex.randomSign(p.random(0.1, 2.5));
+    this.d = p5ex.randomSign(p.random(0.1, 2.5));
 
-    // console.log(this.a + ',\n' + this.b + ',\n' + this.c + ',\n' + this.d);
+    console.log(
+      Math.round(this.a * 100) / 100 + ',\n' +
+      Math.round(this.b * 100) / 100 + ',\n' +
+      Math.round(this.c * 100) / 100 + ',\n' +
+      Math.round(this.d * 100) / 100,
+    );
 
     // this.a = -2;
     // this.b = -2;

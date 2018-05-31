@@ -255,6 +255,15 @@ const TWO_PI = 2 * Math.PI;
 // Temporal vectors for calculation use in getClosestPositionOnLineSegment()
 const tmpVectorAP = dummyP5.createVector();
 const tmpVectorAB = dummyP5.createVector();
+/**
+ * Returns n or -n randomly. (n = provided number)
+ * @param {number} n - any number
+ */
+function randomSign(n) {
+    if (Math.random() < 0.5)
+        return n;
+    return -n;
+}
 
 function loopArrayLimited(array, callback, arrayLength) {
     let i = 0;
@@ -801,13 +810,21 @@ class Attractor {
     constructor(p, x, y, size) {
         this.p = p;
         this.size = size;
+        this.retryCount = 0;
         this.position = p.createVector(x, y);
         this.checkTimer = new NonLoopedFrameCounter(0.1 * p.idealFrameRate, () => {
-            if (this.check()) {
+            if (!this.checkParameters()) {
+                this.reset();
+                return;
+            }
+            if (this.check() || this.retryCount > 10) {
+                this.retryCount = 0;
                 this.disappearanceDelayTimer.on();
             }
-            else
+            else {
+                this.retryCount += 1;
                 this.reset();
+            }
         });
         this.disappearanceTimer = new NonLoopedFrameCounter(1 * p.idealFrameRate, () => { this.reset(); }).off();
         this.repetitionPerFrame = (24000 / p.idealFrameRate) / Attractor.pieceCountLevel;
@@ -842,6 +859,14 @@ class Attractor {
         g.rectMode(p.CENTER);
         this.particle = new Particle(this.p, 0.22 * this.size);
     }
+    checkParameters() {
+        const particle = this.particle;
+        return (Math.abs(particle.a) +
+            Math.abs(particle.b) +
+            Math.abs(particle.c) +
+            Math.abs(particle.d)
+            > 4);
+    }
     check() {
         const g = this.graphics;
         g.loadPixels();
@@ -856,7 +881,7 @@ class Attractor {
         const totalPixels = g.pixels.length / 4;
         const pixelPopulationRatio = coloredPixelCount / totalPixels;
         const alphaValueRatio = totalAlpha / (this.size * 255);
-        return pixelPopulationRatio > 0.003 && alphaValueRatio > 0.0005;
+        return pixelPopulationRatio > 0.002 && alphaValueRatio > 0.00025;
     }
     draw() {
         this.checkTimer.step();
@@ -889,11 +914,14 @@ class Particle {
         this.scaleFactor = scaleFactor;
         this.position = p5.Vector.random2D().mult(p.random(0.01));
         this.previousPosition = p.createVector();
-        this.a = p.random(-2.5, 2.5);
-        this.b = p.random(-2.5, 2.5);
-        this.c = p.random(-2.5, 2.5);
-        this.d = p.random(-2.5, 2.5);
-        // console.log(this.a + ',\n' + this.b + ',\n' + this.c + ',\n' + this.d);
+        this.a = randomSign(p.random(0.1, 2.5));
+        this.b = randomSign(p.random(0.1, 2.5));
+        this.c = randomSign(p.random(0.1, 2.5));
+        this.d = randomSign(p.random(0.1, 2.5));
+        console.log(Math.round(this.a * 100) / 100 + ',\n' +
+            Math.round(this.b * 100) / 100 + ',\n' +
+            Math.round(this.c * 100) / 100 + ',\n' +
+            Math.round(this.d * 100) / 100);
         // this.a = -2;
         // this.b = -2;
         // this.c = -1.2;
