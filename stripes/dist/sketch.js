@@ -853,6 +853,7 @@ const sketch = (p) => {
         [0, 150, 210],
         [0, 90, 180, 270],
     ];
+    let graphicsToSave;
     // ---- functions
     function drawStripe(color) {
         p.blendMode(Math.random() < 0.5 ? p.MULTIPLY : p.BURN);
@@ -892,16 +893,20 @@ const sketch = (p) => {
         }
         p.filter(p.ERODE);
         p.scalableCanvas.cancelScale();
+        graphicsToSave = p.createGraphics(p.width, p.height);
+        graphicsToSave.background(backgroundColor);
+        graphicsToSave.image(p, 0, 0);
     };
     p.windowResized = () => {
         p.resizeScalableCanvas();
+        p.redraw();
     };
     p.mouseClicked = () => {
         p.redraw();
     };
     p.keyTyped = () => {
         if (p.key === 's')
-            p.saveCanvas('stripes', 'png');
+            p.save(graphicsToSave, 'stripes.png');
     };
 };
 new p5exClass(sketch, SKETCH_NAME);
