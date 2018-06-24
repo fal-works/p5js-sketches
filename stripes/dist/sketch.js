@@ -847,6 +847,8 @@ const SKETCH_NAME = 'Stripes';
 const sketch = (p) => {
     // ---- variables
     let backgroundColor;
+    let backgroundPixels;
+    let timeoutId = -1;
     const huePatterns = [
         [0, 120, 240],
         [0, 30, 60],
@@ -871,6 +873,12 @@ const sketch = (p) => {
             x += interval;
         }
     }
+    function reset() {
+        p.background(backgroundColor);
+        applyRandomTexture(p, 16);
+        p.loadPixels();
+        backgroundPixels = p.pixels;
+    }
     // ---- Setup & Draw etc.
     p.preload = () => {
     };
@@ -878,11 +886,12 @@ const sketch = (p) => {
         p.createScalableCanvas(ScalableCanvasTypes.SQUARE640x640);
         backgroundColor = p.color(255);
         p.rectMode(p.CENTER);
+        reset();
         p.noLoop();
     };
     p.draw = () => {
-        p.background(backgroundColor);
-        applyRandomTexture(p, 16);
+        p.pixels = backgroundPixels;
+        p.updatePixels();
         p.scalableCanvas.scale();
         p.translate(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
         const huePattern = p.random(huePatterns);
@@ -894,11 +903,17 @@ const sketch = (p) => {
         p.filter(p.ERODE);
         p.scalableCanvas.cancelScale();
         graphicsToSave = p.createGraphics(p.width, p.height);
-        graphicsToSave.background(backgroundColor);
+        graphicsToSave.background(backgroundColor); // Don't know why this is necessary
         graphicsToSave.image(p, 0, 0);
     };
     p.windowResized = () => {
         p.resizeScalableCanvas();
+        if (timeoutId !== -1)
+            clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            reset();
+            p.redraw();
+        }, 200);
         p.redraw();
     };
     p.mouseClicked = () => {

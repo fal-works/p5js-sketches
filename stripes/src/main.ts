@@ -7,6 +7,8 @@ const SKETCH_NAME = 'Stripes';
 const sketch = (p: p5ex.p5exClass) => {
   // ---- variables
   let backgroundColor: p5.Color;
+  let backgroundPixels: number[];
+  let timeoutId = -1;
   const huePatterns = [
     [0, 120, 240],
     [0, 30, 60],
@@ -37,6 +39,13 @@ const sketch = (p: p5ex.p5exClass) => {
     }
   }
 
+  function reset(): void {
+    p.background(backgroundColor);
+    p5ex.applyRandomTexture(p, 16);
+    p.loadPixels();
+    backgroundPixels = p.pixels;
+  }
+
   // ---- Setup & Draw etc.
   p.preload = () => {
   };
@@ -49,12 +58,14 @@ const sketch = (p: p5ex.p5exClass) => {
     backgroundColor = p.color(255);
     p.rectMode(p.CENTER);
 
+    reset();
+
     p.noLoop();
   };
 
   p.draw = () => {
-    p.background(backgroundColor);
-    p5ex.applyRandomTexture(p, 16);
+    p.pixels = backgroundPixels;
+    p.updatePixels();
 
     p.scalableCanvas.scale();
     p.translate(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
@@ -84,6 +95,15 @@ const sketch = (p: p5ex.p5exClass) => {
 
   p.windowResized = () => {
     p.resizeScalableCanvas();
+
+    if (timeoutId !== -1) clearTimeout(timeoutId);
+    timeoutId = setTimeout(
+      () => {
+        reset();
+        p.redraw();
+      },
+      200,
+    );
     p.redraw();
   };
 
