@@ -899,6 +899,10 @@ const sketch = (p) => {
     p.mouseClicked = () => {
         p.redraw();
     };
+    p.keyTyped = () => {
+        if (p.key === 's')
+            p.saveCanvas('stripes', 'png');
+    };
 };
 new p5exClass(sketch, SKETCH_NAME);
 
