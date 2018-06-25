@@ -905,14 +905,14 @@ const sketch = (p) => {
     ];
     // ---- functions
     function drawStripe(color) {
-        p.blendMode(Math.random() < 0.5 ? p.MULTIPLY : p.BURN);
+        p.blendMode(p.MULTIPLY);
         p.noStroke();
         p.fill(color);
         const thickness = p.random(5, 70);
         const interval = thickness + p.random(10, 50);
         const length = p.random(0.4, 0.6) * p.nonScaledHeight;
         const y = p.random(-1, 1) * 100;
-        let x = -p.random(0.2, 0.3) * p.nonScaledWidth;
+        let x = -p.random(0.2, 0.3) * p.nonScaledWidth + thickness / 2;
         const maxX = -x;
         const xOffset = p.random(-1, 1) * 100;
         while (x < maxX) {
@@ -933,6 +933,7 @@ const sketch = (p) => {
         p.createScalableCanvas(ScalableCanvasTypes.SQUARE640x640);
         backgroundColor = p.color(255);
         p.rectMode(p.CENTER);
+        p.pixelDensity(1);
         reset();
         p.noLoop();
     };
@@ -943,8 +944,8 @@ const sketch = (p) => {
         p.translate(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
         const huePattern = p.random(huePatterns);
         for (let i = 0; i < huePattern.length; i += 1) {
-            const theta = p.radians(p.random(40, 60));
-            const color = p.color(cielchColor(100 * Math.sin(theta), 60 + 70 * Math.cos(theta), p.random(p.TWO_PI) + p.radians(huePattern[i]), 128));
+            const theta = p.radians(p.random(40, 70));
+            const color = p.color(cielchColor(100 * Math.sin(theta), 80 + 50 * Math.cos(theta) + p.random(-1, 1) * 10, p.random(p.TWO_PI) + p.radians(huePattern[i]), 128));
             drawStripe(color);
         }
         p.filter(p.ERODE);

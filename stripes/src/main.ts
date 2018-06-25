@@ -18,7 +18,7 @@ const sketch = (p: p5ex.p5exClass) => {
 
   // ---- functions
   function drawStripe(color: p5.Color) {
-    p.blendMode(Math.random() < 0.5 ? p.MULTIPLY : p.BURN);
+    p.blendMode(p.MULTIPLY);
 
     p.noStroke();
     p.fill(color);
@@ -28,7 +28,7 @@ const sketch = (p: p5ex.p5exClass) => {
     const length = p.random(0.4, 0.6) * p.nonScaledHeight;
     const y = p.random(-1, 1) * 100;
 
-    let x = -p.random(0.2, 0.3) * p.nonScaledWidth;
+    let x = -p.random(0.2, 0.3) * p.nonScaledWidth + thickness / 2;
     const maxX = -x;
     const xOffset = p.random(-1, 1) * 100;
 
@@ -56,7 +56,7 @@ const sketch = (p: p5ex.p5exClass) => {
 
     backgroundColor = p.color(255);
     p.rectMode(p.CENTER);
-
+    p.pixelDensity(1);
     reset();
 
     p.noLoop();
@@ -72,10 +72,10 @@ const sketch = (p: p5ex.p5exClass) => {
     const huePattern = p.random(huePatterns);
 
     for (let i = 0; i < huePattern.length; i += 1) {
-      const theta = p.radians(p.random(40, 60));
+      const theta = p.radians(p.random(40, 70));
       const color = p.color(p5ex.cielchColor(
         100 * Math.sin(theta),
-        60 + 70 * Math.cos(theta),
+        80 + 50 * Math.cos(theta) + p.random(-1, 1) * 10,
         p.random(p.TWO_PI) + p.radians(huePattern[i]),
         128,
       ));
