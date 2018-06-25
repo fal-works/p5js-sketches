@@ -8,7 +8,11 @@ const sketch = (p: p5ex.p5exClass) => {
   // ---- variables
   let backgroundColor: p5.Color;
   let backgroundPixels: number[];
-  let timeoutId = -1;
+
+  let resetIndicator: boolean = false;
+  let resizeIndicator: boolean = false;
+  let timeoutId: number = -1;
+
   const huePatterns = [
     [0, 120, 240],
     [0, 30, 60],
@@ -38,13 +42,6 @@ const sketch = (p: p5ex.p5exClass) => {
     }
   }
 
-  function reset(): void {
-    p.background(backgroundColor);
-    p5ex.applyRandomTexture(p, 16);
-    p.loadPixels();
-    backgroundPixels = p.pixels;
-  }
-
   // ---- Setup & Draw etc.
   p.preload = () => {
   };
@@ -57,12 +54,29 @@ const sketch = (p: p5ex.p5exClass) => {
     backgroundColor = p.color(255);
     p.rectMode(p.CENTER);
     p.pixelDensity(1);
-    reset();
+    p.setFrameRate(1);
 
+    resetIndicator = true;
     p.noLoop();
   };
 
   p.draw = () => {
+    if (resetIndicator || resizeIndicator) {
+      p.background(backgroundColor);
+      p5ex.applyRandomTexture(p, 16);
+      p.loadPixels();
+      backgroundPixels = p.pixels;
+
+      resetIndicator = false;
+
+      if (resizeIndicator) {
+        resizeIndicator = false;
+        if (timeoutId !== -1) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => { p.redraw(); }, 100);
+        return;
+      }
+    }
+
     p.pixels = backgroundPixels;
     p.updatePixels();
 
@@ -89,20 +103,12 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.windowResized = () => {
+    resizeIndicator = true;
     p.resizeScalableCanvas();
-
-    if (timeoutId !== -1) clearTimeout(timeoutId);
-    timeoutId = setTimeout(
-      () => {
-        reset();
-        p.redraw();
-      },
-      200,
-    );
-    p.redraw();
   };
 
-  p.mouseClicked = () => {
+  p.mousePressed = () => {
+    if (!p5ex.mouseIsInCanvas(p)) return;
     p.redraw();
   };
 
