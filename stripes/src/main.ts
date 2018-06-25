@@ -15,7 +15,6 @@ const sketch = (p: p5ex.p5exClass) => {
     [0, 150, 210],
     [0, 90, 180, 270],
   ];
-  let graphicsToSave: p5.Graphics;
 
   // ---- functions
   function drawStripe(color: p5.Color) {
@@ -87,10 +86,6 @@ const sketch = (p: p5ex.p5exClass) => {
     p.filter(p.ERODE);
 
     p.scalableCanvas.cancelScale();
-
-    graphicsToSave = p.createGraphics(p.width, p.height);
-    (graphicsToSave as any).background(backgroundColor);  // Don't know why this is necessary
-    (graphicsToSave as any).image(p, 0, 0);
   };
 
   p.windowResized = () => {
@@ -112,7 +107,7 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.keyTyped = () => {
-    if (p.key === 's') p.save(graphicsToSave, 'stripes.png');
+    if (p.key === 's') p.saveCanvas('stripes', 'png');
   };
 };
 

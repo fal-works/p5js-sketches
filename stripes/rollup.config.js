@@ -3,7 +3,7 @@ import typescript from 'rollup-plugin-typescript2';
 import cleanup from 'rollup-plugin-cleanup';
 
 const title = 'Stripes';
-const version = '0.1.0';
+const version = '0.1.1';
 
 const hasAdditionalBanner = false;
 const additionalBanner = `/**

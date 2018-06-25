@@ -4,7 +4,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2018 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.0
+ * @version 0.1.1
  * @license CC-BY-SA-3.0
  */
 
@@ -272,6 +272,23 @@ const TWO_PI = 2 * Math.PI;
 // Temporal vectors for calculation use in getClosestPositionOnLineSegment()
 const tmpVectorAP = dummyP5.createVector();
 const tmpVectorAB = dummyP5.createVector();
+/**
+ * Returns the position on the line segment AB which is closest to the reference point P.
+ * @param {p5.Vector} P - The position of the reference point.
+ * @param {p5.Vector} A - The position of the line segment start point.
+ * @param {p5.Vector} B - The position of the line segment end point.
+ * @param {p5.Vector} target - The vector to receive the result.
+ */
+
+/**
+ * Just lerp.
+ * @param startValue - The start value.
+ * @param endValue - The end value.
+ * @param ratio - The ratio between 0 and 1.
+ */
+function lerp(startValue, endValue, ratio) {
+    return startValue + ratio * (endValue - startValue);
+}
 
 function createCielabToXyzFunc() {
     const delta = 6 / 29;
@@ -658,6 +675,7 @@ const tmpMidPoint1 = dummyP5.createVector();
 const tmpMidPoint2 = dummyP5.createVector();
 /**
  * Set color to the specified pixel.
+ * Should be used in conjunction with loadPixels() and updatePixels().
  * @param renderer - Instance of either p5 or p5.Graphics.
  * @param x - The x index of the pixel.
  * @param y - The y index of the pixel.
@@ -680,21 +698,51 @@ function setPixel(renderer, x, y, red, green, blue, alpha, pixelDensity) {
     }
 }
 /**
- * Blends the specified color (default: black) to each pixel with a random alpha value.
+ * Lerp color to the specified pixel. The alpha channel remains unchanged.
+ * Should be used in conjunction with loadPixels() and updatePixels().
+ * @param renderer - Instance of either p5 or p5.Graphics.
+ * @param x - The x index of the pixel.
+ * @param y - The y index of the pixel.
+ * @param red - The red value (0 - 255).
+ * @param green - The green value (0 - 255).
+ * @param blue - The blue value (0 - 255).
+ * @param pixelDensity - If not specified, renderer.pixelDensity() will be called.
+ * @param lerpRatio - The lerp ratio (0 - 1). If 1, the color will be replaced.
+ */
+function lerpPixel(renderer, x, y, red, green, blue, pixelDensity, lerpRatio = 1) {
+    const g = renderer;
+    const d = pixelDensity || g.pixelDensity();
+    for (let i = 0; i < d; i += 1) {
+        for (let j = 0; j < d; j += 1) {
+            const idx = 4 * ((y * d + j) * g.width * d + (x * d + i));
+            g.pixels[idx] = lerp(g.pixels[idx], red, lerpRatio);
+            g.pixels[idx + 1] = lerp(g.pixels[idx + 1], green, lerpRatio);
+            g.pixels[idx + 2] = lerp(g.pixels[idx + 2], blue, lerpRatio);
+            // g.pixels[idx + 3] = 255;
+        }
+    }
+}
+function lerpPixelForRandomTexture(renderer, x, y, red, green, blue, alpha) {
+    lerpPixel(renderer, x, y, red, green, blue, undefined, alpha / 255);
+}
+/**
+ * Sets the specified color (default: black) to each pixel with a random alpha value.
  * @param renderer - Instance of either p5 or p5.Graphics.
  * @param {number} maxAlpha - The max value of alpha channel (1 - 255).
+ * @param {boolean} [blend] - Set true for blending, false for replacing.
  * @param {number} [red]
  * @param {number} [green]
  * @param {number} [blue]
  */
-function applyRandomTexture(renderer, maxAlpha, red = 0, green = 0, blue = 0) {
+function applyRandomTexture(renderer, maxAlpha, blend = true, red = 0, green = 0, blue = 0) {
     const g = renderer;
     const width = g.width;
     const height = g.height;
+    const operatePixel = blend ? lerpPixelForRandomTexture : setPixel;
     g.loadPixels();
     for (let y = 0; y < height; y += 1) {
         for (let x = 0; x < width; x += 1) {
-            setPixel(renderer, x, y, red, green, blue, Math.random() * maxAlpha);
+            operatePixel(renderer, x, y, red, green, blue, Math.random() * maxAlpha);
         }
     }
     g.updatePixels();
@@ -855,7 +903,6 @@ const sketch = (p) => {
         [0, 150, 210],
         [0, 90, 180, 270],
     ];
-    let graphicsToSave;
     // ---- functions
     function drawStripe(color) {
         p.blendMode(Math.random() < 0.5 ? p.MULTIPLY : p.BURN);
@@ -902,9 +949,6 @@ const sketch = (p) => {
         }
         p.filter(p.ERODE);
         p.scalableCanvas.cancelScale();
-        graphicsToSave = p.createGraphics(p.width, p.height);
-        graphicsToSave.background(backgroundColor); // Don't know why this is necessary
-        graphicsToSave.image(p, 0, 0);
     };
     p.windowResized = () => {
         p.resizeScalableCanvas();
@@ -921,7 +965,7 @@ const sketch = (p) => {
     };
     p.keyTyped = () => {
         if (p.key === 's')
-            p.save(graphicsToSave, 'stripes.png');
+            p.saveCanvas('stripes', 'png');
     };
 };
 new p5exClass(sketch, SKETCH_NAME);
