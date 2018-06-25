@@ -946,7 +946,6 @@ const sketch = (p) => {
         backgroundColor = p.color(255);
         p.rectMode(p.CENTER);
         p.pixelDensity(1);
-        p.setFrameRate(1);
         resetIndicator = true;
         p.noLoop();
     };
