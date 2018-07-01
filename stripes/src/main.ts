@@ -109,6 +109,7 @@ const sketch = (p: p5ex.p5exClass) => {
   p.mousePressed = () => {
     if (!p5ex.mouseIsInCanvas(p)) return;
     p.redraw();
+    return false;
   };
 
   p.keyTyped = () => {
