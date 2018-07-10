@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es2015",
+        "sourceMap": true,
+        "allowJs": true,
+        "preserveConstEnums": true,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "noEmitOnError": true,
+        "noUnusedLocals": true
+    },
+    "include": [
+        "src/main.ts",
+        "./node_modules/p5/lib/p5.d.ts"
+    ]
+}
