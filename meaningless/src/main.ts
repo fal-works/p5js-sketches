@@ -8,11 +8,12 @@ const sketch = (p: p5ex.p5exClass) => {
   // let backgroundPixels: number[];
   let timeoutId: number = -1;
 
-  let currentX;
-  let currentY;
-  let currentWordLength;
-  let currentParagraphLineCount;
-  let completed = false;
+  let currentX: number;
+  let currentY: number;
+  let currentWordLength: number;
+  let currentParagraphLineCount: number;
+  let completed: boolean;
+  let remainingWaitCount: number;
 
   // ---- functions
   function reset(): void {
@@ -27,6 +28,7 @@ const sketch = (p: p5ex.p5exClass) => {
     currentWordLength = 0;
     currentParagraphLineCount = 1;
     completed = false;
+    remainingWaitCount = 0;
   }
 
   function drawComma() {
@@ -49,6 +51,8 @@ const sketch = (p: p5ex.p5exClass) => {
     p.translate(-currentX, -currentY);
 
     currentX += 24;
+
+    remainingWaitCount = 15;
   }
 
   function drawSpace() {
@@ -113,10 +117,16 @@ const sketch = (p: p5ex.p5exClass) => {
 
     if (completed) return;
 
+    if (remainingWaitCount > 0) {
+      remainingWaitCount -= 1;
+      return;
+    }
+
     p.scalableCanvas.scale();
     if (currentWordLength > 3 && p.random(1) < 0.2) {
-      if (currentParagraphLineCount >= 3 && p.random(1) < 0.2) {
+      if ((currentParagraphLineCount >= 3 && p.random(1) < 0.2) || currentParagraphLineCount >= 5) {
         drawPeriod();
+        remainingWaitCount += 10;
         currentX = 80;
         currentY += 16 * 3;
         currentParagraphLineCount = 1;

@@ -764,7 +764,8 @@ const sketch = (p) => {
     let currentY;
     let currentWordLength;
     let currentParagraphLineCount;
-    let completed = false;
+    let completed;
+    let remainingWaitCount;
     // ---- functions
     function reset() {
         p.background(backgroundColor);
@@ -776,6 +777,7 @@ const sketch = (p) => {
         currentWordLength = 0;
         currentParagraphLineCount = 1;
         completed = false;
+        remainingWaitCount = 0;
     }
     function drawComma() {
         p.translate(currentX, currentY);
@@ -794,6 +796,7 @@ const sketch = (p) => {
         p.ellipse(2, 14, 3, 3);
         p.translate(-currentX, -currentY);
         currentX += 24;
+        remainingWaitCount = 15;
     }
     function drawSpace() {
         currentX += 12;
@@ -838,10 +841,15 @@ const sketch = (p) => {
         // p.updatePixels();
         if (completed)
             return;
+        if (remainingWaitCount > 0) {
+            remainingWaitCount -= 1;
+            return;
+        }
         p.scalableCanvas.scale();
         if (currentWordLength > 3 && p.random(1) < 0.2) {
-            if (currentParagraphLineCount >= 3 && p.random(1) < 0.2) {
+            if ((currentParagraphLineCount >= 3 && p.random(1) < 0.2) || currentParagraphLineCount >= 5) {
                 drawPeriod();
+                remainingWaitCount += 10;
                 currentX = 80;
                 currentY += 16 * 3;
                 currentParagraphLineCount = 1;
