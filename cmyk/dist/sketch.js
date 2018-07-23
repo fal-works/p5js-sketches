@@ -1308,8 +1308,6 @@ const sketch = (p) => {
         });
     }
     function spawn(angle) {
-        if (!mouseIsInCanvas(p))
-            return;
         newColorObjects.push(new UnitColorObject(p, colorArray[currentColorIndex], p5.Vector.fromAngle(angle).mult(8)));
     }
     function drawCursor() {
@@ -1347,7 +1345,7 @@ const sketch = (p) => {
         drawCursor();
         p.scalableCanvas.cancelScale();
         processCollision();
-        if (p.mouseIsPressed && p.frameCount % 2 === 0) {
+        if (mouseIsInCanvas(p) && p.mouseIsPressed && p.frameCount % 2 === 0) {
             const angle = p.TWO_PI * (p.frameCount % 31 / 31);
             spawn(angle);
             spawn(angle + p.PI);
@@ -1365,7 +1363,8 @@ const sketch = (p) => {
     };
     p.mousePressed = () => {
         // if (p.mouseButton === p.RIGHT) p.noLoop();
-        return false;
+        if (mouseIsInCanvas(p))
+            return false;
     };
     p.mouseReleased = () => {
         currentColorIndex = (currentColorIndex + 1) % colorArray.length;

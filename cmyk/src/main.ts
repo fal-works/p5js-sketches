@@ -240,8 +240,6 @@ const sketch = (p: p5ex.p5exClass) => {
   }
 
   function spawn(angle: number): void {
-    if (!p5ex.mouseIsInCanvas(p)) return;
-
     newColorObjects.push(
       new UnitColorObject(
         p,
@@ -307,7 +305,7 @@ const sketch = (p: p5ex.p5exClass) => {
 
     processCollision();
 
-    if (p.mouseIsPressed && p.frameCount % 2 === 0) {
+    if (p5ex.mouseIsInCanvas(p) && p.mouseIsPressed && p.frameCount % 2 === 0) {
       const angle = p.TWO_PI * (p.frameCount % 31 / 31);
       spawn(angle);
       spawn(angle + p.PI);
@@ -331,7 +329,7 @@ const sketch = (p: p5ex.p5exClass) => {
 
   p.mousePressed = () => {
     // if (p.mouseButton === p.RIGHT) p.noLoop();
-    return false;
+    if (p5ex.mouseIsInCanvas(p)) return false;
   };
 
   p.mouseReleased = () => {
