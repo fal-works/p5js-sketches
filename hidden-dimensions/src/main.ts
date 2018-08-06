@@ -133,7 +133,7 @@ const sketch = (p: p5ex.p5exClass) => {
 
       for (const lineSegment of sliced) {
         p.line(lineSegment[0], -240 + 140, lineSegment[0], thresholdPositionY);
-        p.line(lineSegment[1], -240 + 140, lineSegment[1], thresholdPositionY);
+        p.line(lineSegment[1] - 1, -240 + 140, lineSegment[1] - 1, thresholdPositionY);
       }
 
       lineColor.applyColor();
@@ -147,6 +147,13 @@ const sketch = (p: p5ex.p5exClass) => {
 
       p.endShape();
 
+      if (level >= 2 && sliced.length >= 1) {
+        guideLineColor.applyColor();
+        p.line(0, thresholdPositionY, 320 - 1, thresholdPositionY);
+      }
+
+      lineColor.applyColor();
+
       for (const lineSegment of sliced) {
         p.line(lineSegment[0], thresholdPositionY, lineSegment[1], thresholdPositionY);
       }
@@ -159,11 +166,6 @@ const sketch = (p: p5ex.p5exClass) => {
     p.translate(320, 0);
 
     if (level >= 2) {
-      if (sliced.length >= 1) {
-        guideLineColor.applyColor();
-        p.line(-320 + sliced[sliced.length - 1][1] + 1, thresholdPositionY, -1, thresholdPositionY);
-      }
-
       lineColor.applyColor();
       p.line(-10, 240, 240, 240);
       p.line(0, 0, 0, 250);
@@ -210,10 +212,8 @@ const sketch = (p: p5ex.p5exClass) => {
   p.mousePressed = () => {
     if (!p5ex.mouseIsInCanvas(p)) return;
 
-    if (p.mouseButton === p.RIGHT) p.noLoop();
-  };
+    // if (p.mouseButton === p.RIGHT) p.noLoop();
 
-  p.mouseClicked = () => {
     level += 1;
 
     if (level > 2) reset();
