@@ -888,7 +888,7 @@
         }
     }
 
-    const SKETCH_NAME = 'ColoredShadow' + ('');
+    const SKETCH_NAME = 'ColoredShadow' + ('2');
     class ColoredShape {
         constructor(p, hue = p.random(p.TWO_PI)) {
             this.p = p;
@@ -964,8 +964,8 @@
             shapeArray.forEach((shape) => { shape.drawShadow(10); });
             p.filter(p.BLUR, 10);
             {
-                p.blendMode(p.BLEND);
-                shapeArray.forEach((shape) => { shape.drawSolid(); });
+                p.blendMode(p.DIFFERENCE);
+                shapeArray.forEach((shape) => { shape.drawTransparent(); });
             }
             p.scalableCanvas.cancelScale();
             clearScreenIndicator = true;
@@ -983,7 +983,7 @@
         p.keyTyped = () => {
 
             if (p.key === 's')
-                p.saveCanvas('colored-shadow' + (''), 'png');
+                p.saveCanvas('colored-shadow' + ('-2'), 'png');
         };
     };
     new p5exClass(sketch, SKETCH_NAME);

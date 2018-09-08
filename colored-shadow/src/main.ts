@@ -1,7 +1,10 @@
 import * as p5ex from 'p5ex';
 import NoiseShape from './NoiseShape';
 
-const SKETCH_NAME = 'ColoredShadow';
+const TRANSPARENT_INDICATOR: boolean = false;
+
+// tslint:disable-next-line:prefer-template
+const SKETCH_NAME = 'ColoredShadow' + (TRANSPARENT_INDICATOR ? '2' : '');
 
 class ColoredShape implements p5ex.Drawable {
   drawShape: (scaleFactor: number) => void;
@@ -46,6 +49,11 @@ class ColoredShape implements p5ex.Drawable {
     this.draw();
     this.scaleFactor = 1;
     this.p.pop();
+  }
+
+  drawTransparent(): void {
+    this.transparentShapeColor.applyColor(128);
+    this.draw();
   }
 
   drawSolid(): void {
@@ -97,8 +105,13 @@ const sketch = (p: p5ex.p5exClass) => {
 
     p.filter(p.BLUR, 10);
 
-    p.blendMode(p.BLEND);
-    shapeArray.forEach((shape) => { shape.drawSolid(); });
+    if (TRANSPARENT_INDICATOR) {
+      p.blendMode(p.DIFFERENCE);
+      shapeArray.forEach((shape) => { shape.drawTransparent(); });
+    } else {
+      p.blendMode(p.BLEND);
+      shapeArray.forEach((shape) => { shape.drawSolid(); });
+    }
 
     p.scalableCanvas.cancelScale();
 
@@ -118,7 +131,8 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.keyTyped = () => {
-    if (p.key === 's') p.saveCanvas('colored-shadow', 'png');
+    // tslint:disable-next-line:prefer-template
+    if (p.key === 's') p.saveCanvas('colored-shadow' + (TRANSPARENT_INDICATOR ? '-2' : ''), 'png');
   };
 };
 
