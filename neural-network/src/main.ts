@@ -121,8 +121,8 @@ class Neuron {
   position: p5.Vector;
 
   constructor(protected p: p5ex.p5exClass, x: number, y: number) {
-    this.weight1 = p.random(-1, 1);
-    this.weight2 = p.random(-1, 1);
+    this.weight1 = p.random(-1, 1) * 0.7;
+    this.weight2 = p.random(-1, 1) * 0.7;
     this.position = p.createVector(x, y);
   }
 
@@ -272,6 +272,16 @@ const sketch = (p: p5ex.p5exClass) => {
     p.text(`Go right: ${goRight}`, outputNeuron2.position.x + 60, outputNeuron2.position.y);
   }
 
+  function resetNeurons(): void {
+    inputNeuron1 = new Neuron(p, 180, 430);
+    inputNeuron2 = new Neuron(p, 180, 550);
+    hiddenNeuron1 = new Neuron(p, 320, 430);
+    hiddenNeuron2 = new Neuron(p, 320, 550);
+    outputNeuron1 = new Neuron(p, 450, 430);
+    outputNeuron2 = new Neuron(p, 450, 550);
+    neuronArray = [inputNeuron1, inputNeuron2, hiddenNeuron1, hiddenNeuron2, outputNeuron1, outputNeuron2];
+  }
+
   // ---- Setup & Draw etc.
   p.preload = () => {
   };
@@ -297,13 +307,7 @@ const sketch = (p: p5ex.p5exClass) => {
       }
     };
 
-    inputNeuron1 = new Neuron(p, 180, 430);
-    inputNeuron2 = new Neuron(p, 180, 550);
-    hiddenNeuron1 = new Neuron(p, 320, 430);
-    hiddenNeuron2 = new Neuron(p, 320, 550);
-    outputNeuron1 = new Neuron(p, 450, 430);
-    outputNeuron2 = new Neuron(p, 450, 550);
-    neuronArray = [inputNeuron1, inputNeuron2, hiddenNeuron1, hiddenNeuron2, outputNeuron1, outputNeuron2];
+    resetNeurons();
 
     p.textFont('Courier New', 12);
     p.textStyle(p.BOLD);
@@ -335,8 +339,8 @@ const sketch = (p: p5ex.p5exClass) => {
   };
 
   p.mousePressed = () => {
-    // if (!p5ex.mouseIsInCanvas(p)) return;
-    p.noLoop();
+    if (!p5ex.mouseIsInCanvas(p)) return;
+    resetNeurons();
   };
 
   p.keyTyped = () => {
