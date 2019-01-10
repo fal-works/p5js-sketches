@@ -1063,7 +1063,7 @@
             this.isOn = false;
             this.position.set(x, y);
             this.collisionRadius = 5;
-            this.on(new ShapeColor(p, null, p.color(192), true));
+            this.on(Indicator.initialColor);
             this.life = 0.5;
         }
         step() {
@@ -1124,6 +1124,7 @@
                 invisibleBodies.push(new AutoInvisibleBody(p));
             }
             indicators = new SpriteArray(2 * 32 * 32);
+            Indicator.initialColor = new ShapeColor(p, null, p.color(192), true);
             const interval = 20;
             for (let y = 1, yLen = p.nonScaledHeight / interval; y < yLen; y += 1) {
                 const evenRow = y % 2 === 0;

@@ -55,6 +55,8 @@ class ManualInvisibleBody extends InvisibleBody {
 }
 
 class Indicator extends p5ex.PhysicsBody implements p5ex.Sprite {
+  static initialColor: p5ex.ShapeColor;
+
   isOn: boolean = false;
   life: number;
   lifeChange: number;
@@ -64,7 +66,7 @@ class Indicator extends p5ex.PhysicsBody implements p5ex.Sprite {
     super();
     this.position.set(x, y);
     this.collisionRadius = 5;
-    this.on(new p5ex.ShapeColor(p, null, p.color(192), true));
+    this.on(Indicator.initialColor);
     this.life = 0.5;
   }
 
@@ -142,6 +144,7 @@ const sketch = (p: p5ex.p5exClass) => {
     }
 
     indicators = new p5ex.SpriteArray<Indicator>(2 * 32 * 32);
+    Indicator.initialColor = new p5ex.ShapeColor(p, null, p.color(192), true);
 
     const interval = 20;
     for (let y = 1, yLen = p.nonScaledHeight / interval; y < yLen; y += 1) {
