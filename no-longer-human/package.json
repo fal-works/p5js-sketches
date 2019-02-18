@@ -30,6 +30,6 @@
     "build": "npm-run-all rollup uglify",
     "rollup": "rollup -c",
     "test": "",
-    "uglify": "uglifyjs ./dist/sketch.js -c ecma=6 -m --screw-ie8 -o ./dist/sketch.min.js --comments --ecma 6 --safari10"
+    "uglify": "uglifyjs ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments --ecma 6 --safari10"
   }
 }
