@@ -1,15 +1,40 @@
 import * as p5ex from "p5ex";
+import {
+  createGradationRectangle,
+  createRandomTextureGraphics
+} from "./functions";
 
 const SKETCH_NAME = "NoLongerHuman";
 
+enum CharacterSpriteState {
+  BIRTH,
+  STOP,
+  DEATH
+}
+
 class CharacterSprite extends p5ex.PhysicsBody implements p5ex.CleanableSprite {
   public isToBeRemoved = false;
+  private state = CharacterSpriteState.BIRTH;
+  private acceleration: p5.Vector;
   private birthTimer = new p5ex.NonLoopedFrameCounter(30, () => {
-    this.deathTimer.on();
+    this.deathDelayTimer.on();
+    this.state = CharacterSpriteState.STOP;
   });
-  private deathTimer = new p5ex.NonLoopedFrameCounter(60, () => {
+  private deathDelayTimer = new p5ex.NonLoopedFrameCounter(120, () => {
+    this.deathTimer.on();
+    this.state = CharacterSpriteState.DEATH;
+    const direction = this.p.random(-1, 1) * this.p.QUARTER_PI;
+    this.acceleration.set(
+      this.p.createVector(Math.cos(direction), Math.sin(direction)).mult(0.05)
+    );
+    this.rotationAcceleration = this.p.random(-1, 1) * this.p.TWO_PI * 0.0001;
+  });
+  private deathTimer = new p5ex.NonLoopedFrameCounter(120, () => {
     this.isToBeRemoved = true;
   }).off();
+  private rotationAngle = 0;
+  private rotationVelocity = 0;
+  private rotationAcceleration = 0;
   private alphaValue = 0;
 
   public constructor(
@@ -18,6 +43,7 @@ class CharacterSprite extends p5ex.PhysicsBody implements p5ex.CleanableSprite {
     protected readonly shapeColor: p5ex.ShapeColor
   ) {
     super();
+    this.acceleration = p.createVector();
   }
 
   public setPosition(position: p5.Vector): CharacterSprite {
@@ -26,28 +52,45 @@ class CharacterSprite extends p5ex.PhysicsBody implements p5ex.CleanableSprite {
   }
 
   public step(): void {
+    this.velocity.add(this.acceleration);
     super.step();
+    this.rotationVelocity += this.rotationAcceleration;
+    this.rotationAngle += this.rotationVelocity;
 
     this.birthTimer.step();
+    this.deathDelayTimer.step();
     this.deathTimer.step();
 
-    this.alphaValue = Math.ceil(
-      255 *
-        (this.birthTimer.isOn
-          ? this.birthTimer.getProgressRatio()
-          : 1 - this.deathTimer.getProgressRatio())
-    );
+    switch (this.state) {
+      case CharacterSpriteState.BIRTH:
+        this.alphaValue = Math.ceil(255 * this.birthTimer.getProgressRatio());
+        break;
+      case CharacterSpriteState.STOP:
+        this.alphaValue = 255;
+        break;
+      case CharacterSpriteState.DEATH:
+        this.alphaValue = Math.ceil(
+          255 * (1 - p5ex.easeOutQuad(this.deathTimer.getProgressRatio()))
+        );
+        break;
+    }
   }
 
   public draw(): void {
+    if (this.alphaValue < 1) return;
+
     this.shapeColor.applyColor(this.alphaValue);
     this.p.push();
     this.p.translate(this.position.x, this.position.y);
+    this.p.rotate(this.rotationAngle);
     this.p.text(this.character, 0, 0);
     this.p.pop();
   }
 
-  public clean(): void {}
+  public clean(): void {
+    if (!this.p.scalableCanvas.region.contains(this.position, 30))
+      this.isToBeRemoved = true;
+  }
 }
 
 interface Page {
@@ -64,7 +107,7 @@ const sketch = (p: p5ex.p5exClass): void => {
   // ---- variables
   const characters = new p5ex.CleanableSpriteArray();
   const shapeColor = new p5ex.ShapeColor(p, undefined, p.color(32), true);
-  let backgroundColor: p5.Color;
+  let backgroundPixels: number[];
   let currentFont: p5.Font;
   let pageList: Page[] = [];
   let currentPageIndex = 0;
@@ -77,6 +120,28 @@ const sketch = (p: p5ex.p5exClass): void => {
   let characterGeneraterTimer: p5ex.LoopedFrameCounter;
 
   // ---- functions
+  function createBackgroundGraphics(): p5.Graphics {
+    const gradation = createGradationRectangle(
+      p,
+      p.nonScaledWidth,
+      p.nonScaledHeight,
+      p.color(252, 252, 253),
+      p.color(252, 252, 253),
+      p.color(208, 208, 216),
+      3,
+      2
+    ) as any;
+    const texture = createRandomTextureGraphics(
+      p,
+      p.nonScaledWidth,
+      p.nonScaledHeight,
+      0.05
+    );
+    gradation.image(texture, 0, 0);
+
+    return gradation;
+  }
+
   function splitWithoutRemove(s: string, deliminator: string): string[] {
     let index = 0;
     const len = s.length;
@@ -194,8 +259,6 @@ const sketch = (p: p5ex.p5exClass): void => {
       defaultCharacterPositionY
     );
 
-    window.console.log(lineList);
-
     characterGeneraterTimer.resetCount();
     characterGeneraterTimer.on();
   }
@@ -241,13 +304,19 @@ const sketch = (p: p5ex.p5exClass): void => {
   p.setup = () => {
     p.createScalableCanvas(p5ex.ScalableCanvasTypes.SQUARE640x640);
 
-    backgroundColor = p.color(244, 244, 250);
+    const backgroundGraphics = createBackgroundGraphics();
+    p.scalableCanvas.scale();
+    p.image(backgroundGraphics, 0, 0);
+    p.scalableCanvas.cancelScale();
+    p.loadPixels();
+    backgroundPixels = p.pixels;
+
     p.textFont(currentFont, FONT_SIZE);
-    p.textAlign(p.CENTER);
+    p.textAlign(p.CENTER, p.CENTER);
 
-    defaultCharacterPositionY = p.nonScaledHeight * 0.1;
+    defaultCharacterPositionY = p.nonScaledHeight * 0.09;
 
-    sentenceReaderTimer = new p5ex.NonLoopedFrameCounter(60, () => {
+    sentenceReaderTimer = new p5ex.NonLoopedFrameCounter(30, () => {
       const next = nextPage(pageList, currentPageIndex);
       setLineList(next.page.lineList);
       updatePageIndex(next.index);
@@ -276,20 +345,20 @@ const sketch = (p: p5ex.p5exClass): void => {
       if (currentLineIndex >= currentLineList.length) {
         characterGeneraterTimer.off();
         sentenceReaderTimer.resetCount();
-        sentenceReaderTimer.on();
+        sentenceReaderTimer.on(180);
       }
     }).off();
   };
 
   p.draw = () => {
-    p.background(backgroundColor);
-
     sentenceReaderTimer.step();
     characterGeneraterTimer.step();
 
     characters.step();
     characters.clean();
 
+    p.pixels = backgroundPixels;
+    p.updatePixels();
     p.scalableCanvas.scale();
     characters.draw();
     p.scalableCanvas.cancelScale();

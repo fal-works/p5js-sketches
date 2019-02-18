@@ -5,9 +5,10 @@ import cleanup from "rollup-plugin-cleanup";
 const title = "NoLongerHuman";
 const version = "0.1.0";
 
-const hasAdditionalBanner = false;
+const hasAdditionalBanner = true;
 const additionalBanner = `/**
- * 
+ * Font from: [Oradano明朝GSSRフォント](http://www.asahi-net.or.jp/~sd5a-ucd/freefonts/Oradano-Mincho/)
+ * Text from: [青空文庫 ＞ 人間失格（太宰治）](https://www.aozora.gr.jp/cards/000035/files/301_14912.html)
  */
 `;
 
@@ -30,11 +31,11 @@ export default {
     format: "iife",
     sourcemap: true,
     globals: {
-      p5ex: "p5ex"
+      // p5ex: "p5ex"
     },
     banner: myBanner
   },
-  external: ["p5ex"],
+  // external: ["p5ex"],
   plugins: [
     resolve({
       extensions: [".js", ".mjs"],
