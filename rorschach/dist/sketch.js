@@ -51,43 +51,35 @@
           this.p.rotate(-this.rotationAngle);
           this.p.translate(-this.centerPosition.x, -this.centerPosition.y);
       }
-      drawVertice(yScaleFactor, noiseMagnitude, progressRatio, currentBasePositionX, index) {
-          const distanceFactor = progressRatio *
-              this.p.sq(this.p.sin((index / this.vertexCount) * this.p.PI));
-          const noiseX = (2 *
-              this.p.noise(this.xNoiseParameterOffset.x +
-                  this.noiseDistanceScale * currentBasePositionX, this.xNoiseParameterOffset.y + this.noiseTime) -
-              1) *
-              noiseMagnitude;
-          const noiseY = (2 *
-              this.p.noise(this.yNoiseParameterOffset.x +
-                  this.noiseDistanceScale * currentBasePositionX, this.yNoiseParameterOffset.y + this.noiseTime) -
-              1) *
-              noiseMagnitude;
-          const vertexPositionX = currentBasePositionX + distanceFactor * noiseX;
-          const vertexPositionY = yScaleFactor * distanceFactor * (0.3 * this.shapeSize + noiseY);
-          this.p.curveVertex(vertexPositionX, vertexPositionY);
-          const rotatedVertexPosition = RorschachShape.temporalVector;
-          rotatedVertexPosition.set(vertexPositionX, vertexPositionY);
-          rotatedVertexPosition.rotate(this.rotationAngle);
-          this.checkScreen(this.centerPosition.x + rotatedVertexPosition.x, this.centerPosition.y + rotatedVertexPosition.y);
-      }
       drawVertices(yScaleFactor) {
+          const p = this.p;
           const noiseMagnitude = this.noiseMagnitudeFactor * 0.5 * this.shapeSize;
-          this.p.beginShape();
+          p.beginShape();
+          let currentBasePositionX = -0.5 * this.shapeSize;
           const basePositionIntervalDistance = this.shapeSize / this.vertexCount;
           const progressRatio = this.frameCounter.getProgressRatio();
-          let currentBasePositionX = -0.5 * this.shapeSize;
           for (let i = 0; i < this.vertexCount; i += 1) {
-              this.drawVertice(yScaleFactor, noiseMagnitude, progressRatio, currentBasePositionX, i);
+              const distanceFactor = progressRatio * p.sq(p.sin((i / this.vertexCount) * p.PI));
+              const noiseX = (2 *
+                  p.noise(this.xNoiseParameterOffset.x +
+                      this.noiseDistanceScale * currentBasePositionX, this.xNoiseParameterOffset.y + this.noiseTime) -
+                  1) *
+                  noiseMagnitude;
+              const noiseY = (2 *
+                  p.noise(this.yNoiseParameterOffset.x +
+                      this.noiseDistanceScale * currentBasePositionX, this.yNoiseParameterOffset.y + this.noiseTime) -
+                  1) *
+                  noiseMagnitude;
+              const vertexPositionX = currentBasePositionX + distanceFactor * noiseX;
+              const vertexPositionY = yScaleFactor * distanceFactor * (0.3 * this.shapeSize + noiseY);
+              p.vertex(vertexPositionX, vertexPositionY);
+              const rotatedVertexPosition = RorschachShape.temporalVector;
+              rotatedVertexPosition.set(vertexPositionX, vertexPositionY);
+              rotatedVertexPosition.rotate(this.rotationAngle);
+              this.checkScreen(this.centerPosition.x + rotatedVertexPosition.x, this.centerPosition.y + rotatedVertexPosition.y);
               currentBasePositionX += basePositionIntervalDistance;
           }
-          currentBasePositionX = -0.5 * this.shapeSize;
-          for (let i = 0; i < 3; i += 1) {
-              this.drawVertice(yScaleFactor, noiseMagnitude, progressRatio, currentBasePositionX, i);
-              currentBasePositionX += basePositionIntervalDistance;
-          }
-          this.p.endShape();
+          p.endShape();
       }
       checkScreen(absolutePositionX, absolutePositionY) {
           const xMargin = 0.01 * this.p.nonScaledWidth;
@@ -104,11 +96,9 @@
 
   const SKETCH_NAME = "Rorschach";
   const sketch = (p) => {
-      // ---- constants
       // ---- variables
       const IDEAL_FRAME_RATE = 60;
       let unitLength;
-      // let unitSpeed: number;
       let backgroundColor;
       let frameCounter;
       let rorschachShape;
@@ -116,7 +106,6 @@
       // ---- functions
       function initialize() {
           unitLength = Math.min(p.nonScaledWidth, p.nonScaledHeight) / 640;
-          // unitSpeed = unitLength / IDEAL_FRAME_RATE;
           p.strokeWeight(Math.max(1, 1 * unitLength));
           p.background(backgroundColor);
           const rorschachShapeSize = 480 * unitLength;
@@ -127,7 +116,7 @@
               noiseMagnitudeFactor: p.random(1, 4),
               noiseTimeScale: 0.0005
           });
-          rorschachShape.centerPosition.set(0.5 * p.nonScaledWidth, 0.48 * p.nonScaledHeight);
+          rorschachShape.centerPosition.set(0.5 * p.nonScaledWidth, 0.5 * p.nonScaledHeight);
           rorschachShape.rotationAngle = p.PI + p.HALF_PI;
           rorschachShapeColor = new p5ex.ShapeColor(p, p.color(0, p.random(4, 48)), null, false);
           frameCounter.resetCount();
@@ -138,6 +127,8 @@
       p.preload = () => { };
       p.setup = () => {
           p.createScalableCanvas(p5ex.ScalableCanvasTypes.SQUARE640x640);
+          p.frameRate(IDEAL_FRAME_RATE);
+          p.strokeJoin(p.ROUND);
           backgroundColor = p.color(252);
           frameCounter = new p5ex.NonLoopedFrameCounter(13 * IDEAL_FRAME_RATE, () => {
               p.noLoop();
@@ -145,21 +136,21 @@
           initialize();
       };
       p.draw = () => {
-          p.scalableCanvas.scale();
           rorschachShape.step();
+          p.scalableCanvas.scale();
           rorschachShapeColor.applyColor();
           rorschachShape.draw();
-          frameCounter.step();
           p.scalableCanvas.cancelScale();
+          frameCounter.step();
       };
-      p.windowResized = () => { };
       p.mousePressed = () => {
-          // if (!p5ex.mouseIsInCanvas(p)) return;
-          // p.noLoop();
+          initialize();
       };
       p.keyTyped = () => {
           if (p.key === "p")
               p.noLoop();
+          if (p.keyCode === 83)
+              p.save("rorschach.png");
       };
   };
   new p5ex.p5exClass(sketch, SKETCH_NAME);
