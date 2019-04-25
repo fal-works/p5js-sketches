@@ -14,6 +14,7 @@ const additionalBanner = `/**
 const myBanner =
   `/**
  * ${title}.
+ * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
@@ -22,7 +23,6 @@ const myBanner =
  */
 ` + (hasAdditionalBanner ? "\n" + additionalBanner : "");
 
-//  * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
 
 export default {
   input: "src/main.ts",
@@ -31,11 +31,11 @@ export default {
     format: "iife",
     sourcemap: true,
     globals: {
-      p5ex: "p5ex"
+      // p5ex: "p5ex"
     },
     banner: myBanner
   },
-  external: ["p5ex"],
+  // external: ["p5ex"],
   plugins: [
     resolve({
       extensions: [".js", ".mjs"],
