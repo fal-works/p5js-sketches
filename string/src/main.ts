@@ -80,11 +80,11 @@ const sketch = (p: p5ex.p5exClass): void => {
       )
     );
 
-    let retryCount = 15;
+    let retryCount = 100;
     while (retryCount > 0) {
       positionArrayList = createPositionArrayList();
       vertexCount = positionArrayList[0].length;
-      if (vertexCount < 100) continue;
+      if (vertexCount > 100) break;
       retryCount--;
     }
   }

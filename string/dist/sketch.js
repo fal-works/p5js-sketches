@@ -73,8 +73,8 @@
           while (retryCount > 0) {
               positionArrayList = createPositionArrayList();
               vertexCount = positionArrayList[0].length;
-              if (vertexCount < 100)
-                  continue;
+              if (vertexCount > 100)
+                  break;
               retryCount--;
           }
       }
