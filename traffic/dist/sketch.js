@@ -4,7 +4,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.0
+ * @version 0.1.1
  * @license CC-BY-SA-3.0
  */
 
@@ -847,7 +847,7 @@
         };
         const END_POINT_ACCELERATION_CHANGE_PROBABILITY = 0.01;
         const VEHICLE_ACCELERATION_CHANGE_PROBABILITY = 0.02;
-        const ROAD_CHANGE_POSSIBILITY = 0.75;
+        const ROAD_CHANGE_PROBABILITY = 0.75;
         // variables
         let intersectionPool;
         let usedIntersections;
@@ -979,11 +979,12 @@
             roadA.intersectionList.push(intersection);
             roadB.intersectionList.push(intersection);
         }
+        function recycleIntersection(intersection) {
+            recycleObject(intersectionPool, intersection);
+        }
         function recycleAllIntersections() {
-            const len = usedIntersections.length;
-            for (let i = 0; i < len; i++) {
-                recycleObject(intersectionPool, usedIntersections.pop());
-            }
+            usedIntersections.loop(recycleIntersection);
+            usedIntersections.clear();
         }
         function tryChangeRoad(vehicle, intersection) {
             const currentRoad = vehicle.road;
@@ -1005,7 +1006,7 @@
                 ratioDifference > POSITION_RATIO_DISTANCE_THREASHOLD) {
                 return false;
             }
-            if (Math.random() >= ROAD_CHANGE_POSSIBILITY) {
+            if (Math.random() >= ROAD_CHANGE_PROBABILITY) {
                 vehicle.positionRatio =
                     currentRoadIntersectionPositionRatio +
                         POSITION_RATIO_DISTANCE_THREASHOLD;

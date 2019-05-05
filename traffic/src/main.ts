@@ -83,7 +83,7 @@ const sketch = (p: p5ex.p5exClass): void => {
   };
   const END_POINT_ACCELERATION_CHANGE_PROBABILITY = 0.01;
   const VEHICLE_ACCELERATION_CHANGE_PROBABILITY = 0.02;
-  const ROAD_CHANGE_POSSIBILITY = 0.75;
+  const ROAD_CHANGE_PROBABILITY = 0.75;
 
   // variables
   let intersectionPool: ObjectPool<Intersection>;
@@ -260,11 +260,13 @@ const sketch = (p: p5ex.p5exClass): void => {
     roadB.intersectionList.push(intersection);
   }
 
+  function recycleIntersection(intersection: Intersection): void {
+    recycleObject(intersectionPool, intersection);
+  }
+
   function recycleAllIntersections(): void {
-    const len = usedIntersections.length;
-    for (let i = 0; i < len; i++) {
-      recycleObject(intersectionPool, usedIntersections.pop());
-    }
+    usedIntersections.loop(recycleIntersection);
+    usedIntersections.clear();
   }
 
   function tryChangeRoad(
@@ -295,7 +297,7 @@ const sketch = (p: p5ex.p5exClass): void => {
       return false;
     }
 
-    if (Math.random() >= ROAD_CHANGE_POSSIBILITY) {
+    if (Math.random() >= ROAD_CHANGE_PROBABILITY) {
       vehicle.positionRatio =
         currentRoadIntersectionPositionRatio +
         POSITION_RATIO_DISTANCE_THREASHOLD;
