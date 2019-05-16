@@ -1,0 +1,35 @@
+{
+  "name": "none",
+  "description": "none",
+  "version": "0.1.0",
+  "author": "FAL",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.6.0",
+    "@typescript-eslint/parser": "^1.6.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "p5": "^0.8.0",
+    "p5ex": "^0.5.7",
+    "prettier": "^1.16.4",
+    "rollup": "^1.9.3",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-typescript2": "^0.20.1",
+    "typescript": "^3.4.4",
+    "uglify-es": "3.3.7"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "CC-BY-SA-3.0",
+  "main": "dist/sketch.js",
+  "private": true,
+  "scripts": {
+    "build": "npm-run-all rollup uglify",
+    "rollup": "rollup -c",
+    "test": "",
+    "uglify": "uglifyjs ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments --ecma 6"
+  }
+}
