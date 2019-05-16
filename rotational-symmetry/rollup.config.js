@@ -3,7 +3,7 @@ import typescript from "rollup-plugin-typescript2";
 import cleanup from "rollup-plugin-cleanup";
 
 const title = "Rotational Symmetry";
-const version = "0.1.0";
+const version = "0.1.1";
 
 const hasAdditionalBanner = false;
 const additionalBanner = `/**
@@ -14,7 +14,6 @@ const additionalBanner = `/**
 const myBanner =
   `/**
  * ${title}.
- * Including module: p5ex (Copyright 2018 FAL, licensed under MIT).
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>

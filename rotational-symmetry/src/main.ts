@@ -1,7 +1,15 @@
-import * as p5ex from "p5ex";
-import { createRandomTextureGraphics, loop } from "./functions";
+import {
+  createRandomTextureGraphics,
+  loop,
+  createScaledCanvas,
+  createApplyColor,
+  ApplyColorFunction,
+  randomIntBetween,
+  getHTMLElement,
+  ScaledCanvas
+} from "./functions";
 
-const SKETCH_NAME = "RotationalSymmetry";
+const HTML_ELEMENT = getHTMLElement("RotationalSymmetry");
 
 interface RotationallySymmetricShape {
   draw(size: number): void;
@@ -15,7 +23,7 @@ interface ShapeGroup {
   radius: number;
   revolution: number;
   revolutionVelocity: number;
-  shapeColor: p5ex.ShapeColor;
+  applyColor: ApplyColorFunction;
   rotationFactor: number;
 }
 
@@ -25,16 +33,17 @@ interface Icon {
   shapeGroupList: ShapeGroup[];
 }
 
-const sketch = (p: p5ex.p5exClass): void => {
-  // ---- constants
-
+const sketch = (p: p5): void => {
   // ---- variables
+  let nonScaledWidth: number;
+  let nonScaledHeight: number;
+  let scaledCanvas: ScaledCanvas;
   let backgroundPixels: number[];
-  let icons: p5ex.LoopableArray<Icon>;
+  let icons: Icon[];
 
   // ---- functions
   function drawShapeGroup(shapeGroup: ShapeGroup): void {
-    shapeGroup.shapeColor.applyColor();
+    shapeGroup.applyColor();
 
     const revolution = shapeGroup.revolution;
     const count = shapeGroup.count;
@@ -117,11 +126,12 @@ const sketch = (p: p5ex.p5exClass): void => {
     count: number,
     radius: number,
     revolutionVelocityFactor: number,
-    colorStack: p5ex.ShapeColor[]
+    applyColorFunctionStack: ApplyColorFunction[]
   ): ShapeGroup {
     const pickedShape = p.random(shapeCandidates);
-    const poppedShapeColor = colorStack.pop();
-    if (!poppedShapeColor) throw "createShapeGroup - No colors in stack.";
+    const poppedApplyColorFunction = applyColorFunctionStack.pop();
+    if (!poppedApplyColorFunction)
+      throw "createShapeGroup - No colors in stack.";
 
     let determinedRotationFactor: number;
     switch (pickedShape.foldingNumber) {
@@ -146,7 +156,7 @@ const sketch = (p: p5ex.p5exClass): void => {
       radius: radius,
       revolution: 0,
       revolutionVelocity: revolutionVelocityFactor * 0.004 * p.TWO_PI,
-      shapeColor: poppedShapeColor,
+      applyColor: poppedApplyColorFunction,
       rotationFactor: determinedRotationFactor
     };
   }
@@ -155,10 +165,10 @@ const sketch = (p: p5ex.p5exClass): void => {
     x: number,
     y: number,
     shapeCandidates: RotationallySymmetricShape[],
-    shapeColorCandidates: p5ex.ShapeColor[],
+    shapeColorCandidates: ApplyColorFunction[],
     invertedRevolution: boolean = false
   ): Icon {
-    const colorStack: p5ex.ShapeColor[] = p.shuffle(
+    const applyColorFunctionStack: ApplyColorFunction[] = p.shuffle(
       shapeColorCandidates,
       false
     );
@@ -167,17 +177,17 @@ const sketch = (p: p5ex.p5exClass): void => {
     const newShapeGroupList: ShapeGroup[] = [
       createShapeGroup(
         shapeCandidates,
-        p5ex.randomIntBetween(3, 6),
+        randomIntBetween(3, 6),
         35,
         -revolutionVelocityFactor,
-        colorStack
+        applyColorFunctionStack
       ),
       createShapeGroup(
         shapeCandidates,
-        p5ex.randomIntBetween(4, 10),
+        randomIntBetween(4, 10),
         75,
         revolutionVelocityFactor,
-        colorStack
+        applyColorFunctionStack
       )
     ];
 
@@ -209,7 +219,7 @@ const sketch = (p: p5ex.p5exClass): void => {
     };
   }
 
-  function createShifteShape(
+  function createShiftedShape(
     shape: RotationallySymmetricShape,
     shiftFactor: number
   ): RotationallySymmetricShape {
@@ -257,8 +267,8 @@ const sketch = (p: p5ex.p5exClass): void => {
     else newFoldingNumber = 1;
 
     return createCompositeShape(
-      createShifteShape(baseShape, -0.2),
-      createShifteShape(baseShape, 0.2),
+      createShiftedShape(baseShape, -0.2),
+      createShiftedShape(baseShape, 0.2),
       newFoldingNumber
     );
   }
@@ -319,7 +329,7 @@ const sketch = (p: p5ex.p5exClass): void => {
       ].map(createShapePatterns)
     );
 
-    const shapeColorCandidates: p5ex.ShapeColor[] = [
+    const applyColorFunctionCandidates: ApplyColorFunction[] = [
       "#C7243A",
       "#2266AF",
       "#009250",
@@ -327,13 +337,15 @@ const sketch = (p: p5ex.p5exClass): void => {
     ]
       .map((colorString: string) => p.color(colorString))
       // .map((color: p5.Color) => alphaColor(p, color, 160))
-      .map((color: p5.Color) => new p5ex.ShapeColor(p, color, undefined));
+      .map((color: p5.Color) =>
+        createApplyColor(p, { strokeColor: color, fillColor: undefined })
+      );
 
-    icons = new p5ex.LoopableArray<Icon>(9);
+    icons = [];
 
     let invertedRevolution = false;
 
-    const positionInterval = p.nonScaledWidth / 3;
+    const positionInterval = nonScaledWidth / 3;
     for (let row = 0; row < 3; row += 1) {
       const y = (row + 0.5) * positionInterval;
       for (let column = 0; column < 3; column += 1) {
@@ -342,7 +354,7 @@ const sketch = (p: p5ex.p5exClass): void => {
           x,
           y,
           shapeCandidates,
-          shapeColorCandidates,
+          applyColorFunctionCandidates,
           invertedRevolution
         );
         icons.push(newIcon);
@@ -355,16 +367,23 @@ const sketch = (p: p5ex.p5exClass): void => {
   p.preload = () => {};
 
   p.setup = () => {
-    p.createScalableCanvas(p5ex.ScalableCanvasTypes.SQUARE640x640);
+    nonScaledWidth = 640;
+    nonScaledHeight = 640;
+    scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, {
+      width: 640,
+      height: 640
+    });
     const texture: p5.Image = createRandomTextureGraphics(
       p,
-      p.nonScaledWidth,
-      p.nonScaledHeight,
+      nonScaledWidth,
+      nonScaledHeight,
       0.05
     ) as any;
-    p.scalableCanvas.scale();
+
+    p.push();
+    p.scale(scaledCanvas.scaleFactor);
     p.image(texture, 0, 0);
-    p.scalableCanvas.cancelScale();
+    p.pop();
     p.loadPixels();
     backgroundPixels = p.pixels;
 
@@ -380,9 +399,10 @@ const sketch = (p: p5ex.p5exClass): void => {
     p.pixels = backgroundPixels;
     p.updatePixels();
 
-    p.scalableCanvas.scale();
-    icons.loop(drawIcon);
-    p.scalableCanvas.cancelScale();
+    p.push();
+    p.scale(scaledCanvas.scaleFactor);
+    loop(icons, drawIcon);
+    p.pop();
   };
 
   p.mousePressed = () => {
@@ -396,4 +416,4 @@ const sketch = (p: p5ex.p5exClass): void => {
   };
 };
 
-new p5ex.p5exClass(sketch, SKETCH_NAME);
+new p5(sketch, HTML_ELEMENT);
