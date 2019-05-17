@@ -15,7 +15,7 @@ export interface ScaledCanvas {
 
 /**
  * Runs `p.createCanvas()` with the scaled size that fits to `node`.
- * Returns the created canvas ant the scale factor.
+ * Returns the created canvas and the scale factor.
  *
  * @param p - The p5 instance.
  * @param node - The HTML element or its ID.
