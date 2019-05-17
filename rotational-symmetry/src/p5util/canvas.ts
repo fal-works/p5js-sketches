@@ -11,6 +11,7 @@ import { getElementOrBody, getElementSize } from "../common/environment";
 export interface ScaledCanvas {
   p5Canvas: p5.Renderer;
   scaleFactor: number;
+  nonScaledSize: RectangleSize;
 }
 
 /**
@@ -50,6 +51,7 @@ export function createScaledCanvas(
 
   return {
     p5Canvas: canvas,
-    scaleFactor: scaleFactor
+    scaleFactor: scaleFactor,
+    nonScaledSize: nonScaledSize
   };
 }

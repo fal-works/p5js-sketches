@@ -141,7 +141,7 @@
    */
   /**
    * Runs `p.createCanvas()` with the scaled size that fits to `node`.
-   * Returns the created canvas ant the scale factor.
+   * Returns the created canvas and the scale factor.
    *
    * @param p - The p5 instance.
    * @param node - The HTML element or its ID.
@@ -166,7 +166,8 @@
     );
     return {
       p5Canvas: canvas,
-      scaleFactor: scaleFactor
+      scaleFactor: scaleFactor,
+      nonScaledSize: nonScaledSize
     };
   }
 
@@ -230,7 +231,7 @@
    * ------------------------------------------------------------------------
    */
   /**
-   * Set color to the specified pixel.
+   * Sets color to the specified pixel.
    * Should be used in conjunction with loadPixels() and updatePixels().
    * @param renderer - Instance of either p5 or p5.Graphics.
    * @param x - The x index of the pixel.
@@ -359,7 +360,6 @@
   const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
   const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
   const sketch = p => {
-    let nonScaledSize;
     let scaledCanvas;
     let backgroundPixels;
     let icons;
@@ -593,7 +593,7 @@
     function reset() {
       icons = [];
       let invertedRevolution = false;
-      const positionInterval = nonScaledSize.width / 3;
+      const positionInterval = scaledCanvas.nonScaledSize.width / 3;
       for (let row = 0; row < 3; row += 1) {
         const y = (row + 0.5) * positionInterval;
         for (let column = 0; column < 3; column += 1) {
@@ -617,7 +617,7 @@
 
     p.preload = () => {};
     p.setup = () => {
-      nonScaledSize = { width: 640, height: 640 };
+      const nonScaledSize = { width: 640, height: 640 };
       scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
       backgroundPixels = createPixels(p, p => {
         p.background(255);

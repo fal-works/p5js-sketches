@@ -5,7 +5,6 @@
  */
 
 import { getElementOrBody } from "./common/environment";
-import { RectangleSize } from "./common/dataTypes";
 import * as random from "./common/random";
 import { loop, flatNaive } from "./common/array";
 
@@ -48,7 +47,6 @@ interface Icon {
 
 const sketch = (p: p5): void => {
   // ---- variables
-  let nonScaledSize: RectangleSize;
   let scaledCanvas: ScaledCanvas;
   let backgroundPixels: number[];
   let icons: Icon[];
@@ -338,7 +336,7 @@ const sketch = (p: p5): void => {
 
     let invertedRevolution = false;
 
-    const positionInterval = nonScaledSize.width / 3;
+    const positionInterval = scaledCanvas.nonScaledSize.width / 3;
     for (let row = 0; row < 3; row += 1) {
       const y = (row + 0.5) * positionInterval;
       for (let column = 0; column < 3; column += 1) {
@@ -365,7 +363,7 @@ const sketch = (p: p5): void => {
   p.preload = () => {};
 
   p.setup = () => {
-    nonScaledSize = { width: 640, height: 640 };
+    const nonScaledSize = { width: 640, height: 640 };
     scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
     backgroundPixels = createPixels(p, (p: p5) => {
       p.background(255);
