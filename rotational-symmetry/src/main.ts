@@ -13,7 +13,7 @@ const HTML_ELEMENT = getHTMLElement("RotationalSymmetry");
 
 interface RotationallySymmetricShape {
   draw(size: number): void;
-  foldingNumber: number;
+  maxFoldingNumber: number;
 }
 
 interface ShapeGroup {
@@ -108,7 +108,7 @@ const sketch = (p: p5): void => {
     p.ellipse(0, 0, 0.9 * size, 1.3 * size);
   }
 
-  function drawDiamand(size: number): void {
+  function drawRhombus(size: number): void {
     p.quad(0.9 * size, 0, 0, 0.6 * size, -0.9 * size, 0, 0, -0.6 * size);
   }
 
@@ -134,7 +134,7 @@ const sketch = (p: p5): void => {
       throw "createShapeGroup - No colors in stack.";
 
     let determinedRotationFactor: number;
-    switch (pickedShape.foldingNumber) {
+    switch (pickedShape.maxFoldingNumber) {
       case 1:
         determinedRotationFactor = 1;
         break;
@@ -205,9 +205,9 @@ const sketch = (p: p5): void => {
   function createRotatedShape(
     shape: RotationallySymmetricShape
   ): RotationallySymmetricShape | null {
-    if (shape.foldingNumber === Infinity) return null;
+    if (shape.maxFoldingNumber === Infinity) return null;
 
-    const rotationAngle = 0.5 * (p.TWO_PI / shape.foldingNumber);
+    const rotationAngle = 0.5 * (p.TWO_PI / shape.maxFoldingNumber);
 
     return {
       draw: (size: number) => {
@@ -215,7 +215,7 @@ const sketch = (p: p5): void => {
         shape.draw(size);
         p.rotate(-rotationAngle);
       },
-      foldingNumber: shape.foldingNumber
+      maxFoldingNumber: shape.maxFoldingNumber
     };
   }
 
@@ -230,21 +230,21 @@ const sketch = (p: p5): void => {
         shape.draw(size);
         p.translate(-displacement, 0);
       },
-      foldingNumber: 1
+      maxFoldingNumber: 1 // assuming that the base shape was centered at the origin
     };
   }
 
   function createCompositeShape(
     shape: RotationallySymmetricShape,
     otherShape: RotationallySymmetricShape,
-    foldingNumber: number
+    maxFoldingNumber: number
   ): RotationallySymmetricShape {
     return {
       draw: (size: number) => {
         shape.draw(size);
         otherShape.draw(size);
       },
-      foldingNumber: foldingNumber
+      maxFoldingNumber: maxFoldingNumber
     };
   }
 
@@ -255,21 +255,21 @@ const sketch = (p: p5): void => {
     return createCompositeShape(
       baseShape,
       rotatedShape,
-      baseShape.foldingNumber * 2
+      baseShape.maxFoldingNumber * 2
     );
   }
 
   function createShiftedCompositeShape(baseShape: RotationallySymmetricShape) {
-    const baseFoldingNumber = baseShape.foldingNumber;
-    let newFoldingNumber: number;
-    if (baseFoldingNumber === Infinity) newFoldingNumber = 2;
-    else if (baseFoldingNumber % 2 === 0) newFoldingNumber = 2;
-    else newFoldingNumber = 1;
+    const basemaxFoldingNumber = baseShape.maxFoldingNumber;
+    let newmaxFoldingNumber: number;
+    if (basemaxFoldingNumber === Infinity) newmaxFoldingNumber = 2;
+    else if (basemaxFoldingNumber % 2 === 0) newmaxFoldingNumber = 2;
+    else newmaxFoldingNumber = 1;
 
     return createCompositeShape(
       createShiftedShape(baseShape, -0.2),
       createShiftedShape(baseShape, 0.2),
-      newFoldingNumber
+      newmaxFoldingNumber
     );
   }
 
@@ -288,7 +288,7 @@ const sketch = (p: p5): void => {
     const shiftedCompositeShape = createShiftedCompositeShape(baseShape);
     array.push(shiftedCompositeShape);
 
-    if (shiftedCompositeShape.foldingNumber === 2) {
+    if (shiftedCompositeShape.maxFoldingNumber === 2) {
       const rotatedShiftedCompositeShape = createRotatedShape(
         shiftedCompositeShape
       );
@@ -302,30 +302,12 @@ const sketch = (p: p5): void => {
   function initialize() {
     const shapeCandidates: RotationallySymmetricShape[] = flat(
       [
-        {
-          draw: drawSquare,
-          foldingNumber: 4
-        },
-        {
-          draw: drawRegularTriangle,
-          foldingNumber: 3
-        },
-        {
-          draw: drawCircle,
-          foldingNumber: Infinity
-        },
-        {
-          draw: drawEllipse,
-          foldingNumber: 2
-        },
-        {
-          draw: drawDiamand,
-          foldingNumber: 2
-        },
-        {
-          draw: drawDrop,
-          foldingNumber: 1
-        }
+        { draw: drawSquare, maxFoldingNumber: 4 },
+        { draw: drawRegularTriangle, maxFoldingNumber: 3 },
+        { draw: drawCircle, maxFoldingNumber: Infinity },
+        { draw: drawEllipse, maxFoldingNumber: 2 },
+        { draw: drawRhombus, maxFoldingNumber: 2 },
+        { draw: drawDrop, maxFoldingNumber: 1 }
       ].map(createShapePatterns)
     );
 

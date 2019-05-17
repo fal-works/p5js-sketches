@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.1
+ * @version 0.1.2
  * @license CC-BY-SA-3.0
  */
 
@@ -218,7 +218,7 @@
       function drawEllipse(size) {
           p.ellipse(0, 0, 0.9 * size, 1.3 * size);
       }
-      function drawDiamand(size) {
+      function drawRhombus(size) {
           p.quad(0.9 * size, 0, 0, 0.6 * size, -0.9 * size, 0, 0, -0.6 * size);
       }
       function drawDrop(size) {
@@ -235,7 +235,7 @@
           if (!poppedApplyColorFunction)
               throw "createShapeGroup - No colors in stack.";
           let determinedRotationFactor;
-          switch (pickedShape.foldingNumber) {
+          switch (pickedShape.maxFoldingNumber) {
               case 1:
                   determinedRotationFactor = 1;
                   break;
@@ -277,16 +277,16 @@
           return [].concat.apply([], arrays);
       }
       function createRotatedShape(shape) {
-          if (shape.foldingNumber === Infinity)
+          if (shape.maxFoldingNumber === Infinity)
               return null;
-          const rotationAngle = 0.5 * (p.TWO_PI / shape.foldingNumber);
+          const rotationAngle = 0.5 * (p.TWO_PI / shape.maxFoldingNumber);
           return {
               draw: (size) => {
                   p.rotate(rotationAngle);
                   shape.draw(size);
                   p.rotate(-rotationAngle);
               },
-              foldingNumber: shape.foldingNumber
+              maxFoldingNumber: shape.maxFoldingNumber
           };
       }
       function createShiftedShape(shape, shiftFactor) {
@@ -297,34 +297,34 @@
                   shape.draw(size);
                   p.translate(-displacement, 0);
               },
-              foldingNumber: 1
+              maxFoldingNumber: 1 // assuming that the base shape was centered at the origin
           };
       }
-      function createCompositeShape(shape, otherShape, foldingNumber) {
+      function createCompositeShape(shape, otherShape, maxFoldingNumber) {
           return {
               draw: (size) => {
                   shape.draw(size);
                   otherShape.draw(size);
               },
-              foldingNumber: foldingNumber
+              maxFoldingNumber: maxFoldingNumber
           };
       }
       function createRotatedCompositeShape(baseShape) {
           const rotatedShape = createRotatedShape(baseShape);
           if (!rotatedShape)
               throw "createRotatedCompositeShape() - Invalid input.";
-          return createCompositeShape(baseShape, rotatedShape, baseShape.foldingNumber * 2);
+          return createCompositeShape(baseShape, rotatedShape, baseShape.maxFoldingNumber * 2);
       }
       function createShiftedCompositeShape(baseShape) {
-          const baseFoldingNumber = baseShape.foldingNumber;
-          let newFoldingNumber;
-          if (baseFoldingNumber === Infinity)
-              newFoldingNumber = 2;
-          else if (baseFoldingNumber % 2 === 0)
-              newFoldingNumber = 2;
+          const basemaxFoldingNumber = baseShape.maxFoldingNumber;
+          let newmaxFoldingNumber;
+          if (basemaxFoldingNumber === Infinity)
+              newmaxFoldingNumber = 2;
+          else if (basemaxFoldingNumber % 2 === 0)
+              newmaxFoldingNumber = 2;
           else
-              newFoldingNumber = 1;
-          return createCompositeShape(createShiftedShape(baseShape, -0.2), createShiftedShape(baseShape, 0.2), newFoldingNumber);
+              newmaxFoldingNumber = 1;
+          return createCompositeShape(createShiftedShape(baseShape, -0.2), createShiftedShape(baseShape, 0.2), newmaxFoldingNumber);
       }
       function createShapePatterns(baseShape) {
           const array = [baseShape];
@@ -336,7 +336,7 @@
           }
           const shiftedCompositeShape = createShiftedCompositeShape(baseShape);
           array.push(shiftedCompositeShape);
-          if (shiftedCompositeShape.foldingNumber === 2) {
+          if (shiftedCompositeShape.maxFoldingNumber === 2) {
               const rotatedShiftedCompositeShape = createRotatedShape(shiftedCompositeShape);
               if (rotatedShiftedCompositeShape)
                   array.push(rotatedShiftedCompositeShape);
@@ -345,30 +345,12 @@
       }
       function initialize() {
           const shapeCandidates = flat([
-              {
-                  draw: drawSquare,
-                  foldingNumber: 4
-              },
-              {
-                  draw: drawRegularTriangle,
-                  foldingNumber: 3
-              },
-              {
-                  draw: drawCircle,
-                  foldingNumber: Infinity
-              },
-              {
-                  draw: drawEllipse,
-                  foldingNumber: 2
-              },
-              {
-                  draw: drawDiamand,
-                  foldingNumber: 2
-              },
-              {
-                  draw: drawDrop,
-                  foldingNumber: 1
-              }
+              { draw: drawSquare, maxFoldingNumber: 4 },
+              { draw: drawRegularTriangle, maxFoldingNumber: 3 },
+              { draw: drawCircle, maxFoldingNumber: Infinity },
+              { draw: drawEllipse, maxFoldingNumber: 2 },
+              { draw: drawRhombus, maxFoldingNumber: 2 },
+              { draw: drawDrop, maxFoldingNumber: 1 }
           ].map(createShapePatterns));
           const applyColorFunctionCandidates = [
               "#C7243A",

@@ -3,7 +3,7 @@ import typescript from "rollup-plugin-typescript2";
 import cleanup from "rollup-plugin-cleanup";
 
 const title = "Rotational Symmetry";
-const version = "0.1.1";
+const version = "0.1.2";
 
 const hasAdditionalBanner = false;
 const additionalBanner = `/**
