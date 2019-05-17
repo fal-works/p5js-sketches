@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.3
+ * @version 0.1.4
  * @license CC-BY-SA-3.0
  */
 
@@ -388,14 +388,16 @@
       function drawSquare(size) {
           p.rect(0, 0, size, size, 0.05 * size);
       }
-      const ROOT_THREE = p.sqrt(3);
       const ONE_THIRD = 1 / 3;
       const TWO_THIRDS = 2 / 3;
+      const ROOT_THREE = p.sqrt(3);
       const ONE_OVER_ROOT_THREE = 1 / ROOT_THREE;
-      const TRIANGLE_SIZE_FACTOR = 1.2;
       function drawRegularTriangle(size) {
-          const sz = TRIANGLE_SIZE_FACTOR * size;
-          p.triangle(TWO_THIRDS * sz, 0, -ONE_THIRD * sz, -ONE_OVER_ROOT_THREE * sz, -ONE_THIRD * sz, ONE_OVER_ROOT_THREE * sz);
+          const sz = 1.2 * size;
+          const leftX = -ONE_THIRD * sz;
+          const rightX = TWO_THIRDS * sz;
+          const bottomY = ONE_OVER_ROOT_THREE * sz;
+          p.triangle(rightX, 0, leftX, -bottomY, leftX, bottomY);
       }
       function drawCircle(size) {
           p.ellipse(0, 0, size, size);
@@ -419,7 +421,7 @@
           const pickedShape = fromArray(shapeCandidates);
           const poppedApplyColorFunction = applyColorFunctionStack.pop();
           if (!poppedApplyColorFunction)
-              throw "createShapeGroup - No colors in stack.";
+              throw new Error("No colors in stack.");
           let determinedRotationFactor;
           switch (pickedShape.maxFoldingNumber) {
               case 1:
