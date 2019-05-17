@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.2
+ * @version 0.1.3
  * @license CC-BY-SA-3.0
  */
 
@@ -364,21 +364,19 @@
       // ---- drawing functions
       function drawShapeGroup(shapeGroup) {
           shapeGroup.applyColor();
-          const revolution = shapeGroup.revolution;
+          const revolution = shapeGroup.revolution % p.TWO_PI;
           const count = shapeGroup.count;
           const shape = shapeGroup.shape;
           const radius = shapeGroup.radius;
           const shapeUnitSize = shapeGroup.shapeSize;
           const rotationFactor = shapeGroup.rotationFactor;
-          function drawShape() {
-              shape.draw(shapeUnitSize);
-          }
           let angle = revolution;
           const angleInterval = p.TWO_PI / count;
+          const drawShape = () => shape.draw(shapeUnitSize);
           for (let i = 0; i < count; i += 1) {
               const x = radius * Math.cos(angle);
               const y = radius * Math.sin(angle);
-              const rotationAngle = rotationFactor * angle;
+              const rotationAngle = angle + (rotationFactor || 0) * revolution;
               drawTranslatedAndRotated(p, drawShape, x, y, rotationAngle);
               angle += angleInterval;
           }
@@ -428,13 +426,13 @@
                   determinedRotationFactor = 1;
                   break;
               case 4:
-                  determinedRotationFactor = fromArray([-1, 0, 1]);
+                  determinedRotationFactor = fromArray([-2, -1, 0, 1, 2]);
                   break;
               case Infinity:
-                  determinedRotationFactor = 0;
+                  determinedRotationFactor = null;
                   break;
               default:
-                  determinedRotationFactor = fromArray([-1, 1]);
+                  determinedRotationFactor = fromArray([-2, 0, 2]);
                   break;
           }
           return {

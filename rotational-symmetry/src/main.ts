@@ -37,7 +37,7 @@ interface ShapeGroup {
   revolution: number;
   revolutionVelocity: number;
   applyColor: ApplyColorFunction;
-  rotationFactor: number;
+  rotationFactor: number | null;
 }
 
 interface Icon {
@@ -59,25 +59,25 @@ const sketch = (p: p5): void => {
   function drawShapeGroup(shapeGroup: ShapeGroup): void {
     shapeGroup.applyColor();
 
-    const revolution = shapeGroup.revolution;
+    const revolution = shapeGroup.revolution % p.TWO_PI;
     const count = shapeGroup.count;
     const shape = shapeGroup.shape;
     const radius = shapeGroup.radius;
     const shapeUnitSize = shapeGroup.shapeSize;
     const rotationFactor = shapeGroup.rotationFactor;
 
-    function drawShape(): void {
-      shape.draw(shapeUnitSize);
-    }
-
     let angle = revolution;
     const angleInterval = p.TWO_PI / count;
+
+    const drawShape = () => shape.draw(shapeUnitSize);
 
     for (let i = 0; i < count; i += 1) {
       const x = radius * Math.cos(angle);
       const y = radius * Math.sin(angle);
-      const rotationAngle = rotationFactor * angle;
+
+      const rotationAngle = angle + (rotationFactor || 0) * revolution;
       drawTranslatedAndRotated(p, drawShape, x, y, rotationAngle);
+
       angle += angleInterval;
     }
 
@@ -149,19 +149,19 @@ const sketch = (p: p5): void => {
     if (!poppedApplyColorFunction)
       throw "createShapeGroup - No colors in stack.";
 
-    let determinedRotationFactor: number;
+    let determinedRotationFactor: number | null;
     switch (pickedShape.maxFoldingNumber) {
       case 1:
         determinedRotationFactor = 1;
         break;
       case 4:
-        determinedRotationFactor = random.fromArray([-1, 0, 1]);
+        determinedRotationFactor = random.fromArray([-2, -1, 0, 1, 2]);
         break;
       case Infinity:
-        determinedRotationFactor = 0;
+        determinedRotationFactor = null;
         break;
       default:
-        determinedRotationFactor = random.fromArray([-1, 1]);
+        determinedRotationFactor = random.fromArray([-2, 0, 2]);
         break;
     }
 
