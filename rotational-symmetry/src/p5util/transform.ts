@@ -11,7 +11,8 @@
  *
  * @param p
  * @param drawCallback
- * @param scaleFactor
+ * @param offsetX
+ * @param offsetY
  */
 export function drawTranslated(
   p: p5,
@@ -31,7 +32,7 @@ export function drawTranslated(
  *
  * @param p
  * @param drawCallback
- * @param scaleFactor
+ * @param angle
  */
 export function drawRotated(
   p: p5,
@@ -48,17 +49,19 @@ export function drawRotated(
  *
  * @param p
  * @param drawCallback
- * @param scaleFactor
+ * @param offsetX
+ * @param offsetY
+ * @param angle
  */
 export function drawTranslatedAndRotated(
   p: p5,
   drawCallback: (p: p5) => any,
   offsetX: number,
   offsetY: number,
-  rotationAngle: number
+  angle: number
 ): void {
   p.translate(offsetX, offsetY);
-  drawRotated(p, drawCallback, rotationAngle);
+  drawRotated(p, drawCallback, angle);
   p.translate(-offsetX, -offsetY);
 }
 

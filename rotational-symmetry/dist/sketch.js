@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.5
+ * @version 0.1.6
  * @license CC-BY-SA-3.0
  */
 
@@ -48,6 +48,7 @@
   /**
    * Returns random integer from 0 up to (but not including) `maxInt`.
    * `maxInt` is not expected to be negative.
+   * @param maxInt
    */
   function int(maxInt) {
       return Math.floor(Math.random() * maxInt);
@@ -55,6 +56,8 @@
   /**
    * Returns random integer from the min number up to (but not including) the max number.
    * The case where `minInt < maxInt` is not expected.
+   * @param minInt
+   * @param maxInt
    */
   function intBetween(minInt, maxInt) {
       return minInt + int(maxInt - minInt);
@@ -79,7 +82,7 @@
   /**
    * Runs `callback` once for each element of `array`.
    * @param array
-   * @param {loopArrayCallBack} callback
+   * @param callback
    */
   function loop(array, callback) {
       const arrayLength = array.length;
@@ -88,10 +91,10 @@
       }
   }
   /**
-   * Creates a new 1-dimensional array from a 2-dimensional array.
+   * Creates a new 1-dimensional array by concatenating elements of a 2-dimensional array.
    * @param arrays
    */
-  function flat(arrays) {
+  function flatNaive(arrays) {
       return [].concat.apply([], arrays);
   }
 
@@ -142,8 +145,8 @@
    * Runs `p.createCanvas()` with the scaled size that fits to `node`.
    * Returns the created canvas ant the scale factor.
    *
-   * @param p The p5 instance.
-   * @param node The HTML element or its ID.
+   * @param p - The p5 instance.
+   * @param node - The HTML element or its ID.
    * @param nonScaledSize
    * @param fittingOption
    * @param renderer
@@ -173,8 +176,8 @@
    * A `null` color will be interpreted as `p.noStroke()` or `p.noFill()`.
    * An `undefined` color will have no effect.
    *
-   * @param p
-   * @param shapeColor
+   * @param p - The p5 instance.
+   * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
    */
   function createApplyColor(p, shapeColor) {
       const strokeColor = shapeColor.strokeColor;
@@ -278,7 +281,8 @@
    *
    * @param p
    * @param drawCallback
-   * @param scaleFactor
+   * @param offsetX
+   * @param offsetY
    */
   function drawTranslated(p, drawCallback, offsetX, offsetY) {
       p.translate(offsetX, offsetY);
@@ -292,7 +296,7 @@
    *
    * @param p
    * @param drawCallback
-   * @param scaleFactor
+   * @param angle
    */
   function drawRotated(p, drawCallback, angle) {
       p.rotate(angle);
@@ -304,11 +308,13 @@
    *
    * @param p
    * @param drawCallback
-   * @param scaleFactor
+   * @param offsetX
+   * @param offsetY
+   * @param angle
    */
-  function drawTranslatedAndRotated(p, drawCallback, offsetX, offsetY, rotationAngle) {
+  function drawTranslatedAndRotated(p, drawCallback, offsetX, offsetY, angle) {
       p.translate(offsetX, offsetY);
-      drawRotated(p, drawCallback, rotationAngle);
+      drawRotated(p, drawCallback, angle);
       p.translate(-offsetX, -offsetY);
   }
   /**
@@ -536,7 +542,7 @@
           p.rectMode(p.CENTER);
       }
       function initializeData() {
-          shapeCandidates = flat([
+          shapeCandidates = flatNaive([
               { draw: drawSquare, maxFoldingNumber: 4 },
               { draw: drawRegularTriangle, maxFoldingNumber: 3 },
               { draw: drawCircle, maxFoldingNumber: Infinity },

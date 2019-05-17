@@ -6,6 +6,8 @@
 
 /**
  * Returns random value from `start` up to (but not including) `end`.
+ * @param start
+ * @param end
  */
 export function between(start: number, end: number): number {
   return start + Math.random() * (end - start);
@@ -14,6 +16,7 @@ export function between(start: number, end: number): number {
 /**
  * Returns random integer from 0 up to (but not including) `maxInt`.
  * `maxInt` is not expected to be negative.
+ * @param maxInt
  */
 export function int(maxInt: number): number {
   return Math.floor(Math.random() * maxInt);
@@ -22,6 +25,8 @@ export function int(maxInt: number): number {
 /**
  * Returns random integer from the min number up to (but not including) the max number.
  * The case where `minInt < maxInt` is not expected.
+ * @param minInt
+ * @param maxInt
  */
 export function intBetween(minInt: number, maxInt: number): number {
   return minInt + int(maxInt - minInt);
@@ -29,7 +34,7 @@ export function intBetween(minInt: number, maxInt: number): number {
 
 /**
  * Returns `n` or `-n` randomly.
- * @param {number} n - any number
+ * @param n - any number
  */
 export function signed(n: number): number {
   if (Math.random() < 0.5) return n;
@@ -50,7 +55,7 @@ export function fromArray<T>(array: T[]): T {
 }
 
 /**
- * Returns and removes one array element randomly.
+ * Removes and returns one element from `array` randomly.
  * Throws error if `array` is empty.
  * @param array
  */

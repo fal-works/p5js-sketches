@@ -7,7 +7,7 @@
 import { getElementOrBody } from "./common/environment";
 import { RectangleSize } from "./common/dataTypes";
 import * as random from "./common/random";
-import { loop, flat } from "./common/array";
+import { loop, flatNaive } from "./common/array";
 
 import { createScaledCanvas, ScaledCanvas } from "./p5util/canvas";
 import { createApplyColor, ApplyColorFunction } from "./p5util/color";
@@ -314,7 +314,7 @@ const sketch = (p: p5): void => {
   }
 
   function initializeData() {
-    shapeCandidates = flat(
+    shapeCandidates = flatNaive(
       [
         { draw: drawSquare, maxFoldingNumber: 4 },
         { draw: drawRegularTriangle, maxFoldingNumber: 3 },

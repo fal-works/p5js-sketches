@@ -29,8 +29,8 @@ export interface ApplyColorFunction {
  * A `null` color will be interpreted as `p.noStroke()` or `p.noFill()`.
  * An `undefined` color will have no effect.
  *
- * @param p
- * @param shapeColor
+ * @param p - The p5 instance.
+ * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
  */
 export function createApplyColor(
   p: p5,
@@ -57,6 +57,7 @@ export function createApplyColor(
         p.stroke(strokeColor);
       };
   }
+
   if (fillColor) {
     if (strokeColor === null)
       return () => {

@@ -17,7 +17,7 @@ export function loopLimited<T>(
 /**
  * Runs `callback` once for each element of `array`.
  * @param array
- * @param {loopArrayCallBack} callback
+ * @param callback
  */
 export function loop<T>(
   array: T[],
@@ -46,7 +46,7 @@ export function loopBackwardsLimited<T>(
 /**
  * Runs `callback` once for each element of `array` in descending order.
  * @param array
- * @param {loopArrayCallback} callback
+ * @param callback
  */
 export function loopBackwards<T>(
   array: T[],
@@ -119,16 +119,17 @@ export function roundRobin<T>(
 }
 
 /**
- * Creates a new 1-dimensional array from a 2-dimensional array.
+ * Creates a new 1-dimensional array by concatenating elements of a 2-dimensional array.
  * @param arrays
  */
-export function flat<T>(arrays: T[][]): T[] {
+export function flatNaive<T>(arrays: T[][]): T[] {
   return [].concat.apply([], arrays);
 }
 
 /**
  * An alternative to `Array.prototype.flat()`.
  * @param array
+ * @param depth
  */
 export function flatRecursive<T>(
   array: (T | T[])[],

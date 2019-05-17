@@ -3,7 +3,7 @@ import typescript from "rollup-plugin-typescript2";
 import cleanup from "rollup-plugin-cleanup";
 
 const title = "Rotational Symmetry";
-const version = "0.1.5";
+const version = "0.1.6";
 
 const hasAdditionalBanner = false;
 const additionalBanner = `/**
@@ -48,7 +48,7 @@ export default {
         /^\*[^*](?!\s*tslint\s*:\s*(enable|disable))/,
         /^\/(?!\s*tslint\s*:\s*(enable|disable))/
       ],
-      maxEmptyLines: 1,
+      maxEmptyLines: 2,
       extensions: [".ts", ".mjs"]
     })
   ]
