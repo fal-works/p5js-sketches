@@ -385,6 +385,7 @@
       function drawIcon(icon) {
           drawTranslated(p, () => loop(icon.shapeGroupList, drawShapeGroup), icon.x, icon.y);
       }
+      // ---- primitive shapes drawing functions
       function drawSquare(size) {
           p.rect(0, 0, size, size, 0.05 * size);
       }
@@ -572,6 +573,7 @@
           nonScaledSize = { width: 640, height: 640 };
           scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
           backgroundPixels = createPixels(p, (p) => {
+              p.background(255);
               p.scale(scaledCanvas.scaleFactor);
               p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
           });

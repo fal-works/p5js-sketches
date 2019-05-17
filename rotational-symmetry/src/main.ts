@@ -368,6 +368,7 @@ const sketch = (p: p5): void => {
     nonScaledSize = { width: 640, height: 640 };
     scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
     backgroundPixels = createPixels(p, (p: p5) => {
+      p.background(255);
       p.scale(scaledCanvas.scaleFactor);
       p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
     });
