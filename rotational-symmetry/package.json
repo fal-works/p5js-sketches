@@ -27,9 +27,10 @@
   "main": "dist/sketch.js",
   "private": true,
   "scripts": {
-    "build": "npm-run-all rollup uglify",
+    "build": "npm-run-all rollup prettier uglify",
     "rollup": "rollup -c",
     "test": "",
+    "prettier": "prettier --write ./dist/sketch.js",
     "uglify": "uglifyjs ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments --ecma 6"
   }
 }

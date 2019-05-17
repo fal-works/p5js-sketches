@@ -43,11 +43,7 @@ export default {
       useTsconfigDeclarationDir: true
     }),
     cleanup({
-      comments: [
-        /^\*\*(?![\s\S]*@module\b)/,
-        /^\*[^*](?!\s*tslint\s*:\s*(enable|disable))/,
-        /^\/(?!\s*tslint\s*:\s*(enable|disable))/
-      ],
+      comments: [/^\*\*(?![\s\S]*@module\b)/],
       maxEmptyLines: 2,
       extensions: [".ts", ".mjs"]
     })
