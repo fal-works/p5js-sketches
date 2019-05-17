@@ -11,33 +11,23 @@
   'use strict';
 
   /**
-   * Returns random integer from 0 up to (but not including) the max number.
+   * ------------------------------------------------------------------------
+   *  Common environment utility
+   * ------------------------------------------------------------------------
    */
-  function randomInt(maxInt) {
-      return Math.floor(Math.random() * maxInt);
-  }
   /**
-   * Returns random integer from the min number up to (but not including) the max number.
+   * Finds HTML element by `id`. If not found, returns `document.body`.
+   * @param id
    */
-  function randomIntBetween(minInt, maxInt) {
-      return minInt + randomInt(maxInt - minInt);
-  }
-  function loop(array, callback) {
-      const len = array.length;
-      for (let i = 0; i < len; i += 1)
-          callback(array[i]);
-  }
-  function getHTMLElement(id) {
+  function getElementOrBody(id) {
       return document.getElementById(id) || document.body;
   }
-  var RegionFittingOption;
-  (function (RegionFittingOption) {
-      RegionFittingOption[RegionFittingOption["FIT_SIZE"] = 0] = "FIT_SIZE";
-      RegionFittingOption[RegionFittingOption["FIT_WIDTH"] = 1] = "FIT_WIDTH";
-      RegionFittingOption[RegionFittingOption["FIT_HEIGHT"] = 2] = "FIT_HEIGHT";
-  })(RegionFittingOption || (RegionFittingOption = {}));
-  // -----------------------------------------------------
-  function getHTMLElementRegionSize(node) {
+  /**
+   * Returns the width and height of `node`.
+   * If `node === document.body`, returns the inner width and height of `window`.
+   * @param node
+   */
+  function getElementSize(node) {
       if (node === document.body)
           return {
               width: window.innerWidth,
@@ -49,72 +39,143 @@
           height: boundingClientRect.height
       };
   }
-  function calculateRegionFittingScaleFactor(nonScaledRegionSize, targetRegionSize, fittingOption) {
+
+  /**
+   * ------------------------------------------------------------------------
+   *  Common random utility
+   * ------------------------------------------------------------------------
+   */
+  /**
+   * Returns random integer from 0 up to (but not including) `maxInt`.
+   * `maxInt` is not expected to be negative.
+   */
+  function int(maxInt) {
+      return Math.floor(Math.random() * maxInt);
+  }
+  /**
+   * Returns random integer from the min number up to (but not including) the max number.
+   * The case where `minInt < maxInt` is not expected.
+   */
+  function intBetween(minInt, maxInt) {
+      return minInt + int(maxInt - minInt);
+  }
+  /**
+   * Returns one element of `array` randomly.
+   * Throws error if `array` is empty.
+   * @param array
+   */
+  function fromArray(array) {
+      const length = array.length;
+      if (length === 0)
+          throw new Error("Passed empty array.");
+      return array[int(length)];
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   *  Common array utility
+   * ------------------------------------------------------------------------
+   */
+  /**
+   * Runs `callback` once for each element of `array`.
+   * @param array
+   * @param {loopArrayCallBack} callback
+   */
+  function loop(array, callback) {
+      const arrayLength = array.length;
+      for (let i = 0; i < arrayLength; i += 1) {
+          callback(array[i], i, array);
+      }
+  }
+  /**
+   * Creates a new 1-dimensional array from a 2-dimensional array.
+   * @param arrays
+   */
+  function flat(arrays) {
+      return [].concat.apply([], arrays);
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   *  Common bounding box utility
+   * ------------------------------------------------------------------------
+   */
+  var FittingOption;
+  (function (FittingOption) {
+      FittingOption[FittingOption["FIT_TO_BOX"] = 0] = "FIT_TO_BOX";
+      FittingOption[FittingOption["FIT_WIDTH"] = 1] = "FIT_WIDTH";
+      FittingOption[FittingOption["FIT_HEIGHT"] = 2] = "FIT_HEIGHT";
+  })(FittingOption || (FittingOption = {}));
+  /**
+   * Calculates the scale factor for fitting `nonScaledSize` to `targetSize` keeping the original aspect ratio.
+   *
+   * @param nonScaledSize
+   * @param targetSize
+   * @param fittingOption
+   */
+  function calculateScaleFactor(nonScaledSize, targetSize, fittingOption) {
       switch (fittingOption) {
           default:
-          case RegionFittingOption.FIT_SIZE:
-              const scaleFactorCandidate = targetRegionSize.width / nonScaledRegionSize.width;
-              const nonScaledHeight = nonScaledRegionSize.height;
-              if (scaleFactorCandidate * nonScaledHeight < targetRegionSize.height) {
+          case FittingOption.FIT_TO_BOX:
+              const scaleFactorCandidate = targetSize.width / nonScaledSize.width;
+              const nonScaledHeight = nonScaledSize.height;
+              const targetHeight = targetSize.height;
+              if (scaleFactorCandidate * nonScaledHeight < targetHeight) {
                   return scaleFactorCandidate;
               }
               else {
-                  return targetRegionSize.height / nonScaledHeight;
+                  return targetHeight / nonScaledHeight;
               }
-          case RegionFittingOption.FIT_WIDTH:
-              return targetRegionSize.width / nonScaledRegionSize.width;
-          case RegionFittingOption.FIT_HEIGHT:
-              return targetRegionSize.height / nonScaledRegionSize.height;
+          case FittingOption.FIT_WIDTH:
+              return targetSize.width / nonScaledSize.width;
+          case FittingOption.FIT_HEIGHT:
+              return targetSize.height / nonScaledSize.height;
       }
   }
-  function createScaledCanvas(p, node, nonScaledRegion, fittingOption, renderer) {
-      const maxCanvasRegion = getHTMLElementRegionSize(node);
-      const scaleFactor = calculateRegionFittingScaleFactor(nonScaledRegion, maxCanvasRegion, fittingOption);
-      const canvas = p.createCanvas(scaleFactor * nonScaledRegion.width, scaleFactor * nonScaledRegion.height, renderer);
+
+  /**
+   * ------------------------------------------------------------------------
+   *  p5.js canvas utility
+   * ------------------------------------------------------------------------
+   */
+  /**
+   * Runs `p.createCanvas()` with the scaled size that fits to `node`.
+   * Returns the created canvas ant the scale factor.
+   *
+   * @param p The p5 instance.
+   * @param node The HTML element or its ID.
+   * @param nonScaledSize
+   * @param fittingOption
+   * @param renderer
+   */
+  function createScaledCanvas(p, node, nonScaledSize, fittingOption, renderer) {
+      let htmlElement;
+      if (typeof node === "string")
+          htmlElement = getElementOrBody(node);
+      else
+          htmlElement = node;
+      const maxCanvasRegion = getElementSize(htmlElement);
+      const scaleFactor = calculateScaleFactor(nonScaledSize, maxCanvasRegion, fittingOption);
+      const canvas = p.createCanvas(scaleFactor * nonScaledSize.width, scaleFactor * nonScaledSize.height, renderer);
       return {
           p5Canvas: canvas,
           scaleFactor: scaleFactor
       };
   }
+
   /**
-   * Set color to the specified pixel.
-   * Should be used in conjunction with loadPixels() and updatePixels().
-   * @param renderer - Instance of either p5 or p5.Graphics.
-   * @param x - The x index of the pixel.
-   * @param y - The y index of the pixel.
-   * @param red - The red value (0 - 255).
-   * @param green - The green value (0 - 255).
-   * @param blue - The blue value (0 - 255).
-   * @param pixelDensity - If not specified, renderer.pixelDensity() will be called.
+   * ------------------------------------------------------------------------
+   *  p5.js color utility
+   * ------------------------------------------------------------------------
    */
-  function setPixel(renderer, x, y, red, green, blue, alpha, pixelDensity) {
-      const g = renderer;
-      const d = pixelDensity || g.pixelDensity();
-      const graphicsPixels = g.pixels;
-      for (let i = 0; i < d; i += 1) {
-          for (let j = 0; j < d; j += 1) {
-              const idx = 4 * ((y * d + j) * g.width * d + (x * d + i));
-              graphicsPixels[idx] = red;
-              graphicsPixels[idx + 1] = green;
-              graphicsPixels[idx + 2] = blue;
-              graphicsPixels[idx + 3] = alpha;
-          }
-      }
-  }
-  function createRandomTextureGraphics(p, w, h, factor) {
-      const g = p.createGraphics(w, h);
-      const width = g.width;
-      const height = g.height;
-      const pixelDensity = g.pixelDensity();
-      g.loadPixels();
-      for (let y = 0; y < height; y += 1) {
-          for (let x = 0; x < width; x += 1) {
-              setPixel(g, x, y, 0, 0, 0, 255 * Math.random() * factor, pixelDensity);
-          }
-      }
-      g.updatePixels();
-      return g;
-  }
+  /**
+   * Creates a composite function of `p.stroke()` and `p.fill()`.
+   * A `null` color will be interpreted as `p.noStroke()` or `p.noFill()`.
+   * An `undefined` color will have no effect.
+   *
+   * @param p
+   * @param shapeColor
+   */
   function createApplyColor(p, shapeColor) {
       const strokeColor = shapeColor.strokeColor;
       const fillColor = shapeColor.fillColor;
@@ -161,15 +222,146 @@
       return () => { };
   }
 
-  const HTML_ELEMENT = getHTMLElement("RotationalSymmetry");
+  /**
+   * ------------------------------------------------------------------------
+   *  p5.js drawing utility
+   * ------------------------------------------------------------------------
+   */
+  /**
+   * Set color to the specified pixel.
+   * Should be used in conjunction with loadPixels() and updatePixels().
+   * @param renderer - Instance of either p5 or p5.Graphics.
+   * @param x - The x index of the pixel.
+   * @param y - The y index of the pixel.
+   * @param red - The red value (0 - 255).
+   * @param green - The green value (0 - 255).
+   * @param blue - The blue value (0 - 255).
+   * @param pixelDensity - If not specified, renderer.pixelDensity() will be called.
+   */
+  function setPixel(renderer, x, y, red, green, blue, alpha, pixelDensity) {
+      const g = renderer;
+      const d = pixelDensity || g.pixelDensity();
+      const graphicsPixels = g.pixels;
+      for (let i = 0; i < d; i += 1) {
+          for (let j = 0; j < d; j += 1) {
+              const idx = 4 * ((y * d + j) * g.width * d + (x * d + i));
+              graphicsPixels[idx] = red;
+              graphicsPixels[idx + 1] = green;
+              graphicsPixels[idx + 2] = blue;
+              graphicsPixels[idx + 3] = alpha;
+          }
+      }
+  }
+  /**
+   * Runs `drawCallback` and `p.loadPixels()`, then returns `p.pixels`.
+   * The style and transformations will be restored by using `p.push()` and `p.pop()`.
+   * @param p The p5 instance.
+   * @param drawCallback
+   */
+  function createPixels(p, drawCallback) {
+      p.push();
+      drawCallback(p);
+      p.pop();
+      p.loadPixels();
+      return p.pixels;
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   *  p5.js transformation utility
+   * ------------------------------------------------------------------------
+   */
+  /**
+   * Runs `drawCallback` translated with `offsetX` and `offsetY`,
+   * then restores the transformation by calling `p.translate()` with negative values.
+   * Used to avoid calling `p.push()` and `p.pop()` frequently.
+   *
+   * @param p
+   * @param drawCallback
+   * @param scaleFactor
+   */
+  function drawTranslated(p, drawCallback, offsetX, offsetY) {
+      p.translate(offsetX, offsetY);
+      drawCallback(p);
+      p.translate(-offsetX, -offsetY);
+  }
+  /**
+   * Runs `drawCallback` rotated with `angle`,
+   * then restores the transformation by calling `p.rotate()` with the negative value.
+   * Used to avoid calling `p.push()` and `p.pop()` frequently.
+   *
+   * @param p
+   * @param drawCallback
+   * @param scaleFactor
+   */
+  function drawRotated(p, drawCallback, angle) {
+      p.rotate(angle);
+      drawCallback(p);
+      p.rotate(-angle);
+  }
+  /**
+   * Composite of `drawTranslated()` and `drawRotated()`.
+   *
+   * @param p
+   * @param drawCallback
+   * @param scaleFactor
+   */
+  function drawTranslatedAndRotated(p, drawCallback, offsetX, offsetY, rotationAngle) {
+      p.translate(offsetX, offsetY);
+      drawRotated(p, drawCallback, rotationAngle);
+      p.translate(-offsetX, -offsetY);
+  }
+  /**
+   * Runs `drawCallback` scaled with `scaleFactor`,
+   * then restores the transformation by scaling with the inversed factor.
+   * Used to avoid calling `p.push()` and `p.pop()` frequently.
+   *
+   * @param p
+   * @param drawCallback
+   * @param scaleFactor
+   */
+  function drawScaled(p, drawCallback, scaleFactor) {
+      p.scale(scaleFactor);
+      drawCallback(p);
+      p.scale(1 / scaleFactor);
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   *  Other functions
+   * ------------------------------------------------------------------------
+   */
+  function createRandomTextureGraphics(p, size, factor) {
+      const g = p.createGraphics(size.width, size.height);
+      const width = g.width;
+      const height = g.height;
+      const pixelDensity = g.pixelDensity();
+      g.loadPixels();
+      for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+              setPixel(g, x, y, 0, 0, 0, 255 * Math.random() * factor, pixelDensity);
+          }
+      }
+      g.updatePixels();
+      return g;
+  }
+
+  /**
+   * ------------------------------------------------------------------------
+   *  Main sketch
+   * ------------------------------------------------------------------------
+   */
+  const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
+  const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
   const sketch = (p) => {
       // ---- variables
-      let nonScaledWidth;
-      let nonScaledHeight;
+      let nonScaledSize;
       let scaledCanvas;
       let backgroundPixels;
       let icons;
-      // ---- functions
+      let shapeCandidates;
+      let applyColorFunctionCandidates;
+      // ---- drawing functions
       function drawShapeGroup(shapeGroup) {
           shapeGroup.applyColor();
           const revolution = shapeGroup.revolution;
@@ -178,27 +370,22 @@
           const radius = shapeGroup.radius;
           const shapeUnitSize = shapeGroup.shapeSize;
           const rotationFactor = shapeGroup.rotationFactor;
+          function drawShape() {
+              shape.draw(shapeUnitSize);
+          }
           let angle = revolution;
           const angleInterval = p.TWO_PI / count;
           for (let i = 0; i < count; i += 1) {
               const x = radius * Math.cos(angle);
               const y = radius * Math.sin(angle);
               const rotationAngle = rotationFactor * angle;
-              p.translate(x, y);
-              p.rotate(rotationAngle);
-              shape.draw(shapeUnitSize);
-              p.rotate(-rotationAngle);
-              p.translate(-x, -y);
+              drawTranslatedAndRotated(p, drawShape, x, y, rotationAngle);
               angle += angleInterval;
           }
           shapeGroup.revolution = revolution + shapeGroup.revolutionVelocity;
       }
       function drawIcon(icon) {
-          const x = icon.x;
-          const y = icon.y;
-          p.translate(x, y);
-          loop(icon.shapeGroupList, drawShapeGroup);
-          p.translate(-x, -y);
+          drawTranslated(p, () => loop(icon.shapeGroupList, drawShapeGroup), icon.x, icon.y);
       }
       function drawSquare(size) {
           p.rect(0, 0, size, size, 0.05 * size);
@@ -229,8 +416,9 @@
           p.vertex(0, -0.5 * size);
           p.endShape(p.CLOSE);
       }
+      // ---- builder functions
       function createShapeGroup(shapeCandidates, count, radius, revolutionVelocityFactor, applyColorFunctionStack) {
-          const pickedShape = p.random(shapeCandidates);
+          const pickedShape = fromArray(shapeCandidates);
           const poppedApplyColorFunction = applyColorFunctionStack.pop();
           if (!poppedApplyColorFunction)
               throw "createShapeGroup - No colors in stack.";
@@ -240,13 +428,13 @@
                   determinedRotationFactor = 1;
                   break;
               case 4:
-                  determinedRotationFactor = p.random([-1, 0, 1]);
+                  determinedRotationFactor = fromArray([-1, 0, 1]);
                   break;
               case Infinity:
                   determinedRotationFactor = 0;
                   break;
               default:
-                  determinedRotationFactor = p.random([-1, 1]);
+                  determinedRotationFactor = fromArray([-1, 1]);
                   break;
           }
           return {
@@ -264,17 +452,14 @@
           const applyColorFunctionStack = p.shuffle(shapeColorCandidates, false);
           const revolutionVelocityFactor = invertedRevolution ? -1 : 1;
           const newShapeGroupList = [
-              createShapeGroup(shapeCandidates, randomIntBetween(3, 6), 35, -revolutionVelocityFactor, applyColorFunctionStack),
-              createShapeGroup(shapeCandidates, randomIntBetween(4, 10), 75, revolutionVelocityFactor, applyColorFunctionStack)
+              createShapeGroup(shapeCandidates, intBetween(3, 6), 35, -revolutionVelocityFactor, applyColorFunctionStack),
+              createShapeGroup(shapeCandidates, intBetween(4, 10), 75, revolutionVelocityFactor, applyColorFunctionStack)
           ];
           return {
               x: x,
               y: y,
               shapeGroupList: newShapeGroupList
           };
-      }
-      function flat(arrays) {
-          return [].concat.apply([], arrays);
       }
       function createRotatedShape(shape) {
           if (shape.maxFoldingNumber === Infinity)
@@ -312,7 +497,7 @@
       function createRotatedCompositeShape(baseShape) {
           const rotatedShape = createRotatedShape(baseShape);
           if (!rotatedShape)
-              throw "createRotatedCompositeShape() - Invalid input.";
+              throw new Error("Could not create rotated shape.");
           return createCompositeShape(baseShape, rotatedShape, baseShape.maxFoldingNumber * 2);
       }
       function createShiftedCompositeShape(baseShape) {
@@ -343,8 +528,14 @@
           }
           return array;
       }
-      function initialize() {
-          const shapeCandidates = flat([
+      // ---- initialize & reset
+      function initializeStyle() {
+          p.noFill();
+          p.strokeWeight(2);
+          p.rectMode(p.CENTER);
+      }
+      function initializeData() {
+          shapeCandidates = flat([
               { draw: drawSquare, maxFoldingNumber: 4 },
               { draw: drawRegularTriangle, maxFoldingNumber: 3 },
               { draw: drawCircle, maxFoldingNumber: Infinity },
@@ -352,18 +543,15 @@
               { draw: drawRhombus, maxFoldingNumber: 2 },
               { draw: drawDrop, maxFoldingNumber: 1 }
           ].map(createShapePatterns));
-          const applyColorFunctionCandidates = [
-              "#C7243A",
-              "#2266AF",
-              "#009250",
-              "#EDAD0B"
-          ]
+          applyColorFunctionCandidates = colorStringList
               .map((colorString) => p.color(colorString))
               // .map((color: p5.Color) => alphaColor(p, color, 160))
               .map((color) => createApplyColor(p, { strokeColor: color, fillColor: undefined }));
+      }
+      function reset() {
           icons = [];
           let invertedRevolution = false;
-          const positionInterval = nonScaledWidth / 3;
+          const positionInterval = nonScaledSize.width / 3;
           for (let row = 0; row < 3; row += 1) {
               const y = (row + 0.5) * positionInterval;
               for (let column = 0; column < 3; column += 1) {
@@ -374,37 +562,30 @@
               }
           }
       }
-      // ---- Setup & Draw etc.
+      // ---- core drawing process
+      function drawSketch() {
+          loop(icons, drawIcon);
+      }
+      // ---- setup & draw etc.
       p.preload = () => { };
       p.setup = () => {
-          nonScaledWidth = 640;
-          nonScaledHeight = 640;
-          scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, {
-              width: 640,
-              height: 640
+          nonScaledSize = { width: 640, height: 640 };
+          scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
+          backgroundPixels = createPixels(p, (p) => {
+              p.scale(scaledCanvas.scaleFactor);
+              p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
           });
-          const texture = createRandomTextureGraphics(p, nonScaledWidth, nonScaledHeight, 0.05);
-          p.push();
-          p.scale(scaledCanvas.scaleFactor);
-          p.image(texture, 0, 0);
-          p.pop();
-          p.loadPixels();
-          backgroundPixels = p.pixels;
-          p.noFill();
-          p.strokeWeight(2);
-          p.rectMode(p.CENTER);
-          initialize();
+          initializeStyle();
+          initializeData();
+          reset();
       };
       p.draw = () => {
           p.pixels = backgroundPixels;
           p.updatePixels();
-          p.push();
-          p.scale(scaledCanvas.scaleFactor);
-          loop(icons, drawIcon);
-          p.pop();
+          drawScaled(p, drawSketch, scaledCanvas.scaleFactor);
       };
       p.mousePressed = () => {
-          initialize();
+          reset();
       };
       p.keyTyped = () => {
           if (p.key === "p")

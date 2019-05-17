@@ -1,15 +1,28 @@
-import {
-  createRandomTextureGraphics,
-  loop,
-  createScaledCanvas,
-  createApplyColor,
-  ApplyColorFunction,
-  randomIntBetween,
-  getHTMLElement,
-  ScaledCanvas
-} from "./functions";
+/**
+ * ------------------------------------------------------------------------
+ *  Main sketch
+ * ------------------------------------------------------------------------
+ */
 
-const HTML_ELEMENT = getHTMLElement("RotationalSymmetry");
+import { getElementOrBody } from "./common/environment";
+import { RectangleSize } from "./common/dataTypes";
+import * as random from "./common/random";
+import { loop, flat } from "./common/array";
+
+import { createScaledCanvas, ScaledCanvas } from "./p5util/canvas";
+import { createApplyColor, ApplyColorFunction } from "./p5util/color";
+import { createPixels } from "./p5util/drawing";
+import {
+  drawTranslated,
+  drawTranslatedAndRotated,
+  drawScaled
+} from "./p5util/transform";
+
+import { createRandomTextureGraphics } from "./functions";
+
+const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
+
+const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
 
 interface RotationallySymmetricShape {
   draw(size: number): void;
@@ -35,13 +48,14 @@ interface Icon {
 
 const sketch = (p: p5): void => {
   // ---- variables
-  let nonScaledWidth: number;
-  let nonScaledHeight: number;
+  let nonScaledSize: RectangleSize;
   let scaledCanvas: ScaledCanvas;
   let backgroundPixels: number[];
   let icons: Icon[];
+  let shapeCandidates: RotationallySymmetricShape[];
+  let applyColorFunctionCandidates: ApplyColorFunction[];
 
-  // ---- functions
+  // ---- drawing functions
   function drawShapeGroup(shapeGroup: ShapeGroup): void {
     shapeGroup.applyColor();
 
@@ -52,6 +66,10 @@ const sketch = (p: p5): void => {
     const shapeUnitSize = shapeGroup.shapeSize;
     const rotationFactor = shapeGroup.rotationFactor;
 
+    function drawShape(): void {
+      shape.draw(shapeUnitSize);
+    }
+
     let angle = revolution;
     const angleInterval = p.TWO_PI / count;
 
@@ -59,11 +77,7 @@ const sketch = (p: p5): void => {
       const x = radius * Math.cos(angle);
       const y = radius * Math.sin(angle);
       const rotationAngle = rotationFactor * angle;
-      p.translate(x, y);
-      p.rotate(rotationAngle);
-      shape.draw(shapeUnitSize);
-      p.rotate(-rotationAngle);
-      p.translate(-x, -y);
+      drawTranslatedAndRotated(p, drawShape, x, y, rotationAngle);
       angle += angleInterval;
     }
 
@@ -71,11 +85,12 @@ const sketch = (p: p5): void => {
   }
 
   function drawIcon(icon: Icon): void {
-    const x = icon.x;
-    const y = icon.y;
-    p.translate(x, y);
-    loop(icon.shapeGroupList, drawShapeGroup);
-    p.translate(-x, -y);
+    drawTranslated(
+      p,
+      () => loop(icon.shapeGroupList, drawShapeGroup),
+      icon.x,
+      icon.y
+    );
   }
 
   function drawSquare(size: number): void {
@@ -121,6 +136,7 @@ const sketch = (p: p5): void => {
     p.endShape(p.CLOSE);
   }
 
+  // ---- builder functions
   function createShapeGroup(
     shapeCandidates: RotationallySymmetricShape[],
     count: number,
@@ -128,7 +144,7 @@ const sketch = (p: p5): void => {
     revolutionVelocityFactor: number,
     applyColorFunctionStack: ApplyColorFunction[]
   ): ShapeGroup {
-    const pickedShape = p.random(shapeCandidates);
+    const pickedShape = random.fromArray(shapeCandidates);
     const poppedApplyColorFunction = applyColorFunctionStack.pop();
     if (!poppedApplyColorFunction)
       throw "createShapeGroup - No colors in stack.";
@@ -139,13 +155,13 @@ const sketch = (p: p5): void => {
         determinedRotationFactor = 1;
         break;
       case 4:
-        determinedRotationFactor = p.random([-1, 0, 1]);
+        determinedRotationFactor = random.fromArray([-1, 0, 1]);
         break;
       case Infinity:
         determinedRotationFactor = 0;
         break;
       default:
-        determinedRotationFactor = p.random([-1, 1]);
+        determinedRotationFactor = random.fromArray([-1, 1]);
         break;
     }
 
@@ -177,14 +193,14 @@ const sketch = (p: p5): void => {
     const newShapeGroupList: ShapeGroup[] = [
       createShapeGroup(
         shapeCandidates,
-        randomIntBetween(3, 6),
+        random.intBetween(3, 6),
         35,
         -revolutionVelocityFactor,
         applyColorFunctionStack
       ),
       createShapeGroup(
         shapeCandidates,
-        randomIntBetween(4, 10),
+        random.intBetween(4, 10),
         75,
         revolutionVelocityFactor,
         applyColorFunctionStack
@@ -196,10 +212,6 @@ const sketch = (p: p5): void => {
       y: y,
       shapeGroupList: newShapeGroupList
     };
-  }
-
-  function flat<T>(arrays: T[][]): T[] {
-    return [].concat.apply([], arrays);
   }
 
   function createRotatedShape(
@@ -250,7 +262,7 @@ const sketch = (p: p5): void => {
 
   function createRotatedCompositeShape(baseShape: RotationallySymmetricShape) {
     const rotatedShape = createRotatedShape(baseShape);
-    if (!rotatedShape) throw "createRotatedCompositeShape() - Invalid input.";
+    if (!rotatedShape) throw new Error("Could not create rotated shape.");
 
     return createCompositeShape(
       baseShape,
@@ -299,8 +311,15 @@ const sketch = (p: p5): void => {
     return array;
   }
 
-  function initialize() {
-    const shapeCandidates: RotationallySymmetricShape[] = flat(
+  // ---- initialize & reset
+  function initializeStyle() {
+    p.noFill();
+    p.strokeWeight(2);
+    p.rectMode(p.CENTER);
+  }
+
+  function initializeData() {
+    shapeCandidates = flat(
       [
         { draw: drawSquare, maxFoldingNumber: 4 },
         { draw: drawRegularTriangle, maxFoldingNumber: 3 },
@@ -311,23 +330,20 @@ const sketch = (p: p5): void => {
       ].map(createShapePatterns)
     );
 
-    const applyColorFunctionCandidates: ApplyColorFunction[] = [
-      "#C7243A",
-      "#2266AF",
-      "#009250",
-      "#EDAD0B"
-    ]
+    applyColorFunctionCandidates = colorStringList
       .map((colorString: string) => p.color(colorString))
       // .map((color: p5.Color) => alphaColor(p, color, 160))
       .map((color: p5.Color) =>
         createApplyColor(p, { strokeColor: color, fillColor: undefined })
       );
+  }
 
+  function reset() {
     icons = [];
 
     let invertedRevolution = false;
 
-    const positionInterval = nonScaledWidth / 3;
+    const positionInterval = nonScaledSize.width / 3;
     for (let row = 0; row < 3; row += 1) {
       const y = (row + 0.5) * positionInterval;
       for (let column = 0; column < 3; column += 1) {
@@ -345,55 +361,40 @@ const sketch = (p: p5): void => {
     }
   }
 
-  // ---- Setup & Draw etc.
+  // ---- core drawing process
+  function drawSketch(): void {
+    loop(icons, drawIcon);
+  }
+
+  // ---- setup & draw etc.
   p.preload = () => {};
 
   p.setup = () => {
-    nonScaledWidth = 640;
-    nonScaledHeight = 640;
-    scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, {
-      width: 640,
-      height: 640
+    nonScaledSize = { width: 640, height: 640 };
+    scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
+    backgroundPixels = createPixels(p, (p: p5) => {
+      p.scale(scaledCanvas.scaleFactor);
+      p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
     });
-    const texture: p5.Image = createRandomTextureGraphics(
-      p,
-      nonScaledWidth,
-      nonScaledHeight,
-      0.05
-    ) as any;
 
-    p.push();
-    p.scale(scaledCanvas.scaleFactor);
-    p.image(texture, 0, 0);
-    p.pop();
-    p.loadPixels();
-    backgroundPixels = p.pixels;
-
-    p.noFill();
-    p.strokeWeight(2);
-
-    p.rectMode(p.CENTER);
-
-    initialize();
+    initializeStyle();
+    initializeData();
+    reset();
   };
 
   p.draw = () => {
     p.pixels = backgroundPixels;
     p.updatePixels();
 
-    p.push();
-    p.scale(scaledCanvas.scaleFactor);
-    loop(icons, drawIcon);
-    p.pop();
+    drawScaled(p, drawSketch, scaledCanvas.scaleFactor);
   };
 
   p.mousePressed = () => {
-    initialize();
+    reset();
   };
 
   p.keyTyped = () => {
     if (p.key === "p") p.noLoop();
-
     // if (p.key === "s") p.save("image.png");
   };
 };
