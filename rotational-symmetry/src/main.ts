@@ -147,7 +147,7 @@ const sketch = (p: p5): void => {
     let determinedRotationFactor: number | null;
     switch (pickedShape.maxFoldingNumber) {
       case 1:
-        determinedRotationFactor = 1;
+        determinedRotationFactor = 0;
         break;
       case 4:
         determinedRotationFactor = random.fromArray([-2, -1, 0, 1, 2]);

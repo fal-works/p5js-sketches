@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.4
+ * @version 0.1.5
  * @license CC-BY-SA-3.0
  */
 
@@ -426,7 +426,7 @@
           let determinedRotationFactor;
           switch (pickedShape.maxFoldingNumber) {
               case 1:
-                  determinedRotationFactor = 1;
+                  determinedRotationFactor = 0;
                   break;
               case 4:
                   determinedRotationFactor = fromArray([-2, -1, 0, 1, 2]);
