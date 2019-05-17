@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.6
+ * @version 0.1.7
  * @license CC-BY-SA-3.0
  */
 
@@ -11,75 +11,58 @@
   "use strict";
 
   /**
-   * ------------------------------------------------------------------------
-   *  Common environment utility
-   * ------------------------------------------------------------------------
+   * ---- Common environment utility -------------------------------------------
    */
   /**
    * Finds HTML element by `id`. If not found, returns `document.body`.
    * @param id
    */
-  function getElementOrBody(id) {
-    return document.getElementById(id) || document.body;
-  }
+  const getElementOrBody = id => document.getElementById(id) || document.body;
   /**
    * Returns the width and height of `node`.
    * If `node === document.body`, returns the inner width and height of `window`.
    * @param node
    */
-  function getElementSize(node) {
-    if (node === document.body)
-      return {
-        width: window.innerWidth,
-        height: window.innerHeight
-      };
-    const boundingClientRect = node.getBoundingClientRect();
-    return {
-      width: boundingClientRect.width,
-      height: boundingClientRect.height
-    };
-  }
+  const getElementSize = node =>
+    node === document.body
+      ? {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      : node.getBoundingClientRect();
 
   /**
-   * ------------------------------------------------------------------------
-   *  Common random utility
-   * ------------------------------------------------------------------------
+   * ---- Common random utility ------------------------------------------------
    */
   /**
    * Returns random integer from 0 up to (but not including) `maxInt`.
    * `maxInt` is not expected to be negative.
    * @param maxInt
+   * @return A random integer value.
    */
-  function int(maxInt) {
-    return Math.floor(Math.random() * maxInt);
-  }
+  const pickInt = maxInt => Math.floor(Math.random() * maxInt);
   /**
-   * Returns random integer from the min number up to (but not including) the max number.
-   * The case where `minInt < maxInt` is not expected.
+   * Returns random integer from `minInt` up to (but not including) `maxInt`.
+   * The case where `minInt > maxInt` is not expected.
    * @param minInt
    * @param maxInt
+   * @return A random integer value.
    */
-  function intBetween(minInt, maxInt) {
-    return minInt + int(maxInt - minInt);
-  }
+  const pickIntBetween = (minInt, maxInt) => minInt + pickInt(maxInt - minInt);
   /**
    * Returns one element of `array` randomly.
-   * Throws error if `array` is empty.
+   * `array` is not expected to be empty.
    * @param array
+   * @return A random element.
    */
-  function fromArray(array) {
-    const length = array.length;
-    if (length === 0) throw new Error("Passed empty array.");
-    return array[int(length)];
-  }
+  const fromArray = array => array[pickInt(array.length)];
 
   /**
-   * ------------------------------------------------------------------------
-   *  Common array utility
-   * ------------------------------------------------------------------------
+   * ---- Common array utility -------------------------------------------------
    */
   /**
    * Runs `callback` once for each element of `array`.
+   * Unlike `forEach()`, an element of `array` should not be removed during the iteration.
    * @param array
    * @param callback
    */
@@ -90,17 +73,17 @@
     }
   }
   /**
-   * Creates a new 1-dimensional array by concatenating elements of a 2-dimensional array.
+   * Creates a new 1-dimensional array by concatenating sub-array elements of a 2-dimensional array.
    * @param arrays
+   * @return A new 1-dimensional array.
    */
-  function flatNaive(arrays) {
-    return [].concat.apply([], arrays);
-  }
+  const flatNaive = arrays => [].concat.apply([], arrays);
 
   /**
-   * ------------------------------------------------------------------------
-   *  Common bounding box utility
-   * ------------------------------------------------------------------------
+   * ---- Common bounding box utility ------------------------------------------
+   */
+  /**
+   * -
    */
   var FittingOption;
   (function(FittingOption) {
@@ -115,29 +98,23 @@
    * @param targetSize
    * @param fittingOption
    */
-  function calculateScaleFactor(nonScaledSize, targetSize, fittingOption) {
+  const calculateScaleFactor = (nonScaledSize, targetSize, fittingOption) => {
     switch (fittingOption) {
       default:
       case FittingOption.FIT_TO_BOX:
-        const scaleFactorCandidate = targetSize.width / nonScaledSize.width;
-        const nonScaledHeight = nonScaledSize.height;
-        const targetHeight = targetSize.height;
-        if (scaleFactorCandidate * nonScaledHeight < targetHeight) {
-          return scaleFactorCandidate;
-        } else {
-          return targetHeight / nonScaledHeight;
-        }
+        return Math.min(
+          targetSize.width / nonScaledSize.width,
+          targetSize.height / nonScaledSize.height
+        );
       case FittingOption.FIT_WIDTH:
         return targetSize.width / nonScaledSize.width;
       case FittingOption.FIT_HEIGHT:
         return targetSize.height / nonScaledSize.height;
     }
-  }
+  };
 
   /**
-   * ------------------------------------------------------------------------
-   *  p5.js canvas utility
-   * ------------------------------------------------------------------------
+   * ---- p5.js canvas utility -------------------------------------------------
    */
   /**
    * Runs `p.createCanvas()` with the scaled size that fits to `node`.
@@ -150,13 +127,12 @@
    * @param renderer
    */
   function createScaledCanvas(p, node, nonScaledSize, fittingOption, renderer) {
-    let htmlElement;
-    if (typeof node === "string") htmlElement = getElementOrBody(node);
-    else htmlElement = node;
-    const maxCanvasRegion = getElementSize(htmlElement);
+    const maxCanvasSize = getElementSize(
+      typeof node === "string" ? getElementOrBody(node) : node
+    );
     const scaleFactor = calculateScaleFactor(
       nonScaledSize,
-      maxCanvasRegion,
+      maxCanvasSize,
       fittingOption
     );
     const canvas = p.createCanvas(
@@ -172,9 +148,7 @@
   }
 
   /**
-   * ------------------------------------------------------------------------
-   *  p5.js color utility
-   * ------------------------------------------------------------------------
+   * ---- p5.js color utility --------------------------------------------------
    */
   /**
    * Creates a composite function of `p.stroke()` and `p.fill()`.
@@ -184,51 +158,54 @@
    * @param p - The p5 instance.
    * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
    */
-  function createApplyColor(p, shapeColor) {
+  const createApplyColor = (p, shapeColor) => {
     const strokeColor = shapeColor.strokeColor;
     const fillColor = shapeColor.fillColor;
-    if (strokeColor && fillColor) {
-      return () => {
-        p.stroke(strokeColor);
-        p.fill(fillColor);
-      };
+    switch (strokeColor) {
+      case undefined:
+        switch (fillColor) {
+          case undefined:
+            return () => {};
+          case null:
+            return () => p.noFill();
+          default:
+            return () => p.fill(fillColor);
+        }
+      case null:
+        switch (fillColor) {
+          case undefined:
+            return () => p.noStroke();
+          case null:
+            return () => {
+              p.noStroke();
+              p.noFill();
+            };
+          default:
+            return () => {
+              p.noStroke();
+              p.fill(fillColor);
+            };
+        }
+      default:
+        switch (fillColor) {
+          case undefined:
+            return () => p.stroke(strokeColor);
+          case null:
+            return () => {
+              p.stroke(strokeColor);
+              p.noFill();
+            };
+          default:
+            return () => {
+              p.stroke(strokeColor);
+              p.fill(fillColor);
+            };
+        }
     }
-    if (strokeColor) {
-      if (fillColor === null)
-        return () => {
-          p.stroke(strokeColor);
-          p.noFill();
-        };
-      else
-        return () => {
-          p.stroke(strokeColor);
-        };
-    }
-    if (fillColor) {
-      if (strokeColor === null)
-        return () => {
-          p.noStroke();
-          p.fill(fillColor);
-        };
-      else return () => p.fill(fillColor);
-    }
-    if (strokeColor === null) {
-      if (fillColor === null) {
-        return () => {
-          p.noStroke();
-          p.noFill();
-        };
-      } else return () => p.noStroke();
-    } else {
-      if (fillColor === null) return () => p.noFill();
-    }
-    return () => {};
-  }
+  };
 
   /**
-   * ------------------------------------------------------------------------
-   *  p5.js drawing utility
-   * ------------------------------------------------------------------------
+   * ---- p5.js drawing utility ------------------------------------------------
    */
   /**
    * Sets color to the specified pixel.
@@ -270,9 +247,7 @@
   }
 
   /**
-   * ------------------------------------------------------------------------
-   *  p5.js transformation utility
-   * ------------------------------------------------------------------------
+   * ---- p5.js transformation utility -----------------------------------------
    */
   /**
    * Runs `drawCallback` translated with `offsetX` and `offsetY`,
@@ -333,9 +308,7 @@
   }
 
   /**
-   * ------------------------------------------------------------------------
-   *  Other functions
-   * ------------------------------------------------------------------------
+   * ---- Other functions ------------------------------------------------------
    */
   function createRandomTextureGraphics(p, size, factor) {
     const g = p.createGraphics(size.width, size.height);
@@ -353,9 +326,7 @@
   }
 
   /**
-   * ------------------------------------------------------------------------
-   *  Main sketch
-   * ------------------------------------------------------------------------
+   * ---- Main sketch ----------------------------------------------------------
    */
   const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
   const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
@@ -475,14 +446,14 @@
       const newShapeGroupList = [
         createShapeGroup(
           shapeCandidates,
-          intBetween(3, 6),
+          pickIntBetween(3, 6),
           35,
           -revolutionVelocityFactor,
           applyColorFunctionStack
         ),
         createShapeGroup(
           shapeCandidates,
-          intBetween(4, 10),
+          pickIntBetween(4, 10),
           75,
           revolutionVelocityFactor,
           applyColorFunctionStack

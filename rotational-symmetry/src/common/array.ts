@@ -1,8 +1,8 @@
 /**
- * ------------------------------------------------------------------------
- *  Common array utility
- * ------------------------------------------------------------------------
+ * ---- Common array utility -------------------------------------------------
  */
+
+import { ArrayOrValue } from "./dataTypes";
 
 export function loopLimited<T>(
   array: T[],
@@ -16,13 +16,14 @@ export function loopLimited<T>(
 
 /**
  * Runs `callback` once for each element of `array`.
+ * Unlike `forEach()`, an element of `array` should not be removed during the iteration.
  * @param array
  * @param callback
  */
 export function loop<T>(
   array: T[],
   callback: (currentValue: T, index?: number, array?: T[]) => any
-) {
+): void {
   const arrayLength = array.length;
 
   for (let i = 0; i < arrayLength; i += 1) {
@@ -34,7 +35,7 @@ export function loopBackwardsLimited<T>(
   array: T[],
   callback: (currentValue: T, index?: number, array?: T[]) => any,
   arrayLength: number
-) {
+): void {
   if (arrayLength < 0)
     throw new RangeError(`arrayLength ${arrayLength} is invalid.`);
 
@@ -51,7 +52,7 @@ export function loopBackwardsLimited<T>(
 export function loopBackwards<T>(
   array: T[],
   callback: (currentValue: T, index?: number, array?: T[]) => any
-) {
+): void {
   let arrayLength = array.length;
 
   while (arrayLength--) {
@@ -97,7 +98,7 @@ export function roundRobinLimited<T>(
   array: T[],
   callback: (element: T, otherElement: T) => any,
   arrayLength: number
-) {
+): void {
   const iLen = arrayLength - 1;
   for (let i = 0; i < iLen; i += 1) {
     for (let k = i + 1; k < arrayLength; k += 1) {
@@ -119,34 +120,23 @@ export function roundRobin<T>(
 }
 
 /**
- * Creates a new 1-dimensional array by concatenating elements of a 2-dimensional array.
+ * Creates a new 1-dimensional array by concatenating sub-array elements of a 2-dimensional array.
  * @param arrays
+ * @return A new 1-dimensional array.
  */
-export function flatNaive<T>(arrays: T[][]): T[] {
-  return [].concat.apply([], arrays);
-}
+export const flatNaive = <T>(arrays: T[][]): T[] => [].concat.apply([], arrays);
 
 /**
  * An alternative to `Array.prototype.flat()`.
  * @param array
  * @param depth
+ * @return A new array.
  */
-export function flatRecursive<T>(
-  array: (T | T[])[],
-  depth: number = 1
-): (T | T[])[] {
-  if (depth <= 0) return array;
-
-  const accumulator: (T | T[])[] = [];
-  const len = array.length;
-
-  for (let i = 0; i < len; i += 1) {
-    const currentElement = array[i];
-
-    if (Array.isArray(currentElement))
-      accumulator.concat(flatRecursive(currentElement, depth - 1));
-    else accumulator.concat(currentElement);
-  }
-
-  return accumulator;
-}
+export const flatRecursive = <T>(array: ArrayOrValue<T>[], depth: number = 1) =>
+  depth > 0
+    ? array.reduce(
+        (acc: ArrayOrValue<T>[], cur): ArrayOrValue<T>[] =>
+          acc.concat(Array.isArray(cur) ? flatRecursive(cur, depth - 1) : cur),
+        []
+      )
+    : array;

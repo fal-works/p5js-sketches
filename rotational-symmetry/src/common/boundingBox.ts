@@ -1,11 +1,18 @@
 /**
- * ------------------------------------------------------------------------
- *  Common bounding box utility
- * ------------------------------------------------------------------------
+ * ---- Common bounding box utility ------------------------------------------
  */
 
 import { RectangleSize } from "./dataTypes";
 
+/**
+ * Calculates the aspect ratio i.e. `width / height`.
+ * @param size
+ */
+export const getAspectRatio = (size: RectangleSize) => size.width / size.height;
+
+/**
+ * -
+ */
 export enum FittingOption {
   FIT_TO_BOX,
   FIT_WIDTH,
@@ -19,23 +26,18 @@ export enum FittingOption {
  * @param targetSize
  * @param fittingOption
  */
-export function calculateScaleFactor(
+export const calculateScaleFactor = (
   nonScaledSize: RectangleSize,
   targetSize: RectangleSize,
   fittingOption?: FittingOption
-): number {
+) => {
   switch (fittingOption) {
     default:
     case FittingOption.FIT_TO_BOX:
-      const scaleFactorCandidate = targetSize.width / nonScaledSize.width;
-      const nonScaledHeight = nonScaledSize.height;
-      const targetHeight = targetSize.height;
-
-      if (scaleFactorCandidate * nonScaledHeight < targetHeight) {
-        return scaleFactorCandidate;
-      } else {
-        return targetHeight / nonScaledHeight;
-      }
+      return Math.min(
+        targetSize.width / nonScaledSize.width,
+        targetSize.height / nonScaledSize.height
+      );
 
     case FittingOption.FIT_WIDTH:
       return targetSize.width / nonScaledSize.width;
@@ -43,4 +45,4 @@ export function calculateScaleFactor(
     case FittingOption.FIT_HEIGHT:
       return targetSize.height / nonScaledSize.height;
   }
-}
+};

@@ -1,17 +1,18 @@
 /**
- * ------------------------------------------------------------------------
- *  p5.js canvas utility
- * ------------------------------------------------------------------------
+ * ---- p5.js canvas utility -------------------------------------------------
  */
 
 import { RectangleSize } from "../common/dataTypes";
 import { FittingOption, calculateScaleFactor } from "../common/boundingBox";
 import { getElementOrBody, getElementSize } from "../common/environment";
 
+/**
+ * -
+ */
 export interface ScaledCanvas {
-  p5Canvas: p5.Renderer;
-  scaleFactor: number;
-  nonScaledSize: RectangleSize;
+  readonly p5Canvas: p5.Renderer;
+  readonly scaleFactor: number;
+  readonly nonScaledSize: RectangleSize;
 }
 
 /**
@@ -31,15 +32,12 @@ export function createScaledCanvas(
   fittingOption?: FittingOption,
   renderer?: "p2d" | "webgl" | undefined
 ): ScaledCanvas {
-  let htmlElement: HTMLElement;
-
-  if (typeof node === "string") htmlElement = getElementOrBody(node);
-  else htmlElement = node;
-
-  const maxCanvasRegion = getElementSize(htmlElement);
+  const maxCanvasSize = getElementSize(
+    typeof node === "string" ? getElementOrBody(node) : node
+  );
   const scaleFactor = calculateScaleFactor(
     nonScaledSize,
-    maxCanvasRegion,
+    maxCanvasSize,
     fittingOption
   );
 

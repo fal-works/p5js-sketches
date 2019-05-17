@@ -1,7 +1,5 @@
 /**
- * ------------------------------------------------------------------------
- *  p5.js color utility
- * ------------------------------------------------------------------------
+ * ---- p5.js color utility --------------------------------------------------
  */
 
 /**
@@ -11,15 +9,20 @@
  * @param color
  * @param alpha
  */
-export function alphaColor(p: p5, color: p5.Color, alpha: number): p5.Color {
-  return p.color(p.red(color), p.green(color), p.blue(color), alpha);
-}
+export const alphaColor = (p: p5, color: p5.Color, alpha: number) =>
+  p.color(p.red(color), p.green(color), p.blue(color), alpha);
 
+/**
+ * -
+ */
 export interface ShapeColor {
-  strokeColor: p5.Color | undefined | null;
-  fillColor: p5.Color | undefined | null;
+  readonly strokeColor: p5.Color | undefined | null;
+  readonly fillColor: p5.Color | undefined | null;
 }
 
+/**
+ * -
+ */
 export interface ApplyColorFunction {
   (): void;
 }
@@ -32,51 +35,52 @@ export interface ApplyColorFunction {
  * @param p - The p5 instance.
  * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
  */
-export function createApplyColor(
+export const createApplyColor = (
   p: p5,
   shapeColor: ShapeColor
-): ApplyColorFunction {
+): ApplyColorFunction => {
   const strokeColor = shapeColor.strokeColor;
   const fillColor = shapeColor.fillColor;
 
-  if (strokeColor && fillColor) {
-    return () => {
-      p.stroke(strokeColor);
-      p.fill(fillColor);
-    };
+  switch (strokeColor) {
+    case undefined:
+      switch (fillColor) {
+        case undefined:
+          return () => {};
+        case null:
+          return () => p.noFill();
+        default:
+          return () => p.fill(fillColor);
+      }
+    case null:
+      switch (fillColor) {
+        case undefined:
+          return () => p.noStroke();
+        case null:
+          return () => {
+            p.noStroke();
+            p.noFill();
+          };
+        default:
+          return () => {
+            p.noStroke();
+            p.fill(fillColor);
+          };
+      }
+    default:
+      switch (fillColor) {
+        case undefined:
+          return () => p.stroke(strokeColor);
+        case null:
+          return () => {
+            p.stroke(strokeColor);
+            p.noFill();
+          };
+        default:
+          return () => {
+            p.stroke(strokeColor);
+            p.fill(fillColor);
+          };
+      }
   }
-
-  if (strokeColor) {
-    if (fillColor === null)
-      return () => {
-        p.stroke(strokeColor);
-        p.noFill();
-      };
-    else
-      return () => {
-        p.stroke(strokeColor);
-      };
-  }
-
-  if (fillColor) {
-    if (strokeColor === null)
-      return () => {
-        p.noStroke();
-        p.fill(fillColor);
-      };
-    else return () => p.fill(fillColor);
-  }
-
-  if (strokeColor === null) {
-    if (fillColor === null) {
-      return () => {
-        p.noStroke();
-        p.noFill();
-      };
-    } else return () => p.noStroke();
-  } else {
-    if (fillColor === null) return () => p.noFill();
-  }
-
-  return () => {};
-}
+};

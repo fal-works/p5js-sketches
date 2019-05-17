@@ -1,8 +1,8 @@
 /**
- * ------------------------------------------------------------------------
- *  p5.js transformation utility
- * ------------------------------------------------------------------------
+ * ---- p5.js transformation utility -----------------------------------------
  */
+
+0; // dummy code for VSCode to ignore file header
 
 /**
  * Runs `drawCallback` translated with `offsetX` and `offsetY`,

@@ -1,7 +1,5 @@
 /**
- * ------------------------------------------------------------------------
- *  Main sketch
- * ------------------------------------------------------------------------
+ * ---- Main sketch ----------------------------------------------------------
  */
 
 import { getElementOrBody } from "./common/environment";
@@ -186,14 +184,14 @@ const sketch = (p: p5): void => {
     const newShapeGroupList: ShapeGroup[] = [
       createShapeGroup(
         shapeCandidates,
-        random.intBetween(3, 6),
+        random.pickIntBetween(3, 6),
         35,
         -revolutionVelocityFactor,
         applyColorFunctionStack
       ),
       createShapeGroup(
         shapeCandidates,
-        random.intBetween(4, 10),
+        random.pickIntBetween(4, 10),
         75,
         revolutionVelocityFactor,
         applyColorFunctionStack
