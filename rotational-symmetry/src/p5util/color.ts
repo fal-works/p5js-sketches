@@ -2,6 +2,8 @@
  * ---- p5.js color utility --------------------------------------------------
  */
 
+0; // dummy code for VSCode to ignore file header
+
 /**
  * Creates a new color with RGB values of `color` and alpha value `alpha`.
  * The original alpha value of `color` will be ignored.
@@ -21,10 +23,17 @@ export interface ShapeColor {
 }
 
 /**
- * -
+ * A symbol for distinguishing functions that apply p5.js color settings.
+ */
+export const applyColorSymbol = Symbol();
+
+/**
+ * Function for applying p5.js color settings
+ * (e.g. functions including `stroke()` or `fill()`).
  */
 export interface ApplyColorFunction {
   (): void;
+  [applyColorSymbol]: never;
 }
 
 /**
@@ -41,46 +50,61 @@ export const createApplyColor = (
 ): ApplyColorFunction => {
   const strokeColor = shapeColor.strokeColor;
   const fillColor = shapeColor.fillColor;
+  let newFunction: Function;
 
   switch (strokeColor) {
-    case undefined:
-      switch (fillColor) {
-        case undefined:
-          return () => {};
-        case null:
-          return () => p.noFill();
-        default:
-          return () => p.fill(fillColor);
-      }
-    case null:
-      switch (fillColor) {
-        case undefined:
-          return () => p.noStroke();
-        case null:
-          return () => {
-            p.noStroke();
-            p.noFill();
-          };
-        default:
-          return () => {
-            p.noStroke();
-            p.fill(fillColor);
-          };
-      }
     default:
       switch (fillColor) {
-        case undefined:
-          return () => p.stroke(strokeColor);
-        case null:
-          return () => {
-            p.stroke(strokeColor);
-            p.noFill();
-          };
         default:
-          return () => {
+          newFunction = () => {
             p.stroke(strokeColor);
             p.fill(fillColor);
           };
+          break;
+        case null:
+          newFunction = () => {
+            p.stroke(strokeColor);
+            p.noFill();
+          };
+          break;
+        case undefined:
+          newFunction = () => p.stroke(strokeColor);
+          break;
       }
+      break;
+    case null:
+      switch (fillColor) {
+        default:
+          newFunction = () => {
+            p.noStroke();
+            p.fill(fillColor);
+          };
+          break;
+        case null:
+          newFunction = () => {
+            p.noStroke();
+            p.noFill();
+          };
+          break;
+        case undefined:
+          newFunction = () => p.noStroke();
+          break;
+      }
+      break;
+    case undefined:
+      switch (fillColor) {
+        default:
+          newFunction = () => p.fill(fillColor);
+          break;
+        case null:
+          newFunction = () => p.noFill();
+          break;
+        case undefined:
+          newFunction = () => {};
+          break;
+      }
+      break;
   }
+
+  return newFunction as ApplyColorFunction;
 };

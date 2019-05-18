@@ -3,16 +3,18 @@
  */
 
 import { RectangleSize } from "../common/dataTypes";
-import { FittingOption, calculateScaleFactor } from "../common/boundingBox";
+import { FittingOption, getScaleFactor } from "../common/boundingBox";
 import { getElementOrBody, getElementSize } from "../common/environment";
+import { drawScaled } from "./transform";
 
 /**
- * -
+ * p5.js canvas accompanied by a scale factor.
  */
 export interface ScaledCanvas {
   readonly p5Canvas: p5.Renderer;
   readonly scaleFactor: number;
   readonly nonScaledSize: RectangleSize;
+  readonly drawScaled: (drawCallback: (p: p5) => void) => void;
 }
 
 /**
@@ -35,7 +37,7 @@ export function createScaledCanvas(
   const maxCanvasSize = getElementSize(
     typeof node === "string" ? getElementOrBody(node) : node
   );
-  const scaleFactor = calculateScaleFactor(
+  const scaleFactor = getScaleFactor(
     nonScaledSize,
     maxCanvasSize,
     fittingOption
@@ -50,6 +52,8 @@ export function createScaledCanvas(
   return {
     p5Canvas: canvas,
     scaleFactor: scaleFactor,
-    nonScaledSize: nonScaledSize
+    nonScaledSize: nonScaledSize,
+    drawScaled: (drawCallback: (p: p5) => void) =>
+      drawScaled(p, drawCallback, scaleFactor)
   };
 }

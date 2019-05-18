@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <falworks.contact@gmail.com>
- * @version 0.1.7
+ * @version 0.1.8
  * @license CC-BY-SA-3.0
  */
 
@@ -83,13 +83,14 @@
    * ---- Common bounding box utility ------------------------------------------
    */
   /**
-   * -
+   * Parameter for `getScaleFactor()`.
+   * `FIT_TO_BOX` checks both width and height and returns the smaller scale factor.
    */
   var FittingOption;
   (function(FittingOption) {
-    FittingOption[(FittingOption["FIT_TO_BOX"] = 0)] = "FIT_TO_BOX";
-    FittingOption[(FittingOption["FIT_WIDTH"] = 1)] = "FIT_WIDTH";
-    FittingOption[(FittingOption["FIT_HEIGHT"] = 2)] = "FIT_HEIGHT";
+    FittingOption["FIT_TO_BOX"] = "FIT_TO_BOX";
+    FittingOption["FIT_WIDTH"] = "FIT_WIDTH";
+    FittingOption["FIT_HEIGHT"] = "FIT_HEIGHT";
   })(FittingOption || (FittingOption = {}));
   /**
    * Calculates the scale factor for fitting `nonScaledSize` to `targetSize` keeping the original aspect ratio.
@@ -98,153 +99,20 @@
    * @param targetSize
    * @param fittingOption
    */
-  const calculateScaleFactor = (nonScaledSize, targetSize, fittingOption) => {
+  const getScaleFactor = (nonScaledSize, targetSize, fittingOption) => {
     switch (fittingOption) {
       default:
-      case FittingOption.FIT_TO_BOX:
+      case "FIT_TO_BOX":
         return Math.min(
           targetSize.width / nonScaledSize.width,
           targetSize.height / nonScaledSize.height
         );
-      case FittingOption.FIT_WIDTH:
+      case "FIT_WIDTH":
         return targetSize.width / nonScaledSize.width;
-      case FittingOption.FIT_HEIGHT:
+      case "FIT_HEIGHT":
         return targetSize.height / nonScaledSize.height;
     }
   };
-
-  /**
-   * ---- p5.js canvas utility -------------------------------------------------
-   */
-  /**
-   * Runs `p.createCanvas()` with the scaled size that fits to `node`.
-   * Returns the created canvas and the scale factor.
-   *
-   * @param p - The p5 instance.
-   * @param node - The HTML element or its ID.
-   * @param nonScaledSize
-   * @param fittingOption
-   * @param renderer
-   */
-  function createScaledCanvas(p, node, nonScaledSize, fittingOption, renderer) {
-    const maxCanvasSize = getElementSize(
-      typeof node === "string" ? getElementOrBody(node) : node
-    );
-    const scaleFactor = calculateScaleFactor(
-      nonScaledSize,
-      maxCanvasSize,
-      fittingOption
-    );
-    const canvas = p.createCanvas(
-      scaleFactor * nonScaledSize.width,
-      scaleFactor * nonScaledSize.height,
-      renderer
-    );
-    return {
-      p5Canvas: canvas,
-      scaleFactor: scaleFactor,
-      nonScaledSize: nonScaledSize
-    };
-  }
-
-  /**
-   * ---- p5.js color utility --------------------------------------------------
-   */
-  /**
-   * Creates a composite function of `p.stroke()` and `p.fill()`.
-   * A `null` color will be interpreted as `p.noStroke()` or `p.noFill()`.
-   * An `undefined` color will have no effect.
-   *
-   * @param p - The p5 instance.
-   * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
-   */
-  const createApplyColor = (p, shapeColor) => {
-    const strokeColor = shapeColor.strokeColor;
-    const fillColor = shapeColor.fillColor;
-    switch (strokeColor) {
-      case undefined:
-        switch (fillColor) {
-          case undefined:
-            return () => {};
-          case null:
-            return () => p.noFill();
-          default:
-            return () => p.fill(fillColor);
-        }
-      case null:
-        switch (fillColor) {
-          case undefined:
-            return () => p.noStroke();
-          case null:
-            return () => {
-              p.noStroke();
-              p.noFill();
-            };
-          default:
-            return () => {
-              p.noStroke();
-              p.fill(fillColor);
-            };
-        }
-      default:
-        switch (fillColor) {
-          case undefined:
-            return () => p.stroke(strokeColor);
-          case null:
-            return () => {
-              p.stroke(strokeColor);
-              p.noFill();
-            };
-          default:
-            return () => {
-              p.stroke(strokeColor);
-              p.fill(fillColor);
-            };
-        }
-    }
-  };
-
-  /**
-   * ---- p5.js drawing utility ------------------------------------------------
-   */
-  /**
-   * Sets color to the specified pixel.
-   * Should be used in conjunction with loadPixels() and updatePixels().
-   * @param renderer - Instance of either p5 or p5.Graphics.
-   * @param x - The x index of the pixel.
-   * @param y - The y index of the pixel.
-   * @param red - The red value (0 - 255).
-   * @param green - The green value (0 - 255).
-   * @param blue - The blue value (0 - 255).
-   * @param pixelDensity - If not specified, renderer.pixelDensity() will be called.
-   */
-  function setPixel(renderer, x, y, red, green, blue, alpha, pixelDensity) {
-    const g = renderer;
-    const d = pixelDensity || g.pixelDensity();
-    const graphicsPixels = g.pixels;
-    for (let i = 0; i < d; i += 1) {
-      for (let j = 0; j < d; j += 1) {
-        const idx = 4 * ((y * d + j) * g.width * d + (x * d + i));
-        graphicsPixels[idx] = red;
-        graphicsPixels[idx + 1] = green;
-        graphicsPixels[idx + 2] = blue;
-        graphicsPixels[idx + 3] = alpha;
-      }
-    }
-  }
-  /**
-   * Runs `drawCallback` and `p.loadPixels()`, then returns `p.pixels`.
-   * The style and transformations will be restored by using `p.push()` and `p.pop()`.
-   * @param p The p5 instance.
-   * @param drawCallback
-   */
-  function createPixels(p, drawCallback) {
-    p.push();
-    drawCallback(p);
-    p.pop();
-    p.loadPixels();
-    return p.pixels;
-  }
 
   /**
    * ---- p5.js transformation utility -----------------------------------------
@@ -308,6 +176,154 @@
   }
 
   /**
+   * ---- p5.js canvas utility -------------------------------------------------
+   */
+  /**
+   * Runs `p.createCanvas()` with the scaled size that fits to `node`.
+   * Returns the created canvas and the scale factor.
+   *
+   * @param p - The p5 instance.
+   * @param node - The HTML element or its ID.
+   * @param nonScaledSize
+   * @param fittingOption
+   * @param renderer
+   */
+  function createScaledCanvas(p, node, nonScaledSize, fittingOption, renderer) {
+    const maxCanvasSize = getElementSize(
+      typeof node === "string" ? getElementOrBody(node) : node
+    );
+    const scaleFactor = getScaleFactor(
+      nonScaledSize,
+      maxCanvasSize,
+      fittingOption
+    );
+    const canvas = p.createCanvas(
+      scaleFactor * nonScaledSize.width,
+      scaleFactor * nonScaledSize.height,
+      renderer
+    );
+    return {
+      p5Canvas: canvas,
+      scaleFactor: scaleFactor,
+      nonScaledSize: nonScaledSize,
+      drawScaled: drawCallback => drawScaled(p, drawCallback, scaleFactor)
+    };
+  }
+
+  /**
+   * ---- p5.js color utility --------------------------------------------------
+   */
+  /**
+   * Creates a composite function of `p.stroke()` and `p.fill()`.
+   * A `null` color will be interpreted as `p.noStroke()` or `p.noFill()`.
+   * An `undefined` color will have no effect.
+   *
+   * @param p - The p5 instance.
+   * @param shapeColor - Composite of two colors for `p.stroke()` and `p.fill()`.
+   */
+  const createApplyColor = (p, shapeColor) => {
+    const strokeColor = shapeColor.strokeColor;
+    const fillColor = shapeColor.fillColor;
+    let newFunction;
+    switch (strokeColor) {
+      default:
+        switch (fillColor) {
+          default:
+            newFunction = () => {
+              p.stroke(strokeColor);
+              p.fill(fillColor);
+            };
+            break;
+          case null:
+            newFunction = () => {
+              p.stroke(strokeColor);
+              p.noFill();
+            };
+            break;
+          case undefined:
+            newFunction = () => p.stroke(strokeColor);
+            break;
+        }
+        break;
+      case null:
+        switch (fillColor) {
+          default:
+            newFunction = () => {
+              p.noStroke();
+              p.fill(fillColor);
+            };
+            break;
+          case null:
+            newFunction = () => {
+              p.noStroke();
+              p.noFill();
+            };
+            break;
+          case undefined:
+            newFunction = () => p.noStroke();
+            break;
+        }
+        break;
+      case undefined:
+        switch (fillColor) {
+          default:
+            newFunction = () => p.fill(fillColor);
+            break;
+          case null:
+            newFunction = () => p.noFill();
+            break;
+          case undefined:
+            newFunction = () => {};
+            break;
+        }
+        break;
+    }
+    return newFunction;
+  };
+
+  /**
+   * ---- p5.js drawing utility ------------------------------------------------
+   */
+  /**
+   * Sets color to the specified pixel.
+   * Should be used in conjunction with loadPixels() and updatePixels().
+   * @param renderer - Instance of either p5 or p5.Graphics.
+   * @param x - The x index of the pixel.
+   * @param y - The y index of the pixel.
+   * @param red - The red value (0 - 255).
+   * @param green - The green value (0 - 255).
+   * @param blue - The blue value (0 - 255).
+   * @param pixelDensity - If not specified, renderer.pixelDensity() will be called.
+   */
+  function setPixel(renderer, x, y, red, green, blue, alpha, pixelDensity) {
+    const g = renderer;
+    const d = pixelDensity || g.pixelDensity();
+    const graphicsPixels = g.pixels;
+    for (let i = 0; i < d; i += 1) {
+      for (let j = 0; j < d; j += 1) {
+        const idx = 4 * ((y * d + j) * g.width * d + (x * d + i));
+        graphicsPixels[idx] = red;
+        graphicsPixels[idx + 1] = green;
+        graphicsPixels[idx + 2] = blue;
+        graphicsPixels[idx + 3] = alpha;
+      }
+    }
+  }
+  /**
+   * Runs `drawCallback` and `p.loadPixels()`, then returns `p.pixels`.
+   * The style and transformations will be restored by using `p.push()` and `p.pop()`.
+   * @param p The p5 instance.
+   * @param drawCallback
+   */
+  function createPixels(p, drawCallback) {
+    p.push();
+    drawCallback(p);
+    p.pop();
+    p.loadPixels();
+    return p.pixels;
+  }
+
+  /**
    * ---- Other functions ------------------------------------------------------
    */
   function createRandomTextureGraphics(p, size, factor) {
@@ -330,8 +346,9 @@
    */
   const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
   const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
+  const iconCountLevel = 3;
   const sketch = p => {
-    let scaledCanvas;
+    let canvas;
     let backgroundPixels;
     let icons;
     let shapeCandidates;
@@ -564,10 +581,10 @@
     function reset() {
       icons = [];
       let invertedRevolution = false;
-      const positionInterval = scaledCanvas.nonScaledSize.width / 3;
-      for (let row = 0; row < 3; row += 1) {
+      const positionInterval = canvas.nonScaledSize.width / iconCountLevel;
+      for (let row = 0; row < iconCountLevel; row += 1) {
         const y = (row + 0.5) * positionInterval;
-        for (let column = 0; column < 3; column += 1) {
+        for (let column = 0; column < iconCountLevel; column += 1) {
           const x = (column + 0.5) * positionInterval;
           const newIcon = createIcon(
             x,
@@ -589,11 +606,12 @@
     p.preload = () => {};
     p.setup = () => {
       const nonScaledSize = { width: 640, height: 640 };
-      scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
+      canvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
       backgroundPixels = createPixels(p, p => {
         p.background(255);
-        p.scale(scaledCanvas.scaleFactor);
-        p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
+        canvas.drawScaled(() =>
+          p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0)
+        );
       });
       initializeStyle();
       initializeData();
@@ -602,7 +620,7 @@
     p.draw = () => {
       p.pixels = backgroundPixels;
       p.updatePixels();
-      drawScaled(p, drawSketch, scaledCanvas.scaleFactor);
+      canvas.drawScaled(drawSketch);
     };
     p.mousePressed = () => {
       reset();

@@ -9,17 +9,14 @@ import { loop, flatNaive } from "./common/array";
 import { createScaledCanvas, ScaledCanvas } from "./p5util/canvas";
 import { createApplyColor, ApplyColorFunction } from "./p5util/color";
 import { createPixels } from "./p5util/drawing";
-import {
-  drawTranslated,
-  drawTranslatedAndRotated,
-  drawScaled
-} from "./p5util/transform";
+import { drawTranslated, drawTranslatedAndRotated } from "./p5util/transform";
 
 import { createRandomTextureGraphics } from "./functions";
 
 const HTML_ELEMENT = getElementOrBody("RotationalSymmetry");
 
 const colorStringList = ["#C7243A", "#2266AF", "#009250", "#EDAD0B"];
+const iconCountLevel = 3;
 
 interface RotationallySymmetricShape {
   draw(size: number): void;
@@ -45,7 +42,7 @@ interface Icon {
 
 const sketch = (p: p5): void => {
   // ---- variables
-  let scaledCanvas: ScaledCanvas;
+  let canvas: ScaledCanvas;
   let backgroundPixels: number[];
   let icons: Icon[];
   let shapeCandidates: RotationallySymmetricShape[];
@@ -334,10 +331,10 @@ const sketch = (p: p5): void => {
 
     let invertedRevolution = false;
 
-    const positionInterval = scaledCanvas.nonScaledSize.width / 3;
-    for (let row = 0; row < 3; row += 1) {
+    const positionInterval = canvas.nonScaledSize.width / iconCountLevel;
+    for (let row = 0; row < iconCountLevel; row += 1) {
       const y = (row + 0.5) * positionInterval;
-      for (let column = 0; column < 3; column += 1) {
+      for (let column = 0; column < iconCountLevel; column += 1) {
         const x = (column + 0.5) * positionInterval;
         const newIcon = createIcon(
           x,
@@ -362,11 +359,12 @@ const sketch = (p: p5): void => {
 
   p.setup = () => {
     const nonScaledSize = { width: 640, height: 640 };
-    scaledCanvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
+    canvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
     backgroundPixels = createPixels(p, (p: p5) => {
       p.background(255);
-      p.scale(scaledCanvas.scaleFactor);
-      p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0);
+      canvas.drawScaled(() =>
+        p.image(createRandomTextureGraphics(p, nonScaledSize, 0.05), 0, 0)
+      );
     });
 
     initializeStyle();
@@ -378,7 +376,7 @@ const sketch = (p: p5): void => {
     p.pixels = backgroundPixels;
     p.updatePixels();
 
-    drawScaled(p, drawSketch, scaledCanvas.scaleFactor);
+    canvas.drawScaled(drawSketch);
   };
 
   p.mousePressed = () => {

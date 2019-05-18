@@ -11,12 +11,19 @@ import { RectangleSize } from "./dataTypes";
 export const getAspectRatio = (size: RectangleSize) => size.width / size.height;
 
 /**
- * -
+ * Calculates the area i.e. `width * height`.
+ * @param size
  */
-export enum FittingOption {
-  FIT_TO_BOX,
-  FIT_WIDTH,
-  FIT_HEIGHT
+export const getArea = (size: RectangleSize) => size.width * size.height;
+
+/**
+ * Parameter for `getScaleFactor()`.
+ * `FIT_TO_BOX` checks both width and height and returns the smaller scale factor.
+ */
+export const enum FittingOption {
+  FIT_TO_BOX = "FIT_TO_BOX",
+  FIT_WIDTH = "FIT_WIDTH",
+  FIT_HEIGHT = "FIT_HEIGHT"
 }
 
 /**
@@ -26,7 +33,7 @@ export enum FittingOption {
  * @param targetSize
  * @param fittingOption
  */
-export const calculateScaleFactor = (
+export const getScaleFactor = (
   nonScaledSize: RectangleSize,
   targetSize: RectangleSize,
   fittingOption?: FittingOption
