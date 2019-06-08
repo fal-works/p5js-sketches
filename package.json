@@ -1,0 +1,32 @@
+{
+  "name": "p5jsprojects",
+  "version": "0.1.0",
+  "description": "none",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fal-works/p5js-sketches.git"
+  },
+  "author": "FAL <falworks.contact@gmail.com> (https://github.com/fal-works)",
+  "homepage": "https://github.com/fal-works/p5js-sketches#readme",
+  "dependencies": {
+    "p5": "^0.8.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "p5ex": "^0.5.7",
+    "prettier": "^1.18.2",
+    "rollup": "^1.14.4",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-node-resolve": "^5.0.1",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "typescript": "^3.5.1"
+  }
+}
