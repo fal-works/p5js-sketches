@@ -153,7 +153,7 @@
   }
 
   /**
-   * ---- Common random utility ------------------------------------------------
+   * ---- Common timer utility ------------------------------------------------
    */
   const createTimer = duration => {
     let count = 0;
@@ -208,7 +208,7 @@
   };
 
   /**
-   * ---- Common random utility ------------------------------------------------
+   * ---- Common easing utility ------------------------------------------------
    */
   /**
    * easeOutQuad.
