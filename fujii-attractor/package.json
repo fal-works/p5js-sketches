@@ -1,0 +1,27 @@
+{
+  "name": "none",
+  "description": "none",
+  "version": "0.1.0",
+  "author": "FAL",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "p5": "^0.8.0",
+    "prettier": "^1.18.2",
+    "uglify-es": "^3.3.9"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "CC-BY-SA-3.0",
+  "main": "dist/sketch.js",
+  "private": true,
+  "scripts": {
+    "build": "npm-run-all eslint prettier uglify",
+    "eslint": "eslint --fix ./dist/sketch.js",
+    "prettier": "prettier --write ./dist/sketch.js",
+    "uglify": "uglifyjs ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments --ecma 6"
+  }
+}
