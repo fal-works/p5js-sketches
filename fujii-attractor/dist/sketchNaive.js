@@ -1,4 +1,6 @@
-const [sin, cos] = [Math.sin, Math.cos];
+// formulae from: https://how-to-build-du-e.tumblr.com/
+
+const { sin, cos } = Math;
 
 const next = v => {
   const { x, y, t } = v;
