@@ -27,13 +27,15 @@ const createPolynomial = monomials => {
 
 // parameters
 
+const { sin, cos } = Math;
+
 const a = [-2.1, 1.4, 1.1];
 const b = [0.4, 1.1, 1.0];
-const f = [Math.sin, Math.cos, Math.sin];
+const f = [sin, cos, sin];
 
 const c = [1.1, 1.2, 0.9];
 const d = [1.1, 1.0, 0.7];
-const g = [Math.cos, Math.sin, Math.cos];
+const g = [cos, sin, cos];
 
 const dt = 0.15;
 
