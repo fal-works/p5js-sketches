@@ -170,11 +170,10 @@
     let loaded = false;
 
     const sq = v => v * v;
-    function mouseIsOver() {
-      const mouseAngle = (p.atan2(p.mouseY, p.mouseX) + p.TWO_PI) % p.TWO_PI;
-      const x = -canvas.nonScaledSize.width / 2 + p.mouseX / canvas.scaleFactor;
-      const y =
-        -canvas.nonScaledSize.height / 2 + p.mouseY / canvas.scaleFactor;
+    function mouseIsOver(scaledX, scaledY) {
+      const mouseAngle = (p.atan2(scaledY, scaledX) + p.TWO_PI) % p.TWO_PI;
+      const x = -canvas.nonScaledSize.width / 2 + scaledX / canvas.scaleFactor;
+      const y = -canvas.nonScaledSize.height / 2 + scaledY / canvas.scaleFactor;
       const mouseDistanceSq = sq(x) + sq(y);
       const vertexIndex = Math.floor(
         mouseAngle / (p.TWO_PI / ANGLE_RESOLUTION)
@@ -305,14 +304,22 @@
       p.pixels = backgroundPixels;
       p.updatePixels();
       updateShape(vertices, (1 + sq(reactionFactor)) * DEFAULT_SHAPE_SIZE);
-      clickable = mouseIsOver();
+      clickable = mouseIsOver(p.mouseX, p.mouseY);
       p.translate(0.5 * p.width, 0.45 * p.height);
       canvas.drawScaled(drawSketch);
       time += (1 + 16 * reactionFactor) * 0.01;
       reactionFactor *= 0.92;
     };
     p.mousePressed = () => {
-      if (loaded && clickable) incrementCount();
+      if (!loaded) return;
+      if (clickable) {
+        incrementCount();
+        return;
+      }
+      if (p.touches != null && p.touches.length > 0) {
+        const touch = p.touches[0];
+        if (mouseIsOver(touch.x, touch.y)) incrementCount();
+      }
     };
     p.keyTyped = () => {
       if (p.key === "p") p.noLoop();
