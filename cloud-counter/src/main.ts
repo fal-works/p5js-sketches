@@ -216,6 +216,8 @@ const sketch = (p: p5): void => {
   };
 
   p.mouseMoved = () => {
+    if (!loaded) return;
+
     shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
   };
 
