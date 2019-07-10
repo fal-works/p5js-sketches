@@ -209,6 +209,8 @@ const sketch = (p: p5): void => {
   p.mousePressed = () => {
     if (!loaded) return;
 
+    shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
+
     if (shapeIsActive) {
       incrementCount();
       return;
@@ -218,6 +220,10 @@ const sketch = (p: p5): void => {
   p.mouseMoved = () => {
     if (!loaded) return;
 
+    shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
+  };
+
+  p.mouseReleased = () => {
     shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
   };
 
