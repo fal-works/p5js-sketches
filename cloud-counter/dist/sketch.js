@@ -207,7 +207,7 @@
       request.responseType = "json";
       request.onload = function() {
         const data = request.response;
-        if (currentCount != data.count) {
+        if (data.count > currentCount) {
           currentCount = data.count;
           reactionFactor = 1.0;
         }
@@ -228,8 +228,8 @@
       request.onload = function() {
         const data = request.response;
         if (data.count > currentCount) {
-          reactionFactor = 1.0;
           currentCount = data.count;
+          reactionFactor = 1.0;
         }
       };
       request.send();
@@ -308,15 +308,21 @@
       canvas.drawScaled(drawSketch);
       time += (1 + 16 * reactionFactor) * 0.01;
       reactionFactor *= 0.92;
+      if (p.frameCount % 60 === 0) getCount();
     };
     p.mousePressed = () => {
       if (!loaded) return;
+      shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
       if (shapeIsActive) {
         incrementCount();
         return;
       }
     };
     p.mouseMoved = () => {
+      if (!loaded) return;
+      shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
+    };
+    p.mouseReleased = () => {
       shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
     };
     p.touchStarted = () => {
