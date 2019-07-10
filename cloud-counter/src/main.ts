@@ -202,6 +202,8 @@ const sketch = (p: p5): void => {
 
     time += (1 + 16 * reactionFactor) * 0.01;
     reactionFactor *= 0.92;
+
+    if (p.frameCount % 60 === 0) getCount();
   };
 
   p.mousePressed = () => {
