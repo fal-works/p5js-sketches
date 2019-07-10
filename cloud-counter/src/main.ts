@@ -212,10 +212,19 @@ const sketch = (p: p5): void => {
       incrementCount();
       return;
     }
+  };
+
+  p.touchStarted = () => {
+    if (!loaded) return;
 
     if (p.touches != null && p.touches.length > 0) {
-      const touch: any = p.touches[0];
-      if (mouseIsOver(touch.x, touch.y)) incrementCount();
+      for (const touch of p.touches) {
+        const t = touch as any;
+        if (mouseIsOver(t.x, t.y)) {
+          incrementCount();
+          return;
+        }
+      }
     }
   };
 
