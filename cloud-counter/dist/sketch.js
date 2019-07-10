@@ -166,7 +166,7 @@
     let reactionFactor = 0;
     let time = 0;
     let currentCount = -1;
-    let clickable = false;
+    let shapeIsActive = false;
     let loaded = false;
 
     const sq = v => v * v;
@@ -280,7 +280,7 @@
       }
 
       if (!loaded) return;
-      if (!clickable) {
+      if (!shapeIsActive) {
         p.stroke(shapeColor);
         p.noFill();
       }
@@ -304,7 +304,6 @@
       p.pixels = backgroundPixels;
       p.updatePixels();
       updateShape(vertices, (1 + sq(reactionFactor)) * DEFAULT_SHAPE_SIZE);
-      clickable = mouseIsOver(p.mouseX, p.mouseY);
       p.translate(0.5 * p.width, 0.45 * p.height);
       canvas.drawScaled(drawSketch);
       time += (1 + 16 * reactionFactor) * 0.01;
@@ -312,14 +311,25 @@
     };
     p.mousePressed = () => {
       if (!loaded) return;
-      if (clickable) {
+      if (shapeIsActive) {
         incrementCount();
         return;
       }
-      if (p.touches != null && p.touches.length > 0) {
-        const touch = p.touches[0];
-        if (mouseIsOver(touch.x, touch.y)) incrementCount();
+    };
+    p.mouseMoved = () => {
+      shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
+    };
+    p.touchStarted = () => {
+      if (!loaded) return;
+      if (mouseIsOver(p.mouseX, p.mouseY)) {
+        shapeIsActive = true;
+        incrementCount();
+        return false;
       }
+    };
+    p.touchMoved = () => {};
+    p.touchEnded = () => {
+      shapeIsActive = false;
     };
     p.keyTyped = () => {
       if (p.key === "p") p.noLoop();

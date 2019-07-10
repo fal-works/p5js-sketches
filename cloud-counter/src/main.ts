@@ -27,7 +27,7 @@ const sketch = (p: p5): void => {
   let reactionFactor = 0;
   let time = 0;
   let currentCount = -1;
-  let clickable = false;
+  let shapeIsActive = false;
   let loaded = false;
 
   // ---- functions
@@ -162,7 +162,7 @@ const sketch = (p: p5): void => {
     // draw shape
     if (!loaded) return;
 
-    if (!clickable) {
+    if (!shapeIsActive) {
       p.stroke(shapeColor);
       p.noFill();
     }
@@ -195,7 +195,6 @@ const sketch = (p: p5): void => {
     p.updatePixels();
 
     updateShape(vertices, (1 + sq(reactionFactor)) * DEFAULT_SHAPE_SIZE);
-    clickable = mouseIsOver(p.mouseX, p.mouseY);
 
     p.translate(0.5 * p.width, 0.45 * p.height);
 
@@ -208,24 +207,30 @@ const sketch = (p: p5): void => {
   p.mousePressed = () => {
     if (!loaded) return;
 
-    if (clickable) {
+    if (shapeIsActive) {
       incrementCount();
       return;
     }
   };
 
+  p.mouseMoved = () => {
+    shapeIsActive = mouseIsOver(p.mouseX, p.mouseY);
+  };
+
   p.touchStarted = () => {
     if (!loaded) return;
 
-    if (p.touches != null && p.touches.length > 0) {
-      for (const touch of p.touches) {
-        const t = touch as any;
-        if (mouseIsOver(t.x, t.y)) {
-          incrementCount();
-          return;
-        }
-      }
+    if (mouseIsOver(p.mouseX, p.mouseY)) {
+      shapeIsActive = true;
+      incrementCount();
+      return false;
     }
+  };
+
+  p.touchMoved = () => {};
+
+  p.touchEnded = () => {
+    shapeIsActive = false;
   };
 
   p.keyTyped = () => {
