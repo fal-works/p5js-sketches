@@ -76,7 +76,7 @@ const sketch = (p: p5): void => {
 
     request.onload = function() {
       const data: Count = request.response;
-      if (currentCount != data.count) {
+      if (data.count > currentCount) {
         currentCount = data.count;
         reactionFactor = 1.0;
       }
@@ -98,8 +98,8 @@ const sketch = (p: p5): void => {
     request.onload = function() {
       const data: Count = request.response;
       if (data.count > currentCount) {
-        reactionFactor = 1.0;
         currentCount = data.count;
+        reactionFactor = 1.0;
       }
     };
 
