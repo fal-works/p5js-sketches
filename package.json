@@ -12,7 +12,7 @@
   "author": "FAL <falworks.contact@gmail.com> (https://github.com/fal-works)",
   "homepage": "https://github.com/fal-works/p5js-sketches#readme",
   "dependencies": {
-    "p5": "^0.8.0"
+    "p5": "^0.9.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^1.9.0",
