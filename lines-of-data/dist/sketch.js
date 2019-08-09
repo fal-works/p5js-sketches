@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <contact@fal-works.com>
- * @version 0.1.1
+ * @version 0.1.2
  * @license CC-BY-SA-3.0
  */
 
@@ -68,6 +68,22 @@
           height: window.innerHeight
         }
       : node.getBoundingClientRect();
+
+  /**
+   * ---- Common array utility -------------------------------------------------
+   */
+  /**
+   * Runs `callback` once for each element of `array`.
+   * Unlike `forEach()`, an element of `array` should not be removed during the iteration.
+   * @param array
+   * @param callback
+   */
+  const loop$1 = (array, callback) => {
+    const arrayLength = array.length;
+    for (let i = 0; i < arrayLength; i += 1) {
+      callback(array[i], i, array);
+    }
+  };
 
   /**
    * ---- p5 shared variables --------------------------------------------------
@@ -215,6 +231,14 @@
   };
 
   /**
+   * ---- p5util setup ----------------------------------------------------------
+   */
+  /**
+   * A list of functions that will be called in `p.setup()`.
+   */
+  const onSetup = [];
+
+  /**
    * ---- p5util main -----------------------------------------------------------
    */
   /**
@@ -228,6 +252,8 @@
       p.setup = () => {
         setCanvas(createScaledCanvas(htmlElement, settings.logicalCanvasSize));
         settings.initialize();
+        loop$1(onSetup, listener => listener(p));
+        onSetup.length = 0;
       };
       settings.setP5Methods(p);
     }, htmlElement);
@@ -289,6 +315,45 @@
   };
 
   /**
+   * ---- Common math utility --------------------------------------------------
+   */
+  const sq = v => v * v;
+  const cubic = v => v * v * v;
+  const TWO_PI = 2 * Math.PI;
+  const createAngleArray = resolution => {
+    const array = new Array(resolution);
+    const interval = TWO_PI / resolution;
+    for (let i = 0; i < resolution; i += 1) array[i] = i * interval;
+    return array;
+  };
+  const nearlyEqual = (a, b) => Math.abs(a - b) < 0.0000000000001;
+
+  const LINE_LIST_INITIAL_CAPACITY = 32;
+  const STROKE_WEIGHT = 2;
+  const BACKGROUND_COLOR_ARRAY = [248, 248, 252];
+  const ANGLES = createAngleArray(8);
+  const RIGHT_SEQUENCE_OFFSET = { start: 50, end: 150 };
+  const SEQUENCE_WIDTH = 10;
+  const DATA_UNIT_LENGTH = { start: 2, end: 15 };
+  const DATA_UNIT_SHORT_INTERVAL = { start: 3, end: 20 };
+  const DATA_UNIT_LONG_INTERVAL = { start: 40, end: 160 };
+  const SHORT_INTERVAL_PROBABILITY = 0.8;
+  const LINE_LENGTH = { start: 20, end: 600 };
+  const LINE_CREATION_TRY_COUNT = 1000;
+  const AREA_MARGIN = 80;
+  const BIRTH_DEATH_DURATION_FACTOR = 1 / 15;
+  const WAIT_DURATION = 30;
+
+  const DATA_UNIT_COLOR_CODES = [
+    "#7189bf",
+    "#df7599",
+    "#ffc785",
+    "#72d6c9",
+    "#202020"
+  ];
+  const LINE_COLOR_CODE = "#202020";
+
+  /**
    * ---- Vector 2D ------------------------------------------------------------
    */
   const addPolar = (vector, angle, length) => {
@@ -315,20 +380,6 @@
     }
   }
   const lazy = factory => new Lazy(factory);
-
-  /**
-   * ---- Common math utility --------------------------------------------------
-   */
-  const sq = v => v * v;
-  const cubic = v => v * v * v;
-  const TWO_PI = 2 * Math.PI;
-  const createAngleArray = resolution => {
-    const array = new Array(resolution);
-    const interval = TWO_PI / resolution;
-    for (let i = 0; i < resolution; i += 1) array[i] = i * interval;
-    return array;
-  };
-  const nearlyEqual = (a, b) => Math.abs(a - b) < 0.0000000000001;
 
   /**
    * ---- Common random utility ------------------------------------------------
@@ -379,22 +430,6 @@
    * @param ratio
    */
   const easeOutCubic = ratio => cubic(ratio - 1) + 1;
-
-  /**
-   * ---- Common array utility -------------------------------------------------
-   */
-  /**
-   * Runs `callback` once for each element of `array`.
-   * Unlike `forEach()`, an element of `array` should not be removed during the iteration.
-   * @param array
-   * @param callback
-   */
-  const loop$1 = (array, callback) => {
-    const arrayLength = array.length;
-    for (let i = 0; i < arrayLength; i += 1) {
-      callback(array[i], i, array);
-    }
-  };
 
   /**
    * ---- Common timer utility ------------------------------------------------
@@ -477,19 +512,10 @@
   /**
    * ---- Line -----------------------------------------------------------------
    */
-  const ANGLES = createAngleArray(8);
-  const RIGHT_SEQUENCE_OFFSET = { start: 50, end: 150 };
-  const SEQUENCE_WIDTH = 10;
-  const DATA_UNIT_LENGTH = { start: 2, end: 15 };
-  const DATA_UNIT_SHORT_INTERVAL = { start: 3, end: 20 };
-  const DATA_UNIT_LONG_INTERVAL = { start: 40, end: 160 };
-
   const colorCandidates = lazy(() =>
-    ["#7189bf", "#df7599", "#ffc785", "#72d6c9", "#202020"].map(code =>
-      p.color(code)
-    )
+    DATA_UNIT_COLOR_CODES.map(code => p.color(code))
   );
-  const lineColor = lazy(() => p.color("#202020"));
+  const lineColor = lazy(() => p.color(LINE_COLOR_CODE));
   const createSequence = (length, offset) => {
     const sequence = [];
     let x = offset;
@@ -502,7 +528,9 @@
       });
       x = nextX;
       x += inRangePow(
-        bool(0.8) ? DATA_UNIT_SHORT_INTERVAL : DATA_UNIT_LONG_INTERVAL,
+        bool(SHORT_INTERVAL_PROBABILITY)
+          ? DATA_UNIT_SHORT_INTERVAL
+          : DATA_UNIT_LONG_INTERVAL,
         2
       );
     }
@@ -557,13 +585,15 @@
     const { data, trimRatio } = graphics;
 
     let newLine;
-    const birthDeathDuration = Math.ceil(data.length / 15);
-    const waitDuration = 30;
+    const birthDeathDuration = Math.ceil(
+      BIRTH_DEATH_DURATION_FACTOR * data.length
+    );
+    const waitDuration = WAIT_DURATION;
     const onProgressBirth = timer => {
       trimRatio.end = easeOutCubic(timer.progressRatio);
     };
     const onCompleteBirth = () => {
-      for (let i = 0; i < 1000; i += 1) {
+      for (let i = 0; i < LINE_CREATION_TRY_COUNT; i += 1) {
         const nextStartPoint = addPolar(startPoint, angle, length);
         const nextAngle = fromArray(ANGLES);
         if (
@@ -572,9 +602,10 @@
         ) {
           continue;
         }
-        const nextLength = between(20, 600);
+        const nextLength = inRange(LINE_LENGTH);
         const nextEndPoint = addPolar(nextStartPoint, nextAngle, nextLength);
-        if (!containsPoint(canvas.logicalSize, nextEndPoint, 80)) continue;
+        if (!containsPoint(canvas.logicalSize, nextEndPoint, AREA_MARGIN))
+          continue;
         createLine(nextStartPoint, nextAngle, nextLength, onCreate);
         break;
       }
@@ -623,15 +654,15 @@
     createLine({ x: 700, y: 600 }, Math.PI, 600, onCreate);
   };
   const initialize = () => {
-    const backgroundColor = p.color(248, 248, 252);
+    const backgroundColor = p.color(BACKGROUND_COLOR_ARRAY);
     drawBackground = replacePixels.bind(
       null,
       createPixels(() => p.background(backgroundColor))
     );
     p.noStroke();
-    p.strokeWeight(2);
+    p.strokeWeight(STROKE_WEIGHT);
     p.rectMode(p.CORNERS);
-    lines = create(32);
+    lines = create(LINE_LIST_INITIAL_CAPACITY);
     reset$1();
   };
 
