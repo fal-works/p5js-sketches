@@ -2,22 +2,19 @@
  * ---- Common lazy evaluation utility ---------------------------------------
  */
 
-export interface Lazy<T> {
-  get: () => T;
-  clear: () => Lazy<T>;
+export class Lazy<T> {
+  public value: T | undefined = undefined;
+
+  public constructor(readonly factory: () => T) {}
+
+  public get(): T {
+    return this.value || (this.value = this.factory());
+  }
+
+  public clear(): Lazy<T> {
+    this.value = undefined;
+    return this;
+  }
 }
 
-export const lazy = <T>(factory: () => T): Lazy<T> => {
-  let value: T | undefined = undefined;
-  const lazyObject = {
-    get: () => {
-      if (!value) value = factory();
-      return value;
-    },
-    clear: () => {
-      value = undefined;
-      return lazyObject;
-    }
-  };
-  return lazyObject;
-};
+export const lazy = <T>(factory: () => T): Lazy<T> => new Lazy(factory);
