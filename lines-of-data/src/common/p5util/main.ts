@@ -4,9 +4,11 @@
 
 import p5 from "p5";
 import { getElementOrBody } from "../environment";
+import { RectangleSize } from "../dataTypes";
+import { loop } from "../ds/array";
 import { setP5Instance, setCanvas } from "./shared";
 import { createScaledCanvas } from "./canvas";
-import { RectangleSize } from "../dataTypes";
+import { onSetup } from "./setup";
 
 export interface SketchSettings {
   /**
@@ -43,6 +45,8 @@ export const startSketch = (settings: SketchSettings): void => {
     p.setup = (): void => {
       setCanvas(createScaledCanvas(htmlElement, settings.logicalCanvasSize));
       settings.initialize();
+      loop(onSetup, listener => listener(p));
+      onSetup.length = 0;
     };
     settings.setP5Methods(p);
   }, htmlElement);
