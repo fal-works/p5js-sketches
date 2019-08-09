@@ -3,7 +3,7 @@
  * Website => https://www.fal-works.com/
  * @copyright 2019 FAL
  * @author FAL <contact@fal-works.com>
- * @version 0.1.0
+ * @version 0.1.1
  * @license CC-BY-SA-3.0
  */
 
@@ -144,11 +144,11 @@
    * @param drawCallback
    * @param angle
    */
-  function drawRotated(drawCallback, angle) {
+  const drawRotated = (drawCallback, angle) => {
     p.rotate(angle);
     drawCallback();
     p.rotate(-angle);
-  }
+  };
   /**
    * Composite of `drawTranslated()` and `drawRotated()`.
    *
@@ -157,11 +157,11 @@
    * @param offsetY
    * @param angle
    */
-  function drawTranslatedAndRotated(drawCallback, offsetX, offsetY, angle) {
+  const drawTranslatedAndRotated = (drawCallback, offsetX, offsetY, angle) => {
     p.translate(offsetX, offsetY);
     drawRotated(drawCallback, angle);
     p.translate(-offsetX, -offsetY);
-  }
+  };
   /**
    * Runs `drawCallback` scaled with `scaleFactor`,
    * then restores the transformation by scaling with the inversed factor.
@@ -170,11 +170,11 @@
    * @param drawCallback
    * @param scaleFactor
    */
-  function drawScaled(drawCallback, scaleFactor) {
+  const drawScaled = (drawCallback, scaleFactor) => {
     p.scale(scaleFactor);
     drawCallback();
     p.scale(1 / scaleFactor);
-  }
+  };
 
   /**
    * ---- p5.js canvas utility -------------------------------------------------
@@ -188,7 +188,7 @@
    * @param fittingOption
    * @param renderer
    */
-  function createScaledCanvas(node, logicalSize, fittingOption, renderer) {
+  const createScaledCanvas = (node, logicalSize, fittingOption, renderer) => {
     const maxCanvasSize = getElementSize(
       typeof node === "string" ? getElementOrBody(node) : node
     );
@@ -212,7 +212,7 @@
         y: logicalSize.height / 2
       }
     };
-  }
+  };
 
   /**
    * ---- p5util main -----------------------------------------------------------
@@ -301,20 +301,20 @@
   /**
    * ---- Common lazy evaluation utility ---------------------------------------
    */
-  function lazy(factory) {
-    let value = undefined;
-    const lazyObject = {
-      get: () => {
-        if (!value) value = factory();
-        return value;
-      },
-      clear: () => {
-        value = undefined;
-        return lazyObject;
-      }
-    };
-    return lazyObject;
+  class Lazy {
+    constructor(factory) {
+      this.factory = factory;
+      this.value = undefined;
+    }
+    get() {
+      return this.value || (this.value = this.factory());
+    }
+    clear() {
+      this.value = undefined;
+      return this;
+    }
   }
+  const lazy = factory => new Lazy(factory);
 
   /**
    * ---- Common math utility --------------------------------------------------
@@ -373,16 +373,12 @@
    * easeInQuad.
    * @param ratio
    */
-  function easeInQuad(ratio) {
-    return sq(ratio);
-  }
+  const easeInQuad = sq;
   /**
    * easeOutCubic.
    * @param ratio
    */
-  function easeOutCubic(ratio) {
-    return cubic(ratio - 1) + 1;
-  }
+  const easeOutCubic = ratio => cubic(ratio - 1) + 1;
 
   /**
    * ---- Common array utility -------------------------------------------------
@@ -393,12 +389,12 @@
    * @param array
    * @param callback
    */
-  function loop$1(array, callback) {
+  const loop$1 = (array, callback) => {
     const arrayLength = array.length;
     for (let i = 0; i < arrayLength; i += 1) {
       callback(array[i], i, array);
     }
-  }
+  };
 
   /**
    * ---- Common timer utility ------------------------------------------------
