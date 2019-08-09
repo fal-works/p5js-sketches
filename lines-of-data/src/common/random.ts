@@ -2,7 +2,7 @@
  * ---- Common random utility ------------------------------------------------
  */
 
-import { NumberRange } from "./dataTypes";
+import { Range } from "./dataTypes";
 
 /**
  * Returns random value from `start` up to (but not including) `end`.
@@ -18,12 +18,12 @@ export const between = (start: number, end: number) =>
  * @param range
  * @return A random value.
  */
-export const inRange = (range: NumberRange) => between(range.start, range.end);
+export const inRange = (range: Range) => between(range.start, range.end);
 
 export const betweenPow = (start: number, end: number, exponent: number) =>
   start + Math.pow(Math.random(), exponent) * (end - start);
 
-export const inRangePow = (range: NumberRange, exponent: number) =>
+export const inRangePow = (range: Range, exponent: number) =>
   betweenPow(range.start, range.end, exponent);
 
 /**

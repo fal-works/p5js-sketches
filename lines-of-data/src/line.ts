@@ -4,7 +4,7 @@
 
 import p5 from "p5";
 
-import { MutableNumberRange } from "./common/dataTypes";
+import { MutableRange } from "./common/dataTypes";
 import { Vector2D, addPolar } from "./common/ds/vector-2d";
 import { lazy } from "./common/lazy";
 import { nearlyEqual } from "./common/math";
@@ -93,7 +93,7 @@ const createLineData = (length: number): LineData => {
 
 interface LineGraphics {
   data: LineData;
-  trimRatio: MutableNumberRange;
+  trimRatio: MutableRange;
   draw: () => void;
 }
 

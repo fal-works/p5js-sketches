@@ -14,9 +14,9 @@ export interface RectangleSize {
 
 export type ArrayOrValue<T> = T | T[];
 
-export interface MutableNumberRange {
+export interface MutableRange {
   start: number;
   end: number;
 }
 
-export type NumberRange = Readonly<MutableNumberRange>;
+export type Range = Readonly<MutableRange>;
