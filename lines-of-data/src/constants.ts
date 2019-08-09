@@ -3,7 +3,7 @@ import { Range } from "./common/dataTypes";
 
 export const LINE_LIST_INITIAL_CAPACITY = 32;
 export const STROKE_WEIGHT = 2;
-export const BACKGROUND_COLOR_ARRAY: readonly number[] = [248, 248, 252];
+export const BACKGROUND_COLOR_ARRAY = [248, 248, 252];
 
 export const ANGLES = createAngleArray(8);
 export const RIGHT_SEQUENCE_OFFSET: Range = { start: 50, end: 150 };
