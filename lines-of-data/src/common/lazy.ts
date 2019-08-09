@@ -7,7 +7,7 @@ export interface Lazy<T> {
   clear: () => Lazy<T>;
 }
 
-export function lazy<T>(factory: () => T): Lazy<T> {
+export const lazy = <T>(factory: () => T): Lazy<T> => {
   let value: T | undefined = undefined;
   const lazyObject = {
     get: () => {
@@ -20,4 +20,4 @@ export function lazy<T>(factory: () => T): Lazy<T> {
     }
   };
   return lazyObject;
-}
+};

@@ -66,9 +66,8 @@ export const fromArray = <T>(array: readonly T[]) =>
  * @param array
  * @return A random element.
  */
-export function removeFromArray<T>(array: T[]): T {
-  return array.splice(pickInt(array.length), 1)[0];
-}
+export const removeFromArray = <T>(array: T[]): T =>
+  array.splice(pickInt(array.length), 1)[0];
 
 export const bool = (probability: number): boolean =>
   Math.random() < probability;

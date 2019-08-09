@@ -30,12 +30,12 @@ export interface ScaledCanvas {
  * @param fittingOption
  * @param renderer
  */
-export function createScaledCanvas(
+export const createScaledCanvas = (
   node: HTMLElement | string,
   logicalSize: RectangleSize,
   fittingOption?: FittingOption,
   renderer?: "p2d" | "webgl" | undefined
-): ScaledCanvas {
+): ScaledCanvas => {
   const maxCanvasSize = getElementSize(
     typeof node === "string" ? getElementOrBody(node) : node
   );
@@ -58,4 +58,4 @@ export function createScaledCanvas(
       y: logicalSize.height / 2
     }
   };
-}
+};
