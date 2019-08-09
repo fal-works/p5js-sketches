@@ -4,10 +4,10 @@
 
 import p5 from "p5";
 
-import { NumberRange, MutableNumberRange } from "./common/dataTypes";
+import { MutableNumberRange } from "./common/dataTypes";
 import { Vector2D, addPolar } from "./common/ds/vector-2d";
 import { lazy } from "./common/lazy";
-import { createAngleArray, nearlyEqual } from "./common/math";
+import { nearlyEqual } from "./common/math";
 import * as random from "./common/random";
 import * as easing from "./common/easing";
 import * as Timer from "./common/timer";
@@ -17,21 +17,12 @@ import { Sweepable } from "./common/ds/sweepable";
 import { p, canvas } from "./common/p5util/shared";
 import { drawTranslatedAndRotated } from "./common/p5util/transform";
 
-const ANGLES = createAngleArray(8);
+import * as constants from "./constants";
 
-const RIGHT_SEQUENCE_OFFSET: NumberRange = { start: 50, end: 150 };
-const SEQUENCE_WIDTH = 10;
-const DATA_UNIT_LENGTH: NumberRange = { start: 2, end: 15 };
-const DATA_UNIT_SHORT_INTERVAL: NumberRange = { start: 3, end: 20 };
-const DATA_UNIT_LONG_INTERVAL: NumberRange = { start: 40, end: 160 };
-
-// https://colorhunt.co/palette/144426 +a
 const colorCandidates = lazy(() =>
-  ["#7189bf", "#df7599", "#ffc785", "#72d6c9", "#202020"].map(code =>
-    p.color(code)
-  )
+  constants.DATA_UNIT_COLOR_CODES.map(code => p.color(code))
 );
-const lineColor = lazy(() => p.color("#202020"));
+const lineColor = lazy(() => p.color(constants.LINE_COLOR_CODE));
 
 interface DataUnit {
   readonly color: p5.Color;
@@ -46,7 +37,10 @@ const createSequence = (
   const sequence: DataUnit[] = [];
   let x = offset;
   while (x < length) {
-    const nextX = Math.min(length, x + random.inRangePow(DATA_UNIT_LENGTH, 3));
+    const nextX = Math.min(
+      length,
+      x + random.inRangePow(constants.DATA_UNIT_LENGTH, 3)
+    );
     sequence.push({
       color: random.fromArray(colorCandidates.get()),
       start: x,
@@ -54,7 +48,9 @@ const createSequence = (
     });
     x = nextX;
     x += random.inRangePow(
-      random.bool(0.8) ? DATA_UNIT_SHORT_INTERVAL : DATA_UNIT_LONG_INTERVAL,
+      random.bool(constants.SHORT_INTERVAL_PROBABILITY)
+        ? constants.DATA_UNIT_SHORT_INTERVAL
+        : constants.DATA_UNIT_LONG_INTERVAL,
       2
     );
   }
@@ -68,7 +64,7 @@ const drawSequence = (
   left: boolean
 ) => {
   const unitCount = sequence.length;
-  const height = (left ? -1 : 1) * SEQUENCE_WIDTH;
+  const height = (left ? -1 : 1) * constants.SEQUENCE_WIDTH;
   for (let i = 0; i < unitCount; i += 1) {
     const { color, start, end } = sequence[i];
     if (end < startX) continue;
@@ -88,7 +84,10 @@ const createLineData = (length: number): LineData => {
   return {
     length,
     leftSequence: createSequence(length, 0),
-    rightSequence: createSequence(length, random.inRange(RIGHT_SEQUENCE_OFFSET))
+    rightSequence: createSequence(
+      length,
+      random.inRange(constants.RIGHT_SEQUENCE_OFFSET)
+    )
   };
 };
 
@@ -147,26 +146,31 @@ export const createLine = (
 
   // eslint-disable-next-line prefer-const
   let newLine: Line;
-  const birthDeathDuration = Math.ceil(data.length / 15);
-  const waitDuration = 30;
+  const birthDeathDuration = Math.ceil(
+    constants.BIRTH_DEATH_DURATION_FACTOR * data.length
+  );
+  const waitDuration = constants.WAIT_DURATION;
 
   const onProgressBirth = (timer: Timer.Unit) => {
     trimRatio.end = easing.easeOutCubic(timer.progressRatio);
   };
   const onCompleteBirth = () => {
-    for (let i = 0; i < 1000; i += 1) {
+    for (let i = 0; i < constants.LINE_CREATION_TRY_COUNT; i += 1) {
       const nextStartPoint = addPolar(startPoint, angle, length);
-      const nextAngle = random.fromArray(ANGLES);
+      const nextAngle = random.fromArray(constants.ANGLES);
       if (
         angle === nextAngle ||
         nearlyEqual(Math.abs(angle - nextAngle), Math.PI)
       ) {
         continue;
       }
-      const nextLength = random.between(20, 600);
+      const nextLength = random.inRange(constants.LINE_LENGTH);
       const nextEndPoint = addPolar(nextStartPoint, nextAngle, nextLength);
 
-      if (!containsPoint(canvas.logicalSize, nextEndPoint, 80)) continue;
+      if (
+        !containsPoint(canvas.logicalSize, nextEndPoint, constants.AREA_MARGIN)
+      )
+        continue;
 
       createLine(nextStartPoint, nextAngle, nextLength, onCreate);
       break;

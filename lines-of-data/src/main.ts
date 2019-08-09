@@ -14,6 +14,7 @@ import { createPixels, replacePixels } from "./common/p5util/pixels";
 import { pauseOrResume } from "./common/p5util/pause";
 
 import { HTML_ELEMENT_ID, LOGICAL_CANVAS_SIZE } from "./settings";
+import * as constants from "./constants";
 import { Line, createLine, drawLine, updateLine } from "./line";
 
 // ---- variables ----
@@ -31,17 +32,17 @@ const reset = (): void => {
 };
 
 const initialize = (): void => {
-  const backgroundColor = p.color(248, 248, 252);
+  const backgroundColor = p.color(constants.BACKGROUND_COLOR_ARRAY);
   drawBackground = replacePixels.bind(
     null,
     createPixels(() => p.background(backgroundColor))
   );
 
   p.noStroke();
-  p.strokeWeight(2);
+  p.strokeWeight(constants.STROKE_WEIGHT);
   p.rectMode(p.CORNERS);
 
-  lines = list.create(32);
+  lines = list.create(constants.LINE_LIST_INITIAL_CAPACITY);
 
   reset();
 };
