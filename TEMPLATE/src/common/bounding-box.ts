@@ -1,8 +1,9 @@
 /**
- * ---- Common bounding box utility ------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/bounding-box
  */
 
-import { RectangleSize } from "./dataTypes";
+import { RectangleSize } from "./data-types";
 import { Vector2D } from "./ds/vector-2d";
 
 /**

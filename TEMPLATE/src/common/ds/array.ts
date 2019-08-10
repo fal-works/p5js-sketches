@@ -1,8 +1,9 @@
 /**
- * ---- Common array utility -------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/ds/array
  */
 
-import { ArrayOrValue } from "../dataTypes";
+import { ArrayOrValue } from "../data-types";
 
 export const loopLimited = <T>(
   array: readonly T[],

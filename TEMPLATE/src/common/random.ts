@@ -1,8 +1,9 @@
 /**
- * ---- Common random utility ------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/random
  */
 
-import { Range } from "./dataTypes";
+import { Range } from "./data-types";
 
 /**
  * Returns random value from `start` up to (but not including) `end`.

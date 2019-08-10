@@ -1,5 +1,6 @@
 /**
- * ---- Common data types ----------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/data-types
  */
 
 undefined; // dummy code for VSCode to ignore file header

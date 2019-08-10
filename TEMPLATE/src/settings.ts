@@ -1,9 +1,10 @@
 /**
- * ---- Settings -------------------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module settings
  */
 
 import { getElementOrBody } from "./common/environment";
-import { RectangleSize } from "./common/dataTypes";
+import { RectangleSize } from "./common/data-types";
 
 /**
  * The id of the HTML element to which the canvas should belong.

@@ -1,10 +1,11 @@
 /**
- * ---- p5util main -----------------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/p5util/main
  */
 
 import p5 from "p5";
 import { getElementOrBody } from "../environment";
-import { RectangleSize } from "../dataTypes";
+import { RectangleSize } from "../data-types";
 import { loop } from "../ds/array";
 import { setP5Instance, setCanvas } from "./shared";
 import { createScaledCanvas } from "./canvas";

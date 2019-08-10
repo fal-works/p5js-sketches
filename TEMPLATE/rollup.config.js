@@ -1,5 +1,4 @@
 import typescript from "rollup-plugin-typescript2";
-import cleanup from "rollup-plugin-cleanup";
 
 const title = "Title";
 const comment = "Website => https://www.fal-works.com/";
@@ -41,11 +40,6 @@ export default {
   plugins: [
     typescript({
       useTsconfigDeclarationDir: true
-    }),
-    cleanup({
-      comments: [/^\*\*(?![\s\S]*@module\b)/],
-      maxEmptyLines: 2,
-      extensions: [".js", ".ts", ".mjs"]
     })
   ]
 };

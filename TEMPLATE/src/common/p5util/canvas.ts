@@ -1,11 +1,12 @@
 /**
- * ---- p5.js canvas utility -------------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/p5util/canvas
  */
 
 import p5 from "p5";
 import { p } from "./shared";
-import { RectangleSize } from "../dataTypes";
-import { FittingOption, getScaleFactor } from "../boundingBox";
+import { RectangleSize } from "../data-types";
+import { FittingOption, getScaleFactor } from "../bounding-box";
 import { getElementOrBody, getElementSize } from "../environment";
 import { Vector2D } from "../ds/vector-2d";
 import { drawScaled } from "./transform";

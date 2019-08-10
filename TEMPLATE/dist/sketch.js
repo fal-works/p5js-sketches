@@ -7,33 +7,36 @@
  * @license CC-BY-SA-3.0
  */
 
-(function (p5) {
-  'use strict';
+(function(p5) {
+  "use strict";
 
-  p5 = p5 && p5.hasOwnProperty('default') ? p5['default'] : p5;
+  p5 = p5 && p5.hasOwnProperty("default") ? p5["default"] : p5;
 
   /**
-   * ---- Common environment utility -------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/environment
    */
   /**
    * Finds HTML element by `id`. If not found, returns `document.body`.
    * @param id
    */
-  const getElementOrBody = (id) => document.getElementById(id) || document.body;
+  const getElementOrBody = id => document.getElementById(id) || document.body;
   /**
    * Returns the width and height of `node`.
    * If `node === document.body`, returns the inner width and height of `window`.
    * @param node
    */
-  const getElementSize = (node) => node === document.body
+  const getElementSize = node =>
+    node === document.body
       ? {
           width: window.innerWidth,
           height: window.innerHeight
-      }
+        }
       : node.getBoundingClientRect();
 
   /**
-   * ---- Common array utility -------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/ds/array
    */
   /**
    * Runs `callback` once for each element of `array`.
@@ -42,14 +45,15 @@
    * @param callback
    */
   const loop = (array, callback) => {
-      const arrayLength = array.length;
-      for (let i = 0; i < arrayLength; i += 1) {
-          callback(array[i], i, array);
-      }
+    const arrayLength = array.length;
+    for (let i = 0; i < arrayLength; i += 1) {
+      callback(array[i], i, array);
+    }
   };
 
   /**
-   * ---- p5 shared variables --------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/shared
    */
   /**
    * The shared `p5` instance.
@@ -63,19 +67,20 @@
    * Sets the given `p5` instance to be shared.
    * @param instance
    */
-  const setP5Instance = (instance) => {
-      p = instance;
+  const setP5Instance = instance => {
+    p = instance;
   };
   /**
    * Sets the given `ScaledCanvas` instance to be shared.
    * @param scaledCanvas
    */
-  const setCanvas = (scaledCanvas) => {
-      canvas = scaledCanvas;
+  const setCanvas = scaledCanvas => {
+    canvas = scaledCanvas;
   };
 
   /**
-   * ---- Common bounding box utility ------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/bounding-box
    */
   /**
    * Calculates the scale factor for fitting `nonScaledSize` to `targetSize` keeping the original aspect ratio.
@@ -85,19 +90,23 @@
    * @param fittingOption
    */
   const getScaleFactor = (nonScaledSize, targetSize, fittingOption) => {
-      switch (fittingOption) {
-          default:
-          case "FIT_TO_BOX" :
-              return Math.min(targetSize.width / nonScaledSize.width, targetSize.height / nonScaledSize.height);
-          case "FIT_WIDTH" :
-              return targetSize.width / nonScaledSize.width;
-          case "FIT_HEIGHT" :
-              return targetSize.height / nonScaledSize.height;
-      }
+    switch (fittingOption) {
+      default:
+      case "FIT_TO_BOX" /* FIT_TO_BOX */:
+        return Math.min(
+          targetSize.width / nonScaledSize.width,
+          targetSize.height / nonScaledSize.height
+        );
+      case "FIT_WIDTH" /* FIT_WIDTH */:
+        return targetSize.width / nonScaledSize.width;
+      case "FIT_HEIGHT" /* FIT_HEIGHT */:
+        return targetSize.height / nonScaledSize.height;
+    }
   };
 
   /**
-   * ---- p5.js transformation utility -----------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/transform
    */
   /**
    * Runs `drawCallback` rotated with `angle`,
@@ -108,9 +117,9 @@
    * @param angle
    */
   const drawRotated = (drawCallback, angle) => {
-      p.rotate(angle);
-      drawCallback();
-      p.rotate(-angle);
+    p.rotate(angle);
+    drawCallback();
+    p.rotate(-angle);
   };
   /**
    * Composite of `drawTranslated()` and `drawRotated()`.
@@ -121,9 +130,9 @@
    * @param angle
    */
   const drawTranslatedAndRotated = (drawCallback, offsetX, offsetY, angle) => {
-      p.translate(offsetX, offsetY);
-      drawRotated(drawCallback, angle);
-      p.translate(-offsetX, -offsetY);
+    p.translate(offsetX, offsetY);
+    drawRotated(drawCallback, angle);
+    p.translate(-offsetX, -offsetY);
   };
   /**
    * Runs `drawCallback` scaled with `scaleFactor`,
@@ -134,13 +143,14 @@
    * @param scaleFactor
    */
   const drawScaled = (drawCallback, scaleFactor) => {
-      p.scale(scaleFactor);
-      drawCallback();
-      p.scale(1 / scaleFactor);
+    p.scale(scaleFactor);
+    drawCallback();
+    p.scale(1 / scaleFactor);
   };
 
   /**
-   * ---- p5.js canvas utility -------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/canvas
    */
   /**
    * Runs `p.createCanvas()` with the scaled size that fits to `node`.
@@ -152,23 +162,34 @@
    * @param renderer
    */
   const createScaledCanvas = (node, logicalSize, fittingOption, renderer) => {
-      const maxCanvasSize = getElementSize(typeof node === "string" ? getElementOrBody(node) : node);
-      const scaleFactor = getScaleFactor(logicalSize, maxCanvasSize, fittingOption);
-      const canvas = p.createCanvas(scaleFactor * logicalSize.width, scaleFactor * logicalSize.height, renderer);
-      return {
-          p5Canvas: canvas,
-          scaleFactor: scaleFactor,
-          logicalSize: logicalSize,
-          drawScaled: (drawCallback) => drawScaled(drawCallback, scaleFactor),
-          logicalCenterPosition: {
-              x: logicalSize.width / 2,
-              y: logicalSize.height / 2
-          }
-      };
+    const maxCanvasSize = getElementSize(
+      typeof node === "string" ? getElementOrBody(node) : node
+    );
+    const scaleFactor = getScaleFactor(
+      logicalSize,
+      maxCanvasSize,
+      fittingOption
+    );
+    const canvas = p.createCanvas(
+      scaleFactor * logicalSize.width,
+      scaleFactor * logicalSize.height,
+      renderer
+    );
+    return {
+      p5Canvas: canvas,
+      scaleFactor: scaleFactor,
+      logicalSize: logicalSize,
+      drawScaled: drawCallback => drawScaled(drawCallback, scaleFactor),
+      logicalCenterPosition: {
+        x: logicalSize.width / 2,
+        y: logicalSize.height / 2
+      }
+    };
   };
 
   /**
-   * ---- p5util setup ----------------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/setup
    */
   /**
    * A list of functions that will be called in `p.setup()`.
@@ -176,30 +197,33 @@
   const onSetup = [];
 
   /**
-   * ---- p5util main -----------------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/main
    */
   /**
    * Calls `new p5()` with the given settings information.
    * @param settings
    */
-  const startSketch = (settings) => {
-      const htmlElement = typeof settings.htmlElement === "string"
-          ? getElementOrBody(settings.htmlElement)
-          : settings.htmlElement;
-      new p5((p) => {
-          setP5Instance(p);
-          p.setup = () => {
-              setCanvas(createScaledCanvas(htmlElement, settings.logicalCanvasSize));
-              settings.initialize();
-              loop(onSetup, listener => listener(p));
-              onSetup.length = 0;
-          };
-          settings.setP5Methods(p);
-      }, htmlElement);
+  const startSketch = settings => {
+    const htmlElement =
+      typeof settings.htmlElement === "string"
+        ? getElementOrBody(settings.htmlElement)
+        : settings.htmlElement;
+    new p5(p => {
+      setP5Instance(p);
+      p.setup = () => {
+        setCanvas(createScaledCanvas(htmlElement, settings.logicalCanvasSize));
+        settings.initialize();
+        loop(onSetup, listener => listener(p));
+        onSetup.length = 0;
+      };
+      settings.setP5Methods(p);
+    }, htmlElement);
   };
 
   /**
-   * ---- p5.js pause utility --------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/pause
    */
   let paused = false;
   /**
@@ -207,18 +231,18 @@
    * If already paused, resumes by `p.loop()`.
    */
   const pauseOrResume = () => {
-      if (paused) {
-          p.loop();
-          paused = false;
-      }
-      else {
-          p.noLoop();
-          paused = true;
-      }
+    if (paused) {
+      p.loop();
+      paused = false;
+    } else {
+      p.noLoop();
+      paused = true;
+    }
   };
 
   /**
-   * ---- p5.js pixels utility -------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module common/p5util/pixels
    */
   /**
    * Runs `drawCallback` and `p.loadPixels()`, then returns `p.pixels`.
@@ -226,25 +250,26 @@
    * @param p The p5 instance.
    * @param drawCallback
    */
-  const createPixels = (drawCallback) => {
-      p.push();
-      drawCallback();
-      p.pop();
-      p.loadPixels();
-      return p.pixels;
+  const createPixels = drawCallback => {
+    p.push();
+    drawCallback();
+    p.pop();
+    p.loadPixels();
+    return p.pixels;
   };
   /**
    * Replaces the whole pixels of the canvas.
    * Assigns the given pixels to `p.pixels` and calls `p.updatePixels()`.
    * @param pixels
    */
-  const replacePixels = (pixels) => {
-      p.pixels = pixels;
-      p.updatePixels();
+  const replacePixels = pixels => {
+    p.pixels = pixels;
+    p.updatePixels();
   };
 
   /**
-   * ---- Settings -------------------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module settings
    */
   /**
    * The id of the HTML element to which the canvas should belong.
@@ -258,12 +283,13 @@
    * The logical size of the canvas.
    */
   const LOGICAL_CANVAS_SIZE = {
-      width: 800,
-      height: 800
+    width: 800,
+    height: 800
   };
 
   /**
-   * ---- Constants ------------------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module constants
    */
   const BACKGROUND_COLOR = "#F8F8F8";
   const SQUARE_COLOR = "#202020";
@@ -271,54 +297,59 @@
   const ROTATION_SPEED = 0.05;
 
   /**
-   * ---- Main -----------------------------------------------------------------
+   * -----------------------------------------------------------------------------
+   * @module main
    */
-
+  // ---- variables | functions ----
   let drawBackground;
   const initialize = () => {
-      const backgroundColor = p.color(BACKGROUND_COLOR);
-      const backgroundPixels = createPixels(() => p.background(backgroundColor));
-      drawBackground = replacePixels.bind(null, backgroundPixels);
-      p.noStroke();
-      p.fill(SQUARE_COLOR);
-      p.rectMode(p.CENTER);
+    const backgroundColor = p.color(BACKGROUND_COLOR);
+    const backgroundPixels = createPixels(() => p.background(backgroundColor));
+    drawBackground = replacePixels.bind(null, backgroundPixels);
+    p.noStroke();
+    p.fill(SQUARE_COLOR);
+    p.rectMode(p.CENTER);
   };
-
+  // ---- draw ----
   const drawSquare = () => p.square(0, 0, SQUARE_SIZE);
   const drawSketch = () => {
-      const center = canvas.logicalCenterPosition;
-      drawTranslatedAndRotated(drawSquare, center.x, center.y, p.frameCount * ROTATION_SPEED);
+    const center = canvas.logicalCenterPosition;
+    drawTranslatedAndRotated(
+      drawSquare,
+      center.x,
+      center.y,
+      p.frameCount * ROTATION_SPEED
+    );
   };
   const draw = () => {
-      drawBackground();
-      canvas.drawScaled(drawSketch);
+    drawBackground();
+    canvas.drawScaled(drawSketch);
   };
-
-  const mousePressed = () => { };
+  // ---- UI ----
+  const mousePressed = () => {};
   const keyTyped = () => {
-      switch (p.key) {
-          case "p":
-              pauseOrResume();
-              break;
-          case "s":
-              p.save("image.png");
-              break;
-          case "r":
-              break;
-      }
+    switch (p.key) {
+      case "p":
+        pauseOrResume();
+        break;
+      case "s":
+        p.save("image.png");
+        break;
+      case "r":
+        break;
+    }
   };
-
-  const setP5Methods = (p) => {
-      p.draw = draw;
-      p.mousePressed = mousePressed;
-      p.keyTyped = keyTyped;
+  // ---- start sketch ----
+  const setP5Methods = p => {
+    p.draw = draw;
+    p.mousePressed = mousePressed;
+    p.keyTyped = keyTyped;
   };
   startSketch({
-      htmlElement: HTML_ELEMENT,
-      logicalCanvasSize: LOGICAL_CANVAS_SIZE,
-      initialize,
-      setP5Methods
+    htmlElement: HTML_ELEMENT,
+    logicalCanvasSize: LOGICAL_CANVAS_SIZE,
+    initialize,
+    setP5Methods
   });
-
-}(p5));
+})(p5);
 //# sourceMappingURL=sketch.js.map

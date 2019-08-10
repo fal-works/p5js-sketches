@@ -23,8 +23,8 @@ module.exports = {
     "@typescript-eslint"
   ],
   "rules": {
-    "@typescript-eslint/explicit-function-return-type": "off",
     "no-console": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-parameter-properties": "off"
   }
 };

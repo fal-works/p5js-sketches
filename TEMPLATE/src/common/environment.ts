@@ -1,8 +1,9 @@
 /**
- * ---- Common environment utility -------------------------------------------
+ * -----------------------------------------------------------------------------
+ * @module common/environment
  */
 
-import { RectangleSize } from "./dataTypes";
+import { RectangleSize } from "./data-types";
 
 /**
  * Finds HTML element by `id`. If not found, returns `document.body`.
