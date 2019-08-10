@@ -2,90 +2,116 @@
  * ---- Common timer utility ------------------------------------------------
  */
 
-0;
+import { loop } from "./ds/array";
+import { Mutable } from "./utility-types";
 
-export interface Timer {
-  step: () => void;
-  isCompleted: () => boolean;
-  reset: () => void;
-  getProgressRatio: () => number;
-  getCount: () => number;
+type Listener = (timerUnit: Unit) => void;
+
+export interface Unit {
+  readonly duration: number;
+  readonly progressRatioChangeRate: number;
+  readonly onProgress: Listener;
+  readonly onComplete: Listener;
+  count: number;
+  progressRatio: number;
+  isCompleted: boolean;
 }
 
-export const createTimer = (duration: number): Timer => {
-  let count = 0;
+const emptyListener: Listener = () => {};
 
-  const step = () => {
-    count += 1;
-  };
-  const isCompleted = () => count === duration;
-  const reset = () => {
-    count = 0;
-  };
-  const getProgressRatio = () => count / duration;
-  const getCount = () => count;
-
-  return {
-    step,
-    isCompleted,
-    reset,
-    getProgressRatio,
-    getCount
-  };
+export const reset = (timerUnit: Unit) => {
+  timerUnit.count = 0;
+  timerUnit.progressRatio = 0;
+  timerUnit.isCompleted = false;
 };
 
-export interface TimerCallback {
-  (timer: Timer): void;
-}
+export const step = (timerUnit: Unit) => {
+  const { isCompleted, count, duration, progressRatioChangeRate } = timerUnit;
 
-export interface Phase {
-  duration: number;
-  callback: TimerCallback;
-}
+  if (isCompleted) return;
 
-export interface TimerChain {
-  step: () => void;
-  runPhase: () => void;
-}
-
-export const createTimerChain = (
-  phases: Phase[],
-  loopCallback: () => void = () => {}
-): TimerChain => {
-  let phaseIndex = 0;
-  let currentCallback = phases[0].callback;
-  const phaseLength = phases.length;
-  const timers: Timer[] = [];
-  const callbacks: TimerCallback[] = [];
-  for (let i = 0, len = phases.length; i < len; i += 1) {
-    timers.push(createTimer(phases[i].duration));
-    callbacks.push(phases[i].callback);
+  if (count >= duration) {
+    timerUnit.progressRatio = 1;
+    timerUnit.onProgress(timerUnit);
+    timerUnit.isCompleted = true;
+    timerUnit.onComplete(timerUnit);
+    return;
   }
-  let currentTimer = timers[0];
 
-  const step = () => {
-    currentTimer.step();
+  timerUnit.onProgress(timerUnit);
+  timerUnit.count += 1;
+  timerUnit.progressRatio += progressRatioChangeRate;
+};
 
-    if (currentTimer.isCompleted()) {
-      currentTimer.reset();
-      phaseIndex += 1;
-
-      if (phaseIndex >= phaseLength) {
-        phaseIndex = 0;
-        loopCallback();
-      }
-
-      currentTimer = timers[phaseIndex];
-      currentCallback = phases[phaseIndex].callback;
-    }
-  };
-
-  const runPhase = () => {
-    currentCallback(currentTimer);
-  };
-
+export const create = (
+  duration: number,
+  onProgress: Listener = emptyListener,
+  onComplete: Listener = emptyListener
+): Unit => {
   return {
-    step,
-    runPhase
+    duration,
+    progressRatioChangeRate: 1 / duration,
+    onProgress,
+    onComplete,
+    count: 0,
+    progressRatio: 0,
+    isCompleted: false
   };
 };
+
+export const dummyUnit = create(0);
+
+export const addOnComplete = (timerUnit: Unit, onComplete: Listener): Unit => {
+  const newUnit: Mutable<Unit> = Object.assign({}, timerUnit);
+  newUnit.onComplete = () => {
+    timerUnit.onComplete(newUnit);
+    onComplete(newUnit);
+  };
+  return newUnit;
+};
+
+export const setChainIndex = (chain: Chain, index: number) => {
+  chain.index = index;
+  chain.current = chain.units[index];
+};
+
+export const resetChain = (chain: Chain) => {
+  loop(chain.units, reset);
+  setChainIndex(chain, 0);
+};
+
+export const shiftChain = (chain: Chain) =>
+  setChainIndex(chain, chain.index + 1);
+
+export interface Chain {
+  readonly units: readonly Unit[];
+  current: Unit;
+  index: number;
+}
+
+export const chain = (timers: Unit[], looped: boolean = false) => {
+  // eslint-disable-next-line prefer-const
+  let newChain: Chain;
+  const newTimers: Unit[] = new Array(timers.length);
+
+  const shift = () => shiftChain(newChain);
+  const lastIndex = timers.length - 1;
+  for (let i = 0; i < lastIndex; i += 1) {
+    newTimers[i] = addOnComplete(timers[i], shift);
+  }
+  if (!looped) newTimers[lastIndex] = timers[lastIndex];
+  else
+    newTimers[lastIndex] = addOnComplete(timers[lastIndex], () =>
+      resetChain(newChain)
+    );
+
+  newChain = {
+    units: newTimers,
+    current: newTimers[0],
+    index: 0
+  };
+
+  return newChain;
+};
+
+export const dummyChain = chain([dummyUnit]);

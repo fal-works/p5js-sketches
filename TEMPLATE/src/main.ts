@@ -1,63 +1,87 @@
 /**
- * ---- Main sketch ----------------------------------------------------------
+ * ---- Main -----------------------------------------------------------------
  */
 
-import { getElementOrBody } from "./common/environment";
+import p5 from "p5";
 
-import { createScaledCanvas, ScaledCanvas } from "./p5util/canvas";
-import { createPixels } from "./p5util/drawing";
+import { startSketch } from "./common/p5util/main";
+import { p, canvas } from "./common/p5util/shared";
 
-const HTML_ELEMENT = getElementOrBody("Title");
+import { pauseOrResume } from "./common/p5util/pause";
+import { createPixels, replacePixels } from "./common/p5util/pixels";
+import { drawTranslatedAndRotated } from "./common/p5util/transform";
 
-const sketch = (p: p5): void => {
-  // ---- variables
-  let canvas: ScaledCanvas;
-  let backgroundPixels: number[];
-  let backgroundColor: p5.Color;
+import { HTML_ELEMENT, LOGICAL_CANVAS_SIZE } from "./settings";
+import * as constants from "./constants";
 
-  // ---- functions
+// ---- variables | functions ----
 
-  // ---- initialize & reset
-  function initializeStyle() {}
+let drawBackground: () => void;
 
-  function initializeData() {}
+// ---- reset & initialize ----
 
-  function reset() {}
+const reset = (): void => {};
 
-  // ---- core drawing process
-  function drawSketch(): void {}
+const initialize = (): void => {
+  const backgroundColor = p.color(constants.BACKGROUND_COLOR);
+  const backgroundPixels = createPixels(() => p.background(backgroundColor));
+  drawBackground = replacePixels.bind(null, backgroundPixels);
 
-  // ---- setup & draw etc.
-  p.preload = () => {};
+  p.noStroke();
+  p.fill(constants.SQUARE_COLOR);
+  p.rectMode(p.CENTER);
 
-  p.setup = () => {
-    const nonScaledSize = { width: 800, height: 800 };
-    canvas = createScaledCanvas(p, HTML_ELEMENT, nonScaledSize);
-    backgroundColor = p.color(252, 252, 255);
-    backgroundPixels = createPixels(p, (p: p5) => {
-      p.background(backgroundColor);
-    });
-
-    initializeStyle();
-    initializeData();
-    reset();
-  };
-
-  p.draw = () => {
-    p.pixels = backgroundPixels;
-    p.updatePixels();
-
-    canvas.drawScaled(drawSketch);
-  };
-
-  p.mousePressed = () => {
-    reset();
-  };
-
-  p.keyTyped = () => {
-    if (p.key === "p") p.noLoop();
-    if (p.key === "s") p.save("image.png");
-  };
+  reset();
 };
 
-new p5(sketch, HTML_ELEMENT);
+// ---- draw ----
+
+const drawSquare = () => p.square(0, 0, constants.SQUARE_SIZE);
+
+const drawSketch = (): void => {
+  const center = canvas.logicalCenterPosition;
+  drawTranslatedAndRotated(
+    drawSquare,
+    center.x,
+    center.y,
+    p.frameCount * constants.ROTATION_SPEED
+  );
+};
+
+const draw = (): void => {
+  drawBackground();
+  canvas.drawScaled(drawSketch);
+};
+
+// ---- UI ----
+
+const mousePressed = (): void => {};
+
+const keyTyped = (): void => {
+  switch (p.key) {
+    case "p":
+      pauseOrResume();
+      break;
+    case "s":
+      p.save("image.png");
+      break;
+    case "r":
+      reset();
+      break;
+  }
+};
+
+// ---- start sketch ----
+
+const setP5Methods = (p: p5): void => {
+  p.draw = draw;
+  p.mousePressed = mousePressed;
+  p.keyTyped = keyTyped;
+};
+
+startSketch({
+  htmlElement: HTML_ELEMENT,
+  logicalCanvasSize: LOGICAL_CANVAS_SIZE,
+  initialize,
+  setP5Methods
+});

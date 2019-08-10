@@ -2,39 +2,50 @@
  * ---- Common easing utility ------------------------------------------------
  */
 
-0;
+import { sq, cubic } from "./math";
 
 /**
  * Linear easing function.
  * @param ratio
  */
-export function easeLinear(ratio: number) {
-  return ratio;
-}
+export const easeLinear = (ratio: number): number => ratio;
+
+/**
+ * easeInQuad.
+ * @param ratio
+ */
+export const easeInQuad = sq;
 
 /**
  * easeOutQuad.
  * @param ratio
  */
-export function easeOutQuad(ratio: number) {
-  return -Math.pow(ratio - 1, 2) + 1;
-}
+export const easeOutQuad = (ratio: number): number => -sq(ratio - 1) + 1;
+
+/**
+ * easeInCubic.
+ * @param ratio
+ */
+export const easeInCubic = cubic;
 
 /**
  * easeOutCubic.
  * @param ratio
  */
-export function easeOutCubic(ratio: number) {
-  return Math.pow(ratio - 1, 3) + 1;
-}
+export const easeOutCubic = (ratio: number): number => cubic(ratio - 1) + 1;
+
+/**
+ * easeInQuart.
+ * @param ratio
+ */
+export const easeInQuart = (ratio: number): number => Math.pow(ratio, 4);
 
 /**
  * easeOutQuart.
  * @param ratio
  */
-export function easeOutQuart(ratio: number) {
-  return -Math.pow(ratio - 1, 4) + 1;
-}
+export const easeOutQuart = (ratio: number): number =>
+  -Math.pow(ratio - 1, 4) + 1;
 
 const EASE_OUT_BACK_DEFAULT_COEFFICIENT = 1.70158;
 
@@ -42,15 +53,15 @@ const EASE_OUT_BACK_DEFAULT_COEFFICIENT = 1.70158;
  * easeOutBack.
  * @param ratio
  */
-export function easeOutBack(ratio: number) {
+export const easeOutBack = (ratio: number): number => {
   const r = ratio - 1;
 
   return (
-    (EASE_OUT_BACK_DEFAULT_COEFFICIENT + 1) * Math.pow(r, 3) +
-    EASE_OUT_BACK_DEFAULT_COEFFICIENT * Math.pow(r, 2) +
+    (EASE_OUT_BACK_DEFAULT_COEFFICIENT + 1) * cubic(r) +
+    EASE_OUT_BACK_DEFAULT_COEFFICIENT * sq(r) +
     1
   );
-}
+};
 
 /**
  * Easing function.

@@ -2,7 +2,7 @@
  * ---- Common data types ----------------------------------------------------
  */
 
-0; // dummy code for VSCode to ignore file header
+undefined; // dummy code for VSCode to ignore file header
 
 /**
  * Object that has width and height of a rectangle.
@@ -14,7 +14,15 @@ export interface RectangleSize {
 
 export type ArrayOrValue<T> = T | T[];
 
-export interface NumberRange {
-  readonly start: number;
-  readonly end: number;
+/**
+ * A range between two numbers.
+ */
+export interface MutableRange {
+  start: number;
+  end: number;
 }
+
+/**
+ * A range between two numbers.
+ */
+export type Range = Readonly<MutableRange>;

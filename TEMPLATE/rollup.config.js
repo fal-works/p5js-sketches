@@ -1,9 +1,12 @@
-import resolve from "rollup-plugin-node-resolve";
 import typescript from "rollup-plugin-typescript2";
 import cleanup from "rollup-plugin-cleanup";
 
 const title = "Title";
+const comment = "Website => https://www.fal-works.com/";
 const version = "0.1.0";
+const copyright = "2019 FAL";
+const author = "FAL <contact@fal-works.com>";
+const license = "CC-BY-SA-3.0";
 
 const hasAdditionalBanner = false;
 const additionalBanner = `/**
@@ -11,14 +14,14 @@ const additionalBanner = `/**
  */
 `;
 
-const myBanner =
+const bannerComment =
   `/**
  * ${title}.
- * Website => https://www.fal-works.com/
- * @copyright 2019 FAL
- * @author FAL <falworks.contact@gmail.com>
+ * ${comment}
+ * @copyright ${copyright}
+ * @author ${author}
  * @version ${version}
- * @license CC-BY-SA-3.0
+ * @license ${license}
  */
 ` + (hasAdditionalBanner ? "\n" + additionalBanner : "");
 
@@ -28,24 +31,21 @@ export default {
     file: "dist/sketch.js",
     format: "iife",
     sourcemap: true,
+    banner: bannerComment,
+    preferConst: true,
     globals: {
-      // p5ex: "p5ex"
-    },
-    banner: myBanner
+      p5: "p5"
+    }
   },
-  // external: ["p5ex"],
+  external: ["p5"],
   plugins: [
-    resolve({
-      extensions: [".js", ".mjs"],
-      modulesOnly: true
-    }),
     typescript({
       useTsconfigDeclarationDir: true
     }),
     cleanup({
       comments: [/^\*\*(?![\s\S]*@module\b)/],
       maxEmptyLines: 2,
-      extensions: [".ts", ".mjs"]
+      extensions: [".js", ".ts", ".mjs"]
     })
   ]
 };

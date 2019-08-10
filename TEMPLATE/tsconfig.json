@@ -3,15 +3,12 @@
         "moduleResolution": "node",
         "target": "es2015",
         "sourceMap": true,
-        "allowJs": true,
-        "preserveConstEnums": true,
-        "alwaysStrict": true,
-        "strictNullChecks": true,
+        "preserveConstEnums": false,
         "noEmitOnError": true,
-        "noUnusedLocals": true
-    },
-    "include": [
-        "src/main.ts",
-        "./p5.d.ts"
-    ]
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
+    }
 }

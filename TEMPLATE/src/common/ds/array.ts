@@ -2,17 +2,17 @@
  * ---- Common array utility -------------------------------------------------
  */
 
-import { ArrayOrValue } from "./dataTypes";
+import { ArrayOrValue } from "../dataTypes";
 
-export function loopLimited<T>(
-  array: T[],
-  callback: (currentValue: T, index?: number, array?: T[]) => any,
+export const loopLimited = <T>(
+  array: readonly T[],
+  callback: (currentValue: T, index?: number, array?: readonly T[]) => void,
   arrayLength: number
-) {
+): void => {
   for (let i = 0; i < arrayLength; i += 1) {
     callback(array[i], i, array);
   }
-}
+};
 
 /**
  * Runs `callback` once for each element of `array`.
@@ -20,59 +20,59 @@ export function loopLimited<T>(
  * @param array
  * @param callback
  */
-export function loop<T>(
-  array: T[],
-  callback: (currentValue: T, index?: number, array?: T[]) => any
-): void {
+export const loop = <T>(
+  array: readonly T[],
+  callback: (currentValue: T, index?: number, array?: readonly T[]) => void
+): void => {
   const arrayLength = array.length;
 
   for (let i = 0; i < arrayLength; i += 1) {
     callback(array[i], i, array);
   }
-}
+};
 
-export function loopBackwardsLimited<T>(
-  array: T[],
-  callback: (currentValue: T, index?: number, array?: T[]) => any,
+export const loopBackwardsLimited = <T>(
+  array: readonly T[],
+  callback: (currentValue: T, index?: number, array?: readonly T[]) => void,
   arrayLength: number
-): void {
+): void => {
   if (arrayLength < 0)
     throw new RangeError(`arrayLength ${arrayLength} is invalid.`);
 
   while (arrayLength--) {
     callback(array[arrayLength], arrayLength, array);
   }
-}
+};
 
 /**
  * Runs `callback` once for each element of `array` in descending order.
  * @param array
  * @param callback
  */
-export function loopBackwards<T>(
-  array: T[],
-  callback: (currentValue: T, index?: number, array?: T[]) => any
-): void {
+export const loopBackwards = <T>(
+  array: readonly T[],
+  callback: (currentValue: T, index?: number, array?: readonly T[]) => void
+): void => {
   let arrayLength = array.length;
 
   while (arrayLength--) {
     callback(array[arrayLength], arrayLength, array);
   }
-}
+};
 
-export function nestedLoopJoinLimited<T, U>(
-  array: T[],
-  otherArray: U[],
-  callback: (element: T, otherElement: U) => any,
+export const nestedLoopJoinLimited = <T, U>(
+  array: readonly T[],
+  otherArray: readonly U[],
+  callback: (element: T, otherElement: U) => void,
   arrayLength: number,
   otherArrayLength: number
-): void {
+): void => {
   for (let i = 0; i < arrayLength; i += 1) {
     for (let k = 0; k < otherArrayLength; k += 1) {
       callback(array[i], otherArray[k]);
     }
   }
-}
+};
 
 /**
  * Joins two arrays and runs `callback` once for each joined pair.
@@ -80,11 +80,11 @@ export function nestedLoopJoinLimited<T, U>(
  * @param otherArray
  * @param callback
  */
-export function nestedLoopJoin<T, U>(
-  array: T[],
-  otherArray: U[],
-  callback: (element: T, otherElement: U) => any
-): void {
+export const nestedLoopJoin = <T, U>(
+  array: readonly T[],
+  otherArray: readonly U[],
+  callback: (element: T, otherElement: U) => void
+): void => {
   nestedLoopJoinLimited(
     array,
     otherArray,
@@ -92,39 +92,39 @@ export function nestedLoopJoin<T, U>(
     array.length,
     otherArray.length
   );
-}
+};
 
-export function roundRobinLimited<T>(
-  array: T[],
-  callback: (element: T, otherElement: T) => any,
+export const roundRobinLimited = <T>(
+  array: readonly T[],
+  callback: (element: T, otherElement: T) => void,
   arrayLength: number
-): void {
+): void => {
   const iLen = arrayLength - 1;
   for (let i = 0; i < iLen; i += 1) {
     for (let k = i + 1; k < arrayLength; k += 1) {
       callback(array[i], array[k]);
     }
   }
-}
+};
 
 /**
  * Runs `callback` once for each pair within `array`.
  * @param array
  * @param callback
  */
-export function roundRobin<T>(
-  array: T[],
-  callback: (element: T, otherElement: T) => any
-): void {
-  roundRobinLimited(array, callback, array.length);
-}
+export const roundRobin = <T>(
+  array: readonly T[],
+  callback: (element: T, otherElement: T) => void
+): void => roundRobinLimited(array, callback, array.length);
 
 /**
  * Creates a new 1-dimensional array by concatenating sub-array elements of a 2-dimensional array.
  * @param arrays
  * @return A new 1-dimensional array.
  */
-export const flatNaive = <T>(arrays: T[][]): T[] => [].concat.apply([], arrays);
+// eslint-disable-next-line prefer-spread
+export const flatNaive = <T>(arrays: readonly T[][]): readonly T[] =>
+  ([] as T[]).concat(...arrays);
 
 /**
  * An alternative to `Array.prototype.flat()`.

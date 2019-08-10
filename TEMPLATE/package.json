@@ -4,20 +4,20 @@
   "version": "0.1.0",
   "author": "FAL",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
+    "@types/p5": "^0.7.3",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-prettier": "^3.1.0",
     "p5": "^0.9.0",
     "prettier": "^1.18.2",
-    "rollup": "^1.14.4",
+    "rollup": "^1.18.0",
     "rollup-plugin-cleanup": "^3.1.1",
-    "rollup-plugin-node-resolve": "^5.0.1",
-    "rollup-plugin-typescript2": "^0.21.1",
-    "typescript": "^3.5.1",
-    "uglify-es": "^3.3.9"
+    "rollup-plugin-typescript2": "^0.21.2",
+    "typescript": "^3.5.3",
+    "terser": "^4.1.3"
   },
   "files": [
     "dist"
@@ -26,11 +26,10 @@
   "main": "dist/sketch.js",
   "private": true,
   "scripts": {
-    "build": "npm-run-all rollup eslint prettier uglify",
-    "rollup": "rollup -c",
-    "test": "",
+    "build": "npm-run-all rollup eslint prettier terser",
     "eslint": "eslint --fix ./dist/sketch.js",
     "prettier": "prettier --write ./dist/sketch.js",
-    "uglify": "uglifyjs ./dist/sketch.js -c -m reserved=['createTimer'] -o ./dist/sketch.min.js --comments --ecma 5"
+    "rollup": "rollup -c",
+    "terser": "terser ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments --ecma 6"
   }
 }

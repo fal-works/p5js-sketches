@@ -2,7 +2,7 @@
  * ---- Common random utility ------------------------------------------------
  */
 
-import { NumberRange } from "./dataTypes";
+import { Range } from "./dataTypes";
 
 /**
  * Returns random value from `start` up to (but not including) `end`.
@@ -18,7 +18,13 @@ export const between = (start: number, end: number) =>
  * @param range
  * @return A random value.
  */
-export const inRange = (range: NumberRange) => between(range.start, range.end);
+export const inRange = (range: Range) => between(range.start, range.end);
+
+export const betweenPow = (start: number, end: number, exponent: number) =>
+  start + Math.pow(Math.random(), exponent) * (end - start);
+
+export const inRangePow = (range: Range, exponent: number) =>
+  betweenPow(range.start, range.end, exponent);
 
 /**
  * Returns random integer from 0 up to (but not including) `maxInt`.
@@ -51,7 +57,8 @@ export const signed = (n: number) => (Math.random() < 0.5 ? n : -n);
  * @param array
  * @return A random element.
  */
-export const fromArray = <T>(array: T[]) => array[pickInt(array.length)];
+export const fromArray = <T>(array: readonly T[]) =>
+  array[pickInt(array.length)];
 
 /**
  * Removes and returns one element from `array` randomly.
@@ -59,6 +66,8 @@ export const fromArray = <T>(array: T[]) => array[pickInt(array.length)];
  * @param array
  * @return A random element.
  */
-export function removeFromArray<T>(array: T[]): T {
-  return array.splice(pickInt(array.length), 1)[0];
-}
+export const removeFromArray = <T>(array: T[]): T =>
+  array.splice(pickInt(array.length), 1)[0];
+
+export const bool = (probability: number): boolean =>
+  Math.random() < probability;
