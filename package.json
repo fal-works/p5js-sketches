@@ -12,6 +12,8 @@
   "author": "FAL <falworks.contact@gmail.com> (https://github.com/fal-works)",
   "homepage": "https://github.com/fal-works/p5js-sketches#readme",
   "dependencies": {
+    "@fal-works/creative-coding-core": "^0.1.4",
+    "@fal-works/p5-extension": "^0.1.3",
     "p5": "^0.9.0"
   },
   "devDependencies": {
