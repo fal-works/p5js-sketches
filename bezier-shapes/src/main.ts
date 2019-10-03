@@ -80,13 +80,10 @@ const reset = (): void => {
 
   const createDrawShapeTranslated = (column: number, row: number) => {
     const drawShape = createDrawShape();
+    const x = (column + 1) * xInterval;
+    const y = (row + 1) * yInterval;
 
-    return () =>
-      drawTranslated(
-        drawShape,
-        (column + 1) * xInterval,
-        (row + 1) * yInterval
-      );
+    return () => drawTranslated(drawShape, x, y);
   };
 
   for (let column = 0; column < gridSize; column += 1) {

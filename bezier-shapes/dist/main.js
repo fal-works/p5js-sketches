@@ -78,12 +78,9 @@
     };
     const createDrawShapeTranslated = (column, row) => {
       const drawShape = createDrawShape();
-      return () =>
-        p5Extension.drawTranslated(
-          drawShape,
-          (column + 1) * xInterval,
-          (row + 1) * yInterval
-        );
+      const x = (column + 1) * xInterval;
+      const y = (row + 1) * yInterval;
+      return () => p5Extension.drawTranslated(drawShape, x, y);
     };
     for (let column = 0; column < gridSize; column += 1) {
       for (let row = 0; row < gridSize; row += 1) {
