@@ -12,26 +12,26 @@
   "author": "FAL <falworks.contact@gmail.com> (https://github.com/fal-works)",
   "homepage": "https://github.com/fal-works/p5js-sketches#readme",
   "dependencies": {
-    "@fal-works/creative-coding-core": "^0.1.4",
-    "@fal-works/p5-extension": "^0.1.3",
     "p5": "^0.9.0"
   },
   "devDependencies": {
-    "@types/p5": "^0.7.3",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-node": "^9.1.0",
-    "eslint-plugin-prettier": "^3.1.0",
+    "@fal-works/creative-coding-core": "^0.1.7",
+    "@fal-works/p5-extension": "^0.1.7",
+    "@types/p5": "^0.9.0",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "p5ex": "^0.5.7",
     "prettier": "^1.18.2",
-    "rollup": "^1.14.4",
+    "rollup": "^1.25.1",
     "rollup-plugin-cleanup": "^3.1.1",
-    "rollup-plugin-node-resolve": "^5.0.1",
-    "rollup-plugin-typescript2": "^0.21.1",
-    "terser": "^4.1.3",
-    "typescript": "^3.5.1",
-    "uglify-es": "^3.3.7"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.24.3",
+    "terser": "^4.3.9",
+    "typescript": "^3.6.4",
+    "uglify-es": "^3.3.9"
   }
 }
