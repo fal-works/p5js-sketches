@@ -5,3 +5,4 @@ package-lock.json
 note.txt
 tmp/
 private-assets/
+/package.json
