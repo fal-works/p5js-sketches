@@ -3,7 +3,7 @@ import * as p5ex from "@fal-works/p5-extension";
 
 import { HTML_ELEMENT, LOGICAL_CANVAS_SIZE } from "./settings";
 import * as Contours from "./contours";
-import { p, canvas, Mouse } from "./global";
+import { p, canvas, Mouse, RectangleRegion } from "./global";
 
 const { startSketch, createPixels, replaceCanvasPixels, pauseOrResume } = p5ex;
 
@@ -78,6 +78,15 @@ const keyTyped = (): void => {
   }
 };
 
+const mouseIsOnCanvas = () =>
+  RectangleRegion.containsPoint(canvas.logicalRegion, Mouse.logicalPosition, 0);
+
+const mousePressed = () => {
+  Contours.gather();
+
+  if (mouseIsOnCanvas()) return false;
+};
+
 // ---- start sketch ----
 
 const setP5Methods = (p: p5): void => {
@@ -85,7 +94,7 @@ const setP5Methods = (p: p5): void => {
   p.keyTyped = keyTyped;
   p.mouseMoved = Mouse.updatePosition;
   p.mouseDragged = Mouse.updatePosition;
-  p.mousePressed = Contours.gather;
+  p.mousePressed = mousePressed;
   p.mouseReleased = Contours.release;
 };
 

@@ -6121,7 +6121,8 @@
     Kinematics,
     SimpleDynamics,
     Rotation,
-    Gravitation
+    Gravitation,
+    RectangleRegion: RectangleRegion$1
   } = CCC$1;
   const { onSetup: onSetup$1, Mouse } = p5ex;
   /**
@@ -6346,12 +6347,22 @@
         break;
     }
   };
+  const mouseIsOnCanvas = () =>
+    RectangleRegion$1.containsPoint(
+      canvas$1.logicalRegion,
+      Mouse.logicalPosition,
+      0
+    );
+  const mousePressed = () => {
+    gather();
+    if (mouseIsOnCanvas()) return false;
+  };
   const setP5Methods = p => {
     p.draw = draw$2;
     p.keyTyped = keyTyped;
     p.mouseMoved = Mouse.updatePosition;
     p.mouseDragged = Mouse.updatePosition;
-    p.mousePressed = gather;
+    p.mousePressed = mousePressed;
     p.mouseReleased = release;
   };
   startSketch$1({

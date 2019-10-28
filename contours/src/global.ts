@@ -12,7 +12,8 @@ export const {
   Kinematics,
   SimpleDynamics,
   Rotation,
-  Gravitation
+  Gravitation,
+  RectangleRegion
 } = CCC;
 
 export const { onSetup, Mouse } = p5ex;
