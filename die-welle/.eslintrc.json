@@ -1,0 +1,51 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2015,
+    "sourceType": "module"
+  },
+  "overrides": [
+    {
+      "files": ["dist/*.js"],
+      "globals": {
+        "p5": "readonly",
+        "CreativeCodingCore": "readonly",
+        "p5ex": "readonly"
+      },
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "rules": {
+        "no-prototype-builtins": "off",
+        "no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["src/**/*.ts"],
+      "extends": [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier/@typescript-eslint"
+      ],
+      "globals": {},
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-parameter-properties": "off"
+      }
+    }
+  ]
+}
