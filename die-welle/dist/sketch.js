@@ -4148,26 +4148,12 @@
    * ---- Common ----------------------------------------------------------------
    */
   const {
-    ArrayList: ArrayList$1,
-    ArrayUtility: ArrayUtility$1,
-    Random: Random$1,
-    Timer
-  } = CCC;
-  const {
     square: square$1,
     sin: sin$2,
     createMap: createNumericMap,
     floor: floor$1
   } = numeric;
   const { easeOutQuad: easeOutQuad$1 } = easing;
-  const {
-    onSetup: onSetup$1,
-    hsvColor: hsvColor$1,
-    reverseColor: reverseColor$1,
-    Noise,
-    translate: translate$1,
-    undoTranslate: undoTranslate$1
-  } = p5ex;
   const { width, height } = LOGICAL_CANVAS_SIZE;
   const halfHeight = height / 2;
   const MARGIN = 100;
@@ -4177,14 +4163,14 @@
    * Shared p5 instance.
    */
   let p$1;
-  onSetup$1.push(p5Instance => {
+  onSetup.push(p5Instance => {
     p$1 = p5Instance;
   });
   /**
    * Shared canvas instance.
    */
   let canvas$1;
-  onSetup$1.push(() => {
+  onSetup.push(() => {
     canvas$1 = canvas;
   });
 
@@ -4208,8 +4194,8 @@
     return {
       x,
       y,
-      noiseX: Noise.withChangeRate(0.008, noiseOffsetX),
-      noiseY: Noise.withChangeRate(0.008, noiseOffsetY)
+      noiseX: noise.withChangeRate(0.008, noiseOffsetX),
+      noiseY: noise.withChangeRate(0.008, noiseOffsetY)
     };
   };
   const update$2 = vertex => {
@@ -4219,7 +4205,7 @@
   const xToRadians = createNumericMap(0, width, 0, Math.PI);
   const yFactor = x =>
     x > 0 && x < width ? square$1(sin$2(xToRadians(x))) : 0;
-  const noiseAverage = Noise.AVERAGE;
+  const noiseAverage = noise.AVERAGE;
   const draw = vertex => {
     const x = vertex.x + 140 * (vertex.noiseX() - noiseAverage);
     const y = vertex.y + 140 * (vertex.noiseY() - noiseAverage);
@@ -4229,22 +4215,22 @@
   /**
    * ---- Vertices --------------------------------------------------------------
    */
-  const create$d = () => ArrayList$1.create(32);
+  const create$d = () => arrayList.create(32);
   const reset$1 = vertices => {
-    ArrayList$1.clear(vertices);
+    arrayList.clear(vertices);
     [0.25, 0.5, 0.75, 1].forEach(factor =>
-      ArrayList$1.add(vertices, create$c(factor * width, 0))
+      arrayList.add(vertices, create$c(factor * width, 0))
     );
   };
-  const update$3 = vertices => ArrayList$1.removeShiftAll(vertices, update$2);
+  const update$3 = vertices => arrayList.removeShiftAll(vertices, update$2);
   const addNewVertex = (vertices, y, noiseOffsetX, noiseOffsetY) =>
-    ArrayList$1.add(vertices, create$c(RIGHT_X, y, noiseOffsetX, noiseOffsetY));
+    arrayList.add(vertices, create$c(RIGHT_X, y, noiseOffsetX, noiseOffsetY));
   const draw$1 = vertices => {
     p$1.beginShape();
     p$1.curveVertex(LEFT_X - 20, 0);
     p$1.curveVertex(LEFT_X - 10, 0);
     p$1.curveVertex(LEFT_X, 0);
-    ArrayList$1.loop(vertices, draw);
+    arrayList.loop(vertices, draw);
     p$1.curveVertex(RIGHT_X, 0);
     p$1.curveVertex(RIGHT_X + 10, 0);
     p$1.curveVertex(RIGHT_X + 20, 0);
@@ -4255,10 +4241,10 @@
    * ---- Wave ------------------------------------------------------------------
    */
   let colors;
-  onSetup$1.push(() => {
-    colors = ArrayUtility$1.createIntegerSequence(360).map(hue =>
-      reverseColor$1(hsvColor$1(hue, 1, 0.8, 96))
-    );
+  onSetup.push(() => {
+    colors = arrayUtility
+      .createIntegerSequence(360)
+      .map(hue => reverseColor(hsvColor(hue, 1, 0.8, 96)));
   });
   const getColor = hue => colors[floor$1(hue) % 360];
   const create$e = hue => {
@@ -4287,11 +4273,11 @@
   let positiveY = false;
   const addNewVertex$1 = waveList => {
     const yFactor =
-      (positiveY ? 1 : -1) * Random$1.valueCurved(easeOutQuad$1, 0.7);
+      (positiveY ? 1 : -1) * random$1.valueCurved(easeOutQuad$1, 0.7);
     const y = yFactor * halfHeight;
-    const noiseOffsetX = Random$1.value(4096);
-    const noiseOffsetY = Random$1.value(4096);
-    ArrayList$1.loop(waveList, (wave, index) => {
+    const noiseOffsetX = random$1.value(4096);
+    const noiseOffsetY = random$1.value(4096);
+    arrayList.loop(waveList, (wave, index) => {
       const additionalOffset = index * NOISE_OFFSET_INTERVAL;
       addNewVertex(
         wave.vertices,
@@ -4303,13 +4289,13 @@
     positiveY = !positiveY;
   };
   const create$f = () => {
-    const list = ArrayList$1.createPopulated(WAVE_COUNT, index =>
+    const list = arrayList.createPopulated(WAVE_COUNT, index =>
       create$e(index * HUE_INTERVAL)
     );
-    const timer = Timer.loop(
-      Timer.create({
+    const timer = index$1.loop(
+      index$1.create({
         duration: VERTEX_INTERVAL_DURATION,
-        onProgress: () => ArrayList$1.loop(list, update$4),
+        onProgress: () => arrayList.loop(list, update$4),
         onComplete: () => addNewVertex$1(list)
       })
     );
@@ -4320,11 +4306,11 @@
     p$1.push();
     p$1.blendMode(p$1.DIFFERENCE);
     p$1.noFill();
-    ArrayList$1.loop(waves.list, draw$2);
+    arrayList.loop(waves.list, draw$2);
     p$1.pop();
   };
   const reset$3 = waves => {
-    ArrayList$1.loop(waves.list, reset$2);
+    arrayList.loop(waves.list, reset$2);
     waves.timer.reset();
   };
 
@@ -4351,9 +4337,9 @@
   };
   const updateSketch = update$5.bind(undefined, waves);
   const drawSketch = () => {
-    translate$1(0, halfHeight);
+    translate(0, halfHeight);
     draw$3(waves);
-    undoTranslate$1();
+    undoTranslate();
   };
   const draw$4 = () => {
     updateSketch();

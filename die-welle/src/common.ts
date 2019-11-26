@@ -3,22 +3,31 @@
  */
 
 import p5 from "p5";
-import * as CCC from "@fal-works/creative-coding-core";
-import * as p5ex from "@fal-works/p5-extension";
-import { LOGICAL_CANVAS_SIZE } from "./settings";
-
-export const { ArrayList, ArrayUtility, Random, Timer } = CCC;
-export const { square, sin, createMap: createNumericMap, floor } = CCC.Numeric;
-export const { easeOutQuad } = CCC.Easing;
-
-export const {
+import {
+  ArrayList,
+  ArrayUtility,
+  Random,
+  Timer,
+  Numeric,
+  Easing
+} from "@fal-works/creative-coding-core";
+import {
   onSetup,
+  ScaledCanvas,
+  canvas as p5exCanvas,
   hsvColor,
   reverseColor,
   Noise,
   translate,
   undoTranslate
-} = p5ex;
+} from "@fal-works/p5-extension";
+import { LOGICAL_CANVAS_SIZE } from "./settings";
+
+export { ArrayList, ArrayUtility, Random, Timer };
+export const { square, sin, createMap: createNumericMap, floor } = Numeric;
+export const { easeOutQuad } = Easing;
+
+export { onSetup, hsvColor, reverseColor, Noise, translate, undoTranslate };
 
 export const { width, height } = LOGICAL_CANVAS_SIZE;
 export const halfHeight = height / 2;
@@ -39,8 +48,8 @@ onSetup.push(p5Instance => {
 /**
  * Shared canvas instance.
  */
-export let canvas: p5ex.ScaledCanvas;
+export let canvas: ScaledCanvas;
 
 onSetup.push(() => {
-  canvas = p5ex.canvas;
+  canvas = p5exCanvas;
 });
