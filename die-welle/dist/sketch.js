@@ -3034,6 +3034,7 @@
   });
 
   const CCC = /*#__PURE__*/ Object.freeze({
+    __proto__: null,
     Angle: angle,
     ArrayList: arrayList,
     ArrayUtility: arrayUtility,
@@ -4067,6 +4068,7 @@
   };
 
   const p5ex = /*#__PURE__*/ Object.freeze({
+    __proto__: null,
     AlphaColor: alphaColor,
     KeyBoard: keyboard,
     Mouse: mouse,
