@@ -6,4 +6,5 @@ yarn.lock
 note.txt
 tmp/
 private-assets/
+test/
 /package.json
