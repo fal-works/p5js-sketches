@@ -2,7 +2,7 @@
  * Falling.
  * Source code in TypeScript: https://github.com/fal-works/p5js-sketches/tree/master/falling
 
- * @copyright 2019 FAL
+ * @copyright 2020 FAL
  * @version 0.1.0
  */
 

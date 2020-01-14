@@ -8,6 +8,7 @@ const name = "falling";
 const title = "Falling";
 
 const version = "0.1.0";
+const year = "2020";
 const bundleFalWorksLibraries = false;
 const additionalBannerComment = ``;
 
@@ -31,7 +32,7 @@ const bannerComment =
  * ${title}.
  * Source code in TypeScript: ${url}
 ${bundledLibraries}
- * @copyright 2019 FAL
+ * @copyright ${year} FAL
  * @version ${version}
  */
 ` + additionalBannerComment;
