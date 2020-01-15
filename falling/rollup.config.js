@@ -9,7 +9,7 @@ const title = "Falling";
 
 const version = "0.1.0";
 const year = "2020";
-const bundleFalWorksLibraries = false;
+const bundleFalWorksLibraries = true;
 const additionalBannerComment = ``;
 
 const useP5Sound = false;
