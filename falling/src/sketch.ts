@@ -23,7 +23,7 @@ export const initialize = (): void => {
   p.background(252);
   drawBackground = storePixels();
 
-  p.noStroke();
+  p.imageMode(p.CENTER);
 
   reset();
 };

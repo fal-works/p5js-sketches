@@ -2,63 +2,61 @@
  * ---- Dot -------------------------------------------------------------------
  */
 
+import p5 from "p5";
 import * as CCC from "@fal-works/creative-coding-core";
-import { p, SimpleDynamics, ShapeColor, Timer, Tween, Easing } from "./common";
+import { p, onSetup, SimpleDynamics, Easing, min2 } from "./common";
 import { LOGICAL_CANVAS_SIZE } from "./settings";
 
 export interface DotUnit extends CCC.SimpleDynamics.Quantity {
-  alpha: number;
-  size: number;
+  frameCount: number;
 }
 
 export const Dot = (() => {
+  const expandDuration = 30;
+  const livingDuration = 90;
   const maxSize = 20;
-  const habitableZoneBottomY = LOGICAL_CANVAS_SIZE.height + maxSize;
+  const graphicsFrameSize = 24;
+  const habitableZoneBottomY =
+    LOGICAL_CANVAS_SIZE.height + graphicsFrameSize / 2;
+  let graphicsFrames: readonly p5.Graphics[];
 
-  const shapeColor = ShapeColor.create(undefined, [32, 192], 255);
+  const createGraphicsFrame = (index: number) => {
+    const alphaRatio = 1 - index / livingDuration;
+    const sizeRatio = min2(1, index / expandDuration);
+    const easeSize = Easing.Out.createBack(2);
 
-  const timerSet = Timer.Set.construct(1024);
-  const dotSizeTweenParameters: CCC.Tween.Parameters = {
-    start: maxSize / 2,
-    end: maxSize,
-    easing: Easing.Out.createBack()
+    const graphics = p.createGraphics(graphicsFrameSize, graphicsFrameSize);
+    graphics.translate(graphics.width / 2, graphics.height / 2);
+    graphics.noStroke();
+    graphics.fill(32, alphaRatio * 192);
+    graphics.circle(0, 0, maxSize * easeSize(sizeRatio));
+
+    return graphics;
   };
 
-  const create = (x: number, y: number): DotUnit => {
-    const dot = {
-      ...SimpleDynamics.createQuantity(x, y),
-      alpha: 255,
-      size: 0
-    };
-
-    timerSet.add(
-      Tween.create(
-        v => {
-          dot.size = v;
-        },
-        30,
-        dotSizeTweenParameters
-      )
+  onSetup.push(() => {
+    graphicsFrames = CCC.Arrays.createIntegerSequence(livingDuration).map(
+      createGraphicsFrame
     );
+  });
 
-    return dot;
-  };
+  const create = (x: number, y: number): DotUnit => ({
+    ...SimpleDynamics.createQuantity(x, y),
+    frameCount: 0
+  });
 
   const update = (dot: DotUnit) => {
     dot.fy = 0.05;
     SimpleDynamics.updateEuler(dot);
-    dot.alpha -= 2;
+    dot.frameCount += 1;
 
-    return dot.alpha <= 0 || dot.y >= habitableZoneBottomY;
+    return dot.frameCount >= livingDuration || dot.y >= habitableZoneBottomY;
   };
 
-  const draw = (dot: DotUnit) => {
-    ShapeColor.apply(shapeColor, dot.alpha);
-    p.circle(dot.x, dot.y, dot.size);
-  };
+  const draw = (dot: DotUnit) =>
+    p.image(graphicsFrames[dot.frameCount], dot.x, dot.y);
 
   return {
-    timerSet,
     create,
     update,
     draw

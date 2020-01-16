@@ -11,20 +11,18 @@ export const {
   Vector2D,
   SimpleDynamics,
   Random,
-  Timer,
-  Tween,
-  Easing,
-  Numeric: { cube }
+  Numeric: { cube, min2 },
+  Easing
 } = CCC;
 
-export const { Noise, ShapeColor } = p5ex;
+export const { onSetup, Noise } = p5ex;
 
 /**
  * Shared p5 instance.
  */
 export let p: p5;
 
-p5ex.onSetup.push(p5Instance => {
+onSetup.push(p5Instance => {
   p = p5Instance;
 });
 
@@ -33,6 +31,6 @@ p5ex.onSetup.push(p5Instance => {
  */
 export let canvas: p5ex.ScaledCanvas;
 
-p5ex.onSetup.push(() => {
+onSetup.push(() => {
   canvas = p5ex.canvas;
 });
