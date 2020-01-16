@@ -7,7 +7,7 @@ import cleanup from "rollup-plugin-cleanup";
 const name = "falling";
 const title = "Falling";
 
-const version = "0.1.0";
+const version = "0.1.1";
 const year = "2020";
 const bundleFalWorksLibraries = true;
 const additionalBannerComment = ``;

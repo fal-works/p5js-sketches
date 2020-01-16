@@ -7,7 +7,7 @@
  *   @fal-works/p5-extension (MIT license)
  *
  * @copyright 2020 FAL
- * @version 0.1.0
+ * @version 0.1.1
  */
 
 (function(p5) {
@@ -6045,24 +6045,22 @@
     Vector2D: Vector2D$1,
     SimpleDynamics,
     Random,
-    Timer: Timer$1,
-    Tween: Tween$1,
-    Easing,
-    Numeric: { cube: cube$1 }
+    Numeric: { cube: cube$1, min2: min2$1 },
+    Easing
   } = CCC;
-  const { Noise, ShapeColor } = p5ex;
+  const { onSetup: onSetup$1, Noise } = p5ex;
   /**
    * Shared p5 instance.
    */
   let p$1;
-  onSetup.push(p5Instance => {
+  onSetup$1.push(p5Instance => {
     p$1 = p5Instance;
   });
   /**
    * Shared canvas instance.
    */
   let canvas$1;
-  onSetup.push(() => {
+  onSetup$1.push(() => {
     canvas$1 = canvas;
   });
 
@@ -6089,43 +6087,41 @@
    * ---- Dot -------------------------------------------------------------------
    */
   const Dot = (() => {
+    const expandDuration = 30;
+    const livingDuration = 90;
     const maxSize = 20;
-    const habitableZoneBottomY = LOGICAL_CANVAS_SIZE.height + maxSize;
-    const shapeColor = ShapeColor.create(undefined, [32, 192], 255);
-    const timerSet = Timer$1.Set.construct(1024);
-    const dotSizeTweenParameters = {
-      start: maxSize / 2,
-      end: maxSize,
-      easing: Easing.Out.createBack()
+    const graphicsFrameSize = 24;
+    const habitableZoneBottomY =
+      LOGICAL_CANVAS_SIZE.height + graphicsFrameSize / 2;
+    let graphicsFrames;
+    const createGraphicsFrame = index => {
+      const alphaRatio = 1 - index / livingDuration;
+      const sizeRatio = min2$1(1, index / expandDuration);
+      const easeSize = Easing.Out.createBack(2);
+      const graphics = p$1.createGraphics(graphicsFrameSize, graphicsFrameSize);
+      graphics.translate(graphics.width / 2, graphics.height / 2);
+      graphics.noStroke();
+      graphics.fill(32, alphaRatio * 192);
+      graphics.circle(0, 0, maxSize * easeSize(sizeRatio));
+      return graphics;
     };
-    const create = (x, y) => {
-      const dot = Object.assign(
-        Object.assign({}, SimpleDynamics.createQuantity(x, y)),
-        { alpha: 255, size: 0 }
-      );
-      timerSet.add(
-        Tween$1.create(
-          v => {
-            dot.size = v;
-          },
-          30,
-          dotSizeTweenParameters
-        )
-      );
-      return dot;
-    };
+    onSetup$1.push(() => {
+      graphicsFrames = index
+        .createIntegerSequence(livingDuration)
+        .map(createGraphicsFrame);
+    });
+    const create = (x, y) =>
+      Object.assign(Object.assign({}, SimpleDynamics.createQuantity(x, y)), {
+        frameCount: 0
+      });
     const update = dot => {
       dot.fy = 0.05;
       SimpleDynamics.updateEuler(dot);
-      dot.alpha -= 2;
-      return dot.alpha <= 0 || dot.y >= habitableZoneBottomY;
+      dot.frameCount += 1;
+      return dot.frameCount >= livingDuration || dot.y >= habitableZoneBottomY;
     };
-    const draw = dot => {
-      ShapeColor.apply(shapeColor, dot.alpha);
-      p$1.circle(dot.x, dot.y, dot.size);
-    };
+    const draw = dot => p$1.image(graphicsFrames[dot.frameCount], dot.x, dot.y);
     return {
-      timerSet,
       create,
       update,
       draw
@@ -6138,7 +6134,6 @@
   const Dots = (() => {
     const list = ArrayList$1.create(1024);
     const update = () => {
-      Dot.timerSet.step();
       ArrayList$1.removeShiftAll(list, Dot.update);
     };
     const draw = () => ArrayList$1.loop(list, Dot.draw);
@@ -6254,7 +6249,7 @@
   const initialize = () => {
     p$1.background(252);
     drawBackground = storePixels();
-    p$1.noStroke();
+    p$1.imageMode(p$1.CENTER);
   };
   const updateSketch = () => {
     repeater.frequency = 18 * cube$1(noise$1());
