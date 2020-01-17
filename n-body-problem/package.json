@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "author": "FAL",
   "dependencies": {
-    "@fal-works/creative-coding-core": "0.7.0",
-    "@fal-works/p5-extension": "0.7.0",
+    "@fal-works/creative-coding-core": "0.7.1",
+    "@fal-works/p5-extension": "0.7.1",
     "p5": "^0.10.2"
   },
   "devDependencies": {
