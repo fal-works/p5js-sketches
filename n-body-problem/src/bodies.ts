@@ -1,3 +1,7 @@
+/**
+ * ---- Bodies ----------------------------------------------------------------
+ */
+
 import { canvas, ArrayList, Random, ShapeColor, square } from "./common";
 import { BodyUnit, Body } from "./body";
 

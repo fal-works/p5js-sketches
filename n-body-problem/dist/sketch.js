@@ -10519,6 +10519,9 @@
    */
   const LOGICAL_CANVAS_HEIGHT = 1080;
 
+  /**
+   * ---- Body ------------------------------------------------------------------
+   */
   Gravitation.setConstant(2000);
   const Body = (() => {
     const shellSize = 64;
@@ -10599,6 +10602,9 @@
     };
   })();
 
+  /**
+   * ---- Bodies ----------------------------------------------------------------
+   */
   const Bodies = (() => {
     const trailColor = ShapeColor.create([160, 0, 0], null, 1);
     const count = 16;
