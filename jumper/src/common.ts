@@ -36,21 +36,17 @@ onSetup.push(() => {
 });
 
 export let area: CCC.RectangleRegion.Unit;
-onSetup.push(() => {
+export let boundary: CCC.RectangleRegion.Unit;
+export let camera: p5ex.Camera.Unit;
+
+export const resetCommon = () => {
   area = RectangleRegion.createScaled(
     canvas.logicalRegion,
     2,
     RectangleRegion.ScaleOriginType.Center
   );
-});
-
-export let boundary: CCC.RectangleRegion.Unit;
-onSetup.push(() => {
   boundary = RectangleRegion.addMargin(area, -50);
-});
 
-export let camera: p5ex.Camera.Unit;
-onSetup.push(() => {
   camera = Camera.create({
     displaySize: canvas.logicalSize,
     regionBoundary: RectangleRegion.addMargins(area, {
@@ -62,4 +58,4 @@ onSetup.push(() => {
   });
   camera.zoomFactor = 1;
   camera.focusPointEasingFactor = 0.015;
-});
+};

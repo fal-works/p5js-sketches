@@ -10805,15 +10805,11 @@
     canvas$1 = canvas;
   });
   let area;
-  onSetup$1.push(() => {
-    area = RectangleRegion$1.createScaled(canvas$1.logicalRegion, 2, 1);
-  });
   let boundary;
-  onSetup$1.push(() => {
-    boundary = RectangleRegion$1.addMargin(area, -50);
-  });
   let camera$1;
-  onSetup$1.push(() => {
+  const resetCommon = () => {
+    area = RectangleRegion$1.createScaled(canvas$1.logicalRegion, 2, 1);
+    boundary = RectangleRegion$1.addMargin(area, -50);
     camera$1 = Camera.create({
       displaySize: canvas$1.logicalSize,
       regionBoundary: RectangleRegion$1.addMargins(area, {
@@ -10825,7 +10821,7 @@
     });
     camera$1.zoomFactor = 1;
     camera$1.focusPointEasingFactor = 0.015;
-  });
+  };
 
   /**
    * ---- Settings --------------------------------------------------------------
@@ -10984,6 +10980,7 @@
   const reset$3 = () => {
     p$1.background(252);
     drawBackground = storePixels();
+    resetCommon();
     Graph.reset();
   };
   const initialize = () => {

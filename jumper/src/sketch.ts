@@ -3,7 +3,7 @@
  */
 
 import { storePixels } from "@fal-works/p5-extension";
-import { p, canvas } from "./common";
+import { p, canvas, resetCommon } from "./common";
 import { Graph } from "./graph";
 
 // ---- variables | functions ----
@@ -14,6 +14,7 @@ export const reset = () => {
   p.background(252);
   drawBackground = storePixels();
 
+  resetCommon();
   Graph.reset();
 };
 
