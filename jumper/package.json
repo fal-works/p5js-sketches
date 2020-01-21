@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "author": "FAL",
   "dependencies": {
-    "@fal-works/creative-coding-core": "file:../../js-libraries/creative-coding-core",
-    "@fal-works/p5-extension": "file:../../js-libraries/p5-extension",
+    "@fal-works/creative-coding-core": "0.7.2",
+    "@fal-works/p5-extension": "0.7.2",
     "p5": "^0.10.2"
   },
   "devDependencies": {
