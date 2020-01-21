@@ -4,8 +4,8 @@ import cleanup from "rollup-plugin-cleanup";
 
 // ---- settings ------------
 
-const name = "jumber";
-const title = "Jumber";
+const name = "jumper";
+const title = "Jumper";
 
 const version = "0.1.0";
 const year = "2020";

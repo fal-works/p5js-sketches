@@ -1,6 +1,6 @@
 /**
- * Jumber.
- * Source code in TypeScript: https://github.com/fal-works/p5js-sketches/tree/master/jumber
+ * Jumper.
+ * Source code in TypeScript: https://github.com/fal-works/p5js-sketches/tree/master/jumper
  *
  * Bundled libraries:
  *   @fal-works/creative-coding-core (MIT license)
@@ -6510,7 +6510,7 @@
   /**
    * The id of the HTML element to which the canvas should belong.
    */
-  const HTML_ELEMENT_ID = "Jumber";
+  const HTML_ELEMENT_ID = "Jumper";
   /**
    * The logical height of the canvas.
    */
