@@ -6499,8 +6499,12 @@
    */
   const LOGICAL_CANVAS_HEIGHT = 800;
 
+  /**
+   * ---- Cone -------------------------------------------------------------------
+   */
   const randomBearingAngle = () => 2 * Random.angle();
   const randomInteriorAngle = () => Random.between(0.1, 0.8);
+  const randomDirectionOffsetAngle = () => Random.signed(0.2);
   const randomSaturation = () => Random.between(80, 100);
   const randomBrightness = () => Random.between(40, 80);
   let startPointDistance;
@@ -6519,12 +6523,14 @@
     const {
       bearingAngle: startBearingAngle,
       interiorAngle: startInteriorAngle,
+      directionOffsetAngle: startDirectionOffsetAngle,
       hue: startHue,
       saturation: startSaturation,
       brightness: startBrightness
     } = cone;
     const endBearingAngle = randomBearingAngle();
     const endInteriorAngle = randomInteriorAngle();
+    const endDirectionOffsetAngle = randomDirectionOffsetAngle();
     const endHue = (startHue + 110) % 360;
     const endSaturation = randomSaturation();
     const endBrightness = randomBrightness();
@@ -6536,6 +6542,11 @@
         cone.interiorAngle = lerp$2(
           startInteriorAngle,
           endInteriorAngle,
+          ratio
+        );
+        cone.directionOffsetAngle = lerp$2(
+          startDirectionOffsetAngle,
+          endDirectionOffsetAngle,
           ratio
         );
         cone.hue = lerp$2(startHue, endHue, ratio);
@@ -6555,6 +6566,7 @@
       rotationAngle,
       bearingAngle: randomBearingAngle(),
       interiorAngle: randomInteriorAngle(),
+      directionOffsetAngle: randomDirectionOffsetAngle(),
       hue,
       saturation: randomSaturation(),
       brightness: randomBrightness(),
@@ -6576,7 +6588,7 @@
       actualBearingAngle,
       startPoint
     );
-    const direction = actualBearingAngle + PI$1;
+    const direction = actualBearingAngle + PI$1 + cone.directionOffsetAngle;
     const halfInteriorAngle = cone.interiorAngle / 2;
     p$1.arc(
       startPoint.x,

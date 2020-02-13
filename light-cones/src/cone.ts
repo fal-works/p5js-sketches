@@ -20,6 +20,7 @@ export type Unit = {
   rotationAngle: number;
   bearingAngle: number;
   interiorAngle: number;
+  directionOffsetAngle: number;
   hue: number;
   saturation: number;
   brightness: number;
@@ -28,6 +29,7 @@ export type Unit = {
 
 const randomBearingAngle = () => 2 * Random.angle();
 const randomInteriorAngle = () => Random.between(0.1, 0.8);
+const randomDirectionOffsetAngle = () => Random.signed(0.2);
 const randomSaturation = () => Random.between(80, 100);
 const randomBrightness = () => Random.between(40, 80);
 
@@ -50,6 +52,7 @@ const createTimer = (cone: Unit) => {
   const {
     bearingAngle: startBearingAngle,
     interiorAngle: startInteriorAngle,
+    directionOffsetAngle: startDirectionOffsetAngle,
     hue: startHue,
     saturation: startSaturation,
     brightness: startBrightness
@@ -57,6 +60,8 @@ const createTimer = (cone: Unit) => {
 
   const endBearingAngle = randomBearingAngle();
   const endInteriorAngle = randomInteriorAngle();
+  const endDirectionOffsetAngle = randomDirectionOffsetAngle();
+
   const endHue = (startHue + 110) % 360;
   const endSaturation = randomSaturation();
   const endBrightness = randomBrightness();
@@ -68,6 +73,12 @@ const createTimer = (cone: Unit) => {
 
       cone.bearingAngle = lerp(startBearingAngle, endBearingAngle, ratio);
       cone.interiorAngle = lerp(startInteriorAngle, endInteriorAngle, ratio);
+      cone.directionOffsetAngle = lerp(
+        startDirectionOffsetAngle,
+        endDirectionOffsetAngle,
+        ratio
+      );
+
       cone.hue = lerp(startHue, endHue, ratio);
       cone.saturation = lerp(startSaturation, endSaturation, ratio);
       cone.brightness = lerp(startBrightness, endBrightness, ratio);
@@ -92,6 +103,7 @@ export const create = (
     rotationAngle,
     bearingAngle: randomBearingAngle(),
     interiorAngle: randomInteriorAngle(),
+    directionOffsetAngle: randomDirectionOffsetAngle(),
     hue,
     saturation: randomSaturation(),
     brightness: randomBrightness(),
@@ -116,7 +128,7 @@ export const draw = (cone: Unit) => {
 
   Vector2D.Assign.setPolar(startPointDistance, actualBearingAngle, startPoint);
 
-  const direction = actualBearingAngle + PI;
+  const direction = actualBearingAngle + PI + cone.directionOffsetAngle;
   const halfInteriorAngle = cone.interiorAngle / 2;
 
   p.arc(
