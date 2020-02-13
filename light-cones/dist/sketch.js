@@ -6519,7 +6519,6 @@
     diameter = 2 * radius;
   };
   const createTimer = cone => {
-    const wait = Timer$1.create({ duration: 60 });
     const {
       bearingAngle: startBearingAngle,
       interiorAngle: startInteriorAngle,
@@ -6535,7 +6534,7 @@
     const endSaturation = randomSaturation();
     const endBrightness = randomBrightness();
     const move = Timer$1.create({
-      duration: 60,
+      duration: 50,
       onProgress: listener => {
         const ratio = Easing.InOut.expo(listener.ratio);
         cone.bearingAngle = lerp$2(startBearingAngle, endBearingAngle, ratio);
@@ -6554,7 +6553,8 @@
         cone.brightness = lerp$2(startBrightness, endBrightness, ratio);
       }
     });
-    const timer = Timer$1.chain([wait, move]);
+    const wait = Timer$1.create({ duration: 77 });
+    const timer = Timer$1.chain([move, wait]);
     timer.onComplete.push(() => {
       cone.timer = createTimer(cone);
     });

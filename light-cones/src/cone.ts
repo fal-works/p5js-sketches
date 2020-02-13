@@ -47,8 +47,6 @@ export const reset = () => {
 };
 
 const createTimer = (cone: Unit) => {
-  const wait = Timer.create({ duration: 60 });
-
   const {
     bearingAngle: startBearingAngle,
     interiorAngle: startInteriorAngle,
@@ -67,7 +65,7 @@ const createTimer = (cone: Unit) => {
   const endBrightness = randomBrightness();
 
   const move = Timer.create({
-    duration: 60,
+    duration: 50,
     onProgress: listener => {
       const ratio = Easing.InOut.expo(listener.ratio);
 
@@ -85,7 +83,8 @@ const createTimer = (cone: Unit) => {
     }
   });
 
-  const timer = Timer.chain([wait, move]);
+  const wait = Timer.create({ duration: 77 });
+  const timer = Timer.chain([move, wait]);
   timer.onComplete.push(() => {
     cone.timer = createTimer(cone);
   });
