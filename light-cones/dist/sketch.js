@@ -6471,7 +6471,7 @@
     Timer: Timer$1,
     Easing
   } = CCC;
-  const { onSetup: onSetup$1, ShapeColor, Camera } = p5ex;
+  const { onSetup: onSetup$1 } = p5ex;
   /**
    * Shared p5 instance.
    */

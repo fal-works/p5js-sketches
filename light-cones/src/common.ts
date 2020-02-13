@@ -16,7 +16,7 @@ export const {
   Easing
 } = CCC;
 
-export const { onSetup, ShapeColor, Camera } = p5ex;
+export const { onSetup } = p5ex;
 
 /**
  * Shared p5 instance.
