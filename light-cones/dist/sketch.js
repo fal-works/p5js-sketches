@@ -6503,10 +6503,10 @@
    * ---- Cone -------------------------------------------------------------------
    */
   const randomBearingAngle = () => 2 * Random.angle();
-  const randomInteriorAngle = () => Random.between(0.1, 0.8);
-  const randomDirectionOffsetAngle = () => Random.signed(0.2);
+  const randomInteriorAngle = () => Random.between(0.1, 0.7);
+  const randomDirectionOffsetAngle = () => Random.signed(0.15);
   const randomSaturation = () => Random.between(80, 100);
-  const randomBrightness = () => Random.between(40, 80);
+  const randomBrightness = () => Random.between(60, 90);
   let startPointDistance;
   let diameter;
   const reset$2 = () => {
