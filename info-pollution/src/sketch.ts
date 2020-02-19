@@ -169,11 +169,14 @@ const keyTyped = () => {
     case p.ENTER:
     case p.RETURN:
     case p.BACKSPACE:
-      return;
+      return false;
   }
 
   addLetter(p.key);
+
+  return false;
 };
+
 const keyPressed = () => {
   if (!initialized) return;
 

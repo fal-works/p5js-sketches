@@ -6856,9 +6856,10 @@
       case p$1.ENTER:
       case p$1.RETURN:
       case p$1.BACKSPACE:
-        return;
+        return false;
     }
     addLetter(p$1.key);
+    return false;
   };
   const keyPressed = () => {
     if (!initialized) return;
