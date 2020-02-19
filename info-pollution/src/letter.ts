@@ -39,7 +39,7 @@ export const Letter = (() => {
     return g;
   };
 
-  const defaultColor = ShapeColor.create(null, "#000000", 1);
+  const defaultColor = ShapeColor.create(null, "#202020", 1);
   const pollutedColor = ShapeColor.create(null, "#ff0099", 1);
 
   const createDraw = (value: string, polluted: boolean): LetterUnit["draw"] => {

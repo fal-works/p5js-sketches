@@ -6660,7 +6660,7 @@
       g.text(value, 0, fontSize);
       return g;
     };
-    const defaultColor = ShapeColor.create(null, "#000000", 1);
+    const defaultColor = ShapeColor.create(null, "#202020", 1);
     const pollutedColor = ShapeColor.create(null, "#ff0099", 1);
     const createDraw = (value, polluted) => {
       const color = polluted ? pollutedColor : defaultColor;
@@ -6846,7 +6846,13 @@
     drawTextCursor();
   };
   const draw$5 = () => {
-    if (!initialized) return;
+    if (!initialized) {
+      if (p$1.frameCount > 60) {
+        reset$2();
+        initialized = true;
+      }
+      return;
+    }
     updateSketch();
     drawBackground();
     canvas$1.drawScaled(drawSketch);

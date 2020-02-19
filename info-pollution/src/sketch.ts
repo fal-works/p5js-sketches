@@ -154,7 +154,14 @@ const drawSketch = () => {
 };
 
 const draw = (): void => {
-  if (!initialized) return;
+  if (!initialized) {
+    if (p.frameCount > 60) {
+      reset();
+      initialized = true;
+    }
+
+    return;
+  }
 
   updateSketch();
 
