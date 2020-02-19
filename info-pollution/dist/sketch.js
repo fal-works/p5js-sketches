@@ -6807,7 +6807,7 @@
       const currentTextWidth = p$1.textWidth(testString);
       if (
         currentTextWidth !== initialTextWidth ||
-        currentTextWidth === properTextWidth
+        Math.floor(currentTextWidth) === properTextWidth
       ) {
         reset$2();
         initialized = true;

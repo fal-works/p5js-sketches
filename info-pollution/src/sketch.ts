@@ -99,7 +99,7 @@ export const initialize = (): void => {
     const currentTextWidth = p.textWidth(testString);
     if (
       currentTextWidth !== initialTextWidth ||
-      currentTextWidth === properTextWidth
+      Math.floor(currentTextWidth) === properTextWidth
     ) {
       reset();
       initialized = true;
