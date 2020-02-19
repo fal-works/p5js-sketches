@@ -6852,8 +6852,12 @@
     canvas$1.drawScaled(drawSketch);
   };
   const keyTyped = () => {
-    const { keyCode: code } = p$1;
-    if (code < 32 || code > 126) return;
+    switch (p$1.keyCode) {
+      case p$1.ENTER:
+      case p$1.RETURN:
+      case p$1.BACKSPACE:
+        return;
+    }
     addLetter(p$1.key);
   };
   const keyPressed = () => {

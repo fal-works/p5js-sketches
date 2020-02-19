@@ -165,8 +165,12 @@ const draw = (): void => {
 // ---- UI ----
 
 const keyTyped = () => {
-  const { keyCode: code } = p;
-  if (code < 32 || code > 126) return;
+  switch (p.keyCode) {
+    case p.ENTER:
+    case p.RETURN:
+    case p.BACKSPACE:
+      return;
+  }
 
   addLetter(p.key);
 };
