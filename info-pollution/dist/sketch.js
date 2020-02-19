@@ -6733,6 +6733,7 @@
   let x;
   let y;
   let initialized = false;
+  let intervalId = undefined;
   const minX = 30;
   const minY = 30;
   const resetLetters = () => {
@@ -6793,6 +6794,14 @@
     clearArea();
     addInitialSentences();
   };
+  const completeInitialize = () => {
+    reset$2();
+    initialized = true;
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = undefined;
+    }
+  };
   const initialize = () => {
     p$1.textFont(fontName, fontSize);
     const testString = "MMMMMMMMMM";
@@ -6803,15 +6812,13 @@
       initialized = true;
       return;
     }
-    const timeout = setInterval(() => {
+    intervalId = setInterval(() => {
       const currentTextWidth = p$1.textWidth(testString);
       if (
         currentTextWidth !== initialTextWidth ||
         Math.floor(currentTextWidth) === properTextWidth
       ) {
-        reset$2();
-        initialized = true;
-        clearInterval(timeout);
+        completeInitialize();
       }
     }, 100);
     p$1.text("Loading...", 100, 100);
@@ -6847,10 +6854,7 @@
   };
   const draw$5 = () => {
     if (!initialized) {
-      if (p$1.frameCount > 60) {
-        reset$2();
-        initialized = true;
-      }
+      if (p$1.frameCount > 60) completeInitialize();
       return;
     }
     updateSketch();

@@ -13,6 +13,7 @@ const letters: LetterUnit[] = [];
 let x: number;
 let y: number;
 let initialized = false;
+let intervalId: NodeJS.Timeout | undefined = undefined;
 const minX = 30;
 const minY = 30;
 
@@ -84,6 +85,16 @@ export const reset = () => {
   addInitialSentences();
 };
 
+const completeInitialize = () => {
+  reset();
+  initialized = true;
+
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = undefined;
+  }
+};
+
 export const initialize = (): void => {
   p.textFont(fontName, fontSize);
   const testString = "MMMMMMMMMM";
@@ -95,15 +106,13 @@ export const initialize = (): void => {
     return;
   }
 
-  const timeout = setInterval(() => {
+  intervalId = setInterval(() => {
     const currentTextWidth = p.textWidth(testString);
     if (
       currentTextWidth !== initialTextWidth ||
       Math.floor(currentTextWidth) === properTextWidth
     ) {
-      reset();
-      initialized = true;
-      clearInterval(timeout);
+      completeInitialize();
     }
   }, 100);
 
@@ -155,11 +164,7 @@ const drawSketch = () => {
 
 const draw = (): void => {
   if (!initialized) {
-    if (p.frameCount > 60) {
-      reset();
-      initialized = true;
-    }
-
+    if (p.frameCount > 60) completeInitialize();
     return;
   }
 
