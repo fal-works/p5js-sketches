@@ -165,18 +165,14 @@ const draw = (): void => {
 // ---- UI ----
 
 const keyTyped = () => {
-  if (!initialized) return;
-
   switch (p.keyCode) {
     case p.ENTER:
     case p.RETURN:
     case p.BACKSPACE:
-      return false;
+      return;
   }
 
   addLetter(p.key);
-
-  return false;
 };
 const keyPressed = () => {
   if (!initialized) return;
@@ -193,8 +189,6 @@ const keyPressed = () => {
       clearArea();
       break;
   }
-
-  return false;
 };
 
 // ---- p5 methods ----
