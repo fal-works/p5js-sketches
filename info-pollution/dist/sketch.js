@@ -6852,13 +6852,15 @@
     canvas$1.drawScaled(drawSketch);
   };
   const keyTyped = () => {
+    if (!initialized) return;
     switch (p$1.keyCode) {
       case p$1.ENTER:
       case p$1.RETURN:
       case p$1.BACKSPACE:
-        return;
+        return false;
     }
     addLetter(p$1.key);
+    return false;
   };
   const keyPressed = () => {
     if (!initialized) return;
@@ -6874,6 +6876,7 @@
         clearArea();
         break;
     }
+    return false;
   };
   const p5Methods = {
     draw: draw$5,
