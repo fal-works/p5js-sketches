@@ -24,7 +24,7 @@ export const Letter = (() => {
 
   const createLetterGraphics = (value: string, color: p5ex.ShapeColor.Unit) => {
     p.textFont(fontName, fontSize);
-    const width = Math.max(fontSize, p.textWidth(value));
+    const width = Math.max(fontSize, p.textWidth(value) + 10);
     const height = 1.3 * fontSize;
 
     const g = p.createGraphics(width, height);
@@ -90,7 +90,7 @@ export const Letter = (() => {
 
     letter.isAlive = false;
 
-    return create(letter.x, letter.y, newValue, true);
+    return create(letter.targetX, letter.targetY, newValue, true);
   };
 
   const update = (letter: LetterUnit) => {

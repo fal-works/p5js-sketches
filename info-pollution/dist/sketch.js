@@ -6602,9 +6602,7 @@
         "|9",
         "2",
         "12",
-        "R",
         "[z",
-        "Я",
         ".-",
         "|2",
         "|-"
@@ -6650,7 +6648,7 @@
     const emptyFunction = () => {};
     const createLetterGraphics = (value, color) => {
       p$1.textFont(fontName, fontSize);
-      const width = Math.max(fontSize, p$1.textWidth(value));
+      const width = Math.max(fontSize, p$1.textWidth(value) + 10);
       const height = 1.3 * fontSize;
       const g = p$1.createGraphics(width, height);
       g.textFont(fontName, fontSize);
@@ -6694,7 +6692,7 @@
       const newValue = Leet.convertRandom(letter.value.toLowerCase());
       if (!newValue) return undefined;
       letter.isAlive = false;
-      return create(letter.x, letter.y, newValue, true);
+      return create(letter.targetX, letter.targetY, newValue, true);
     };
     const update = letter => {
       letter.frameCount += 1;
