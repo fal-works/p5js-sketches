@@ -4,8 +4,8 @@ import cleanup from "rollup-plugin-cleanup";
 
 // ---- settings ------------
 
-const name = "info-pollution";
-const title = "InfoPollution";
+const name = "unary-numeral-system";
+const title = "UnaryNumeralSystem";
 
 const version = "0.1.0";
 const year = "2020";
@@ -39,16 +39,16 @@ ${bundledLibraries}
 
 const typescriptPlugin = typescript({
   useTsconfigDeclarationDir: true,
-  clean: cleanBuild
+  clean: cleanBuild,
 });
 
 const cleanupPlugin = cleanup({
   comments: /^\*\*/, // preserve multiline comments
-  extensions: ["ts"]
+  extensions: ["ts"],
 });
 
 const globals = {
-  p5: "p5"
+  p5: "p5",
 };
 if (!bundleFalWorksLibraries) {
   globals["@fal-works/creative-coding-core"] = "CreativeCodingCore";
@@ -65,7 +65,7 @@ if (bundleFalWorksLibraries)
   plugins.unshift(
     resolve({
       extensions: [".mjs"],
-      modulesOnly: true
+      modulesOnly: true,
     })
   );
 
@@ -77,13 +77,13 @@ const config = {
     sourcemap: true,
     banner: bannerComment,
     preferConst: true,
-    globals
+    globals,
   },
   treeshake: {
-    propertyReadSideEffects: false
+    propertyReadSideEffects: false,
   },
   external,
-  plugins
+  plugins,
 };
 
 export default config;

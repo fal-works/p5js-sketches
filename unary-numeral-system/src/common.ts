@@ -8,7 +8,7 @@ import * as p5ex from "@fal-works/p5-extension";
 
 export const { Random } = CCC;
 
-export const { onSetup, ShapeColor, setRenderer } = p5ex;
+export const { onSetup, translate, undoTranslate } = p5ex;
 
 /**
  * Shared p5 instance.
