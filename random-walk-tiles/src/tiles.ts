@@ -8,6 +8,11 @@ import * as Tile from "./tile";
 const list = ArrayList.create<Tile.Unit>(256);
 const grid: Tile.Unit[][] = [];
 
+export const reset = () => {
+  ArrayList.clearReference(list);
+  while (grid.length > 0) grid.pop();
+};
+
 export const add = (tile: Tile.Unit) => {
   const x = Math.floor(tile.x / Tile.size);
   const y = Math.floor(tile.y / Tile.size);

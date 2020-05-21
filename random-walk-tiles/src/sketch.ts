@@ -13,25 +13,28 @@ let lastTile: Tile.Unit;
 
 // ---- reset & initialize ----
 export const reset = () => {
+  p.blendMode(p.REPLACE);
   p.background(252);
   drawBackground = storePixels();
+  p.blendMode(p.DARKEST);
+
   resetCommon();
+  Tiles.reset();
+
+  const canvasSize = canvas.logicalSize;
+  const x = 0.5 * canvasSize.width;
+  const y = 0.5 * canvasSize.height;
+  lastTile = Tile.create(x, y, Random.value(360));
 };
 
 export const initialize = (): void => {
   reset();
   p.noStroke();
   p.rectMode(p.CENTER);
-  p.blendMode(p.DARKEST);
 
   context.shadowOffsetX = 6;
   context.shadowOffsetY = 6;
   context.shadowBlur = 16;
-
-  const canvasSize = canvas.logicalSize;
-  const x = 0.5 * canvasSize.width;
-  const y = 0.5 * canvasSize.height;
-  lastTile = Tile.create(x, y, Random.value(360));
 };
 
 // ---- draw ----

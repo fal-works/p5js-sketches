@@ -91,6 +91,10 @@
    */
   const list = ArrayList.create(256);
   const grid = [];
+  const reset = () => {
+    ArrayList.clearReference(list);
+    while (grid.length > 0) grid.pop();
+  };
   const add = (tile) => {
     const x = Math.floor(tile.x / size);
     const y = Math.floor(tile.y / size);
@@ -108,22 +112,24 @@
    */
   let drawBackground;
   let lastTile;
-  const reset = () => {
+  const reset$1 = () => {
+    p.blendMode(p.REPLACE);
     p.background(252);
     drawBackground = p5ex.storePixels();
-  };
-  const initialize = () => {
-    reset();
-    p.noStroke();
-    p.rectMode(p.CENTER);
     p.blendMode(p.DARKEST);
-    context.shadowOffsetX = 6;
-    context.shadowOffsetY = 6;
-    context.shadowBlur = 16;
+    reset();
     const canvasSize = canvas.logicalSize;
     const x = 0.5 * canvasSize.width;
     const y = 0.5 * canvasSize.height;
     lastTile = create(x, y, Random.value(360));
+  };
+  const initialize = () => {
+    reset$1();
+    p.noStroke();
+    p.rectMode(p.CENTER);
+    context.shadowOffsetX = 6;
+    context.shadowOffsetY = 6;
+    context.shadowBlur = 16;
   };
   const addNewTile = () => {
     let x = 0;
@@ -186,7 +192,7 @@
         p.save("image.png");
         break;
       case "r":
-        reset();
+        reset$1();
         break;
     }
     return false;
@@ -204,7 +210,7 @@
     logicalCanvasHeight: LOGICAL_CANVAS_HEIGHT,
     initialize: initialize,
     windowResized: () => canvas.resizeIfNeeded(),
-    onCanvasResized: reset,
+    onCanvasResized: reset$1,
     p5Methods: p5Methods,
   });
 })(p5ex, CreativeCodingCore);
