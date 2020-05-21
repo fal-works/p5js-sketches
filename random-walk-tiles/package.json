@@ -1,0 +1,44 @@
+{
+  "name": "none",
+  "description": "none",
+  "version": "0.1.0",
+  "author": "FAL",
+  "dependencies": {
+    "@fal-works/creative-coding-core": "0.9.0",
+    "@fal-works/p5-extension": "0.9.0",
+    "p5": "^1.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^7.1.3",
+    "@types/p5": "^0.9.0",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "eslint": "7.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.5",
+    "rollup": "^2.10.5",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "terser": "^4.7.0",
+    "typescript": "^3.9.3"
+  },
+  "eslintIgnore": [
+    "*.min.js"
+  ],
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "main": "dist/sketch.js",
+  "private": true,
+  "scripts": {
+    "build": "npm-run-all rollup eslint minify",
+    "eslint": "eslint --fix ./dist/sketch.js",
+    "lint": "eslint --fix ./src/**/*.ts",
+    "lint_": "eslint --fix ./*.js",
+    "rollup": "rollup -c",
+    "minify": "terser ./dist/sketch.js -c -m -o ./dist/sketch.min.js --comments /@copyright/ --ecma 6"
+  }
+}
