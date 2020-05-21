@@ -1,3 +1,7 @@
+/**
+ * ---- Tile ------------------------------------------------------------------
+ */
+
 import { p, HSV, Random, Numeric, Easing, context } from "./common";
 
 export const size = 36;

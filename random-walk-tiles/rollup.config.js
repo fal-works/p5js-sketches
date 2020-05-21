@@ -23,7 +23,7 @@ const bundledLibraries = bundleFalWorksLibraries
  *   @fal-works/creative-coding-core (MIT license)
  *   @fal-works/p5-extension (MIT license)
  *`
-  : "";
+  : " *";
 
 const url = `https://github.com/fal-works/p5js-sketches/tree/master/${name}`;
 

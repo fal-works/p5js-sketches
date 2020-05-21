@@ -1,3 +1,7 @@
+/**
+ * ---- Tiles -----------------------------------------------------------------
+ */
+
 import { ArrayList } from "./common";
 import * as Tile from "./tile";
 

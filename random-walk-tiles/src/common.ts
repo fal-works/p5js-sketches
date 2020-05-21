@@ -6,7 +6,7 @@ import p5 from "p5";
 import * as CCC from "@fal-works/creative-coding-core";
 import * as p5ex from "@fal-works/p5-extension";
 
-export const { Numeric, Arrays, ArrayList, HSV, Random, Easing } = CCC;
+export const { Numeric, ArrayList, HSV, Random, Easing } = CCC;
 
 export const { onSetup, onInstantiate } = p5ex;
 

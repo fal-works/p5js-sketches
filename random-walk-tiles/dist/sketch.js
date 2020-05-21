@@ -1,7 +1,7 @@
 /**
  * Random Walk Tiles.
  * Source code in TypeScript: https://github.com/fal-works/p5js-sketches/tree/master/random-walk-tiles
-
+ *
  * @copyright 2020 FAL
  * @version 0.1.0
  */
@@ -12,7 +12,7 @@
   /**
    * ---- Common ----------------------------------------------------------------
    */
-  const { Numeric, Arrays, ArrayList, HSV, Random, Easing } = CCC;
+  const { Numeric, ArrayList, HSV, Random, Easing } = CCC;
   const { onSetup, onInstantiate } = p5ex;
   /**
    * Shared p5 instance.
@@ -42,6 +42,9 @@
   /** The logical height of the canvas. */
   const LOGICAL_CANVAS_HEIGHT = 1080;
 
+  /**
+   * ---- Tile ------------------------------------------------------------------
+   */
   const size = 36;
   const drawSize = 28;
   const radius = 4;
@@ -83,6 +86,9 @@
     p.rect(tile.x, tile.y, drawSize, drawSize, radius);
   };
 
+  /**
+   * ---- Tiles -----------------------------------------------------------------
+   */
   const list = ArrayList.create(256);
   const grid = [];
   const add = (tile) => {
