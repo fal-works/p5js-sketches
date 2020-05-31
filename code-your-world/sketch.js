@@ -5,7 +5,7 @@
 });
 
 出でよ円 = (点) => 円(点.東, 点.南, 点.径);
-出でよ四方 = (点) => 四方(点.東, 点.南, 方拡率 * 点.径);
+出でよ方 = (点) => 方(点.東, 点.南, 方拡率 * 点.径);
 
 出でよ線 = (甲, 乙) => {
   角 = 逆正接(乙.南 - 甲.南, 乙.東 - 甲.東);
@@ -28,8 +28,8 @@
 出でよ方円 = () => {
   出でよ空();
   出でよ道();
-  出でよ四方(示せ在処());
-  出でよ四方(示せ在処());
+  出でよ方(示せ在処());
+  出でよ方(示せ在処());
 };
 
 // ----------------------------------------------------------------
@@ -39,14 +39,14 @@ const scaleFactor = 0.75;
 const 出でよ空 = () => {
   createCanvas(scaleFactor * 東西, scaleFactor * 南北);
   scale(scaleFactor);
+
+  background(248);
+  stroke(32);
   strokeWeight(4);
   noFill();
   ellipseMode(RADIUS);
 
-  background(248);
-  stroke(32);
-  square(1, 1, 東西 - 2, 南北 - 2);
-  noFill();
+  square(2, 2, 東西 - 4, 南北 - 4);
 
   drawingContext.shadowOffsetX = scaleFactor * 20;
   drawingContext.shadowOffsetY = scaleFactor * 20;
@@ -65,7 +65,7 @@ const 方拡率 = 5;
 const 余白率 = 0.1;
 const 乱 = (min, max) => random(min, max);
 const 円 = (x, y, d) => circle(x, y, d);
-const 四方 = (x, y, d) => square(x, y, d);
+const 方 = (x, y, d) => square(x, y, d);
 const 線 = (x1, y1, x2, y2) => line(x1, y1, x2, y2);
 const 正弦 = Math.sin;
 const 余弦 = Math.cos;
