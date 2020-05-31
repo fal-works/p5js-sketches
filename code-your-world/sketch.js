@@ -37,7 +37,7 @@
 
 // ----------------------------------------------------------------
 
-const scaleFactor = 4;
+const scaleFactor = 0.75;
 
 const 出でよ空 = () => {
   createCanvas(scaleFactor * 東西, scaleFactor * 南北);
