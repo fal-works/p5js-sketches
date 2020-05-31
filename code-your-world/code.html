@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="content-language" content="ja">
+  <style type="text/css">
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <pre><code class="language-javascript">
+    示せ在処 = () => ({
+      東: 乱(余白率 * 東西, (壱 - 余白率) * 東西),
+      南: 乱(余白率 * 南北, (壱 - 余白率) * 南北),
+      径: 乱(最小径, 最大径),
+    });
+
+    出でよ円 = (点) => 円(点.東, 点.南, 点.径);
+    出でよ四方 = (点) => 四方(点.東, 点.南, 方拡率 * 点.径);
+
+    出でよ線 = (甲, 乙) => {
+      角 = 逆正接(乙.南 - 甲.南, 乙.東 - 甲.東);
+      線(
+        甲.東 + 甲.径 * 余弦(角),
+        甲.南 + 甲.径 * 正弦(角),
+        乙.東 - 乙.径 * 余弦(角),
+        乙.南 - 乙.径 * 正弦(角)
+      );
+    };
+
+    出でよ道 = () => {
+      出でよ円((点 = 示せ在処()));
+      for (_ = 零; _ < 円数; ++_) {
+        出でよ線(点, (次点 = 示せ在処()));
+        出でよ円((点 = 次点));
+      }
+    };
+
+    出でよ方円 = () => {
+      出でよ空();
+      出でよ道();
+      出でよ四方(示せ在処());
+      出でよ四方(示せ在処());
+    };
+  </code></pre>
+</body>
+
+</html>
