@@ -124,12 +124,14 @@ const mousePressed = () => {
   Mouse.updatePosition();
   const { x: mx, y: my } = Mouse.position;
   epicenters.push(Epicenter.create(mx, my));
+  return false;
 };
 
 const mouseMoved = () => {
   Mouse.updatePosition();
   const shape = searchShape();
   if (shape) Shape.impact(shape);
+  return false;
 };
 
 const keyTyped = () => {

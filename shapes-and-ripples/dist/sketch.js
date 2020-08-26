@@ -252,11 +252,13 @@
     Mouse.updatePosition();
     const { x: mx, y: my } = Mouse.position;
     epicenters.push(create$1(mx, my));
+    return false;
   };
   const mouseMoved = () => {
     Mouse.updatePosition();
     const shape = searchShape();
     if (shape) impact(shape);
+    return false;
   };
   const keyTyped = () => {
     switch (p.key) {
