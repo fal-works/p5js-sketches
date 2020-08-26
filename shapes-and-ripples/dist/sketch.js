@@ -277,6 +277,7 @@
     keyTyped,
     mousePressed,
     mouseMoved,
+    mouseDragged: mouseMoved,
   };
 
   /**

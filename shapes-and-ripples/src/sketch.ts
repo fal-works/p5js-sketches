@@ -155,4 +155,5 @@ export const p5Methods = {
   keyTyped,
   mousePressed,
   mouseMoved,
+  mouseDragged: mouseMoved,
 };
