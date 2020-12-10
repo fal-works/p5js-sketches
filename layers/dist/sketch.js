@@ -144,23 +144,25 @@
       return h;
     };
     for (let i = 0; i < 4; i += 1) {
-      const x = creativeCodingCore.Random.between(
-        topLeft.x,
-        bottomRight.x - maxWidth
+      const w = creativeCodingCore.Random.Curved.between(
+        creativeCodingCore.Numeric.cube,
+        minWidth,
+        maxWidth
       );
-      const y = 0;
-      const w = creativeCodingCore.Random.between(minWidth, maxWidth);
       const h = canvasHeight;
+      const x = creativeCodingCore.Random.between(topLeft.x, bottomRight.x - w);
+      const y = 0;
       rectangles.push(createRectangle(x, y, w, h, 1, hue()));
     }
     for (let i = 0; i < 3; i += 1) {
-      const x = 0;
-      const y = creativeCodingCore.Random.between(
-        topLeft.y,
-        bottomRight.y - maxHeight
-      );
       const w = canvasWidth;
-      const h = creativeCodingCore.Random.between(minHeight, maxHeight);
+      const h = creativeCodingCore.Random.Curved.between(
+        creativeCodingCore.Numeric.cube,
+        minHeight,
+        maxHeight
+      );
+      const x = 0;
+      const y = creativeCodingCore.Random.between(topLeft.y, bottomRight.y - h);
       rectangles.push(createRectangle(x, y, w, h, 0, hue()));
     }
   };

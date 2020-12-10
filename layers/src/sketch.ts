@@ -3,7 +3,7 @@
  */
 
 import { pauseOrResume } from "@fal-works/p5-extension";
-import { Random } from "@fal-works/creative-coding-core";
+import { Random, Numeric } from "@fal-works/creative-coding-core";
 import { p, canvas } from "./common";
 import {
   Rectangle,
@@ -35,17 +35,17 @@ const addRectangles = (): void => {
   };
 
   for (let i = 0; i < 4; i += 1) {
-    const x = Random.between(topLeft.x, bottomRight.x - maxWidth);
-    const y = 0;
-    const w = Random.between(minWidth, maxWidth);
+    const w = Random.Curved.between(Numeric.cube, minWidth, maxWidth);
     const h = canvasHeight;
+    const x = Random.between(topLeft.x, bottomRight.x - w);
+    const y = 0;
     rectangles.push(createRectangle(x, y, w, h, RectangleType.Vertical, hue()));
   }
   for (let i = 0; i < 3; i += 1) {
-    const x = 0;
-    const y = Random.between(topLeft.y, bottomRight.y - maxHeight);
     const w = canvasWidth;
-    const h = Random.between(minHeight, maxHeight);
+    const h = Random.Curved.between(Numeric.cube, minHeight, maxHeight);
+    const x = 0;
+    const y = Random.between(topLeft.y, bottomRight.y - h);
     rectangles.push(
       createRectangle(x, y, w, h, RectangleType.Horizontal, hue())
     );
