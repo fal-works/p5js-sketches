@@ -1,7 +1,7 @@
 {
   "name": "none",
   "description": "none",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "FAL",
   "dependencies": {
     "@fal-works/creative-coding-core": "0.10.0",

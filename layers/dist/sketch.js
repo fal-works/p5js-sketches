@@ -3,7 +3,7 @@
  * Source code in TypeScript: https://github.com/fal-works/p5js-sketches/tree/master/layers
  *
  * @copyright 2020 FAL
- * @version 0.1.0
+ * @version 0.1.1
  */
 
 (function (p5ex, creativeCodingCore, chroma) {

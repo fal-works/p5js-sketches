@@ -7,7 +7,7 @@ import cleanup from "rollup-plugin-cleanup";
 const name = "layers";
 const title = "Layers";
 
-const version = "0.1.0";
+const version = "0.1.1";
 const year = "2020";
 const bundleFalWorksLibraries = false;
 const additionalBannerComment = ``;
