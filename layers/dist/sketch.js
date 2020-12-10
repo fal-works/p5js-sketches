@@ -73,7 +73,7 @@
    * ---- Rectangle -------------------------------------------------------------
    */
   const maxAlpha = 160;
-  const createRectangle = (x, y, width, height, type) => {
+  const createRectangle = (x, y, width, height, type, hue) => {
     let bounds;
     switch (type) {
       case 0:
@@ -83,9 +83,7 @@
         bounds = { x, y, width: 0, height };
         break;
     }
-    const c = chroma__default["default"]
-      .lch(95, 120, Math.random() * 360)
-      .rgb();
+    const c = chroma__default["default"].lch(95, 120, hue).rgb();
     return {
       bounds,
       targetBounds: { x, y, width, height },
@@ -135,19 +133,25 @@
     const minHeight = 0.1 * canvasHeight;
     const maxWidth = 0.7 * canvasWidth;
     const maxHeight = 0.7 * canvasHeight;
+    const hueArray = [];
+    const hue = () => {
+      let h = 0;
+      for (let i = 0; i < 1000; i += 1) {
+        h = creativeCodingCore.Random.Integer.value(36) * 10;
+        if (!hueArray.includes(h)) break;
+      }
+      hueArray.push(h);
+      return h;
+    };
     for (let i = 0; i < 4; i += 1) {
       const x = creativeCodingCore.Random.between(
         topLeft.x,
         bottomRight.x - maxWidth
       );
       const y = 0;
-      const w = creativeCodingCore.Random.Curved.between(
-        creativeCodingCore.Numeric.square,
-        minWidth,
-        maxWidth
-      );
+      const w = creativeCodingCore.Random.between(minWidth, maxWidth);
       const h = canvasHeight;
-      rectangles.push(createRectangle(x, y, w, h, 1));
+      rectangles.push(createRectangle(x, y, w, h, 1, hue()));
     }
     for (let i = 0; i < 3; i += 1) {
       const x = 0;
@@ -156,12 +160,8 @@
         bottomRight.y - maxHeight
       );
       const w = canvasWidth;
-      const h = creativeCodingCore.Random.Curved.between(
-        creativeCodingCore.Numeric.square,
-        minHeight,
-        maxHeight
-      );
-      rectangles.push(createRectangle(x, y, w, h, 0));
+      const h = creativeCodingCore.Random.between(minHeight, maxHeight);
+      rectangles.push(createRectangle(x, y, w, h, 0, hue()));
     }
   };
   const updateSketch = () => {

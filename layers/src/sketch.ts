@@ -23,20 +23,32 @@ const addRectangles = (): void => {
   const minHeight = 0.1 * canvasHeight;
   const maxWidth = 0.7 * canvasWidth;
   const maxHeight = 0.7 * canvasHeight;
+  const hueArray: number[] = [];
+  const hue = (): number => {
+    let h = 0;
+    for (let i = 0; i < 1000; i += 1) {
+      h = Random.Integer.value(36) * 10;
+      if (!hueArray.includes(h)) break;
+    }
+    hueArray.push(h);
+    return h;
+  };
 
   for (let i = 0; i < 4; i += 1) {
     const x = Random.between(topLeft.x, bottomRight.x - maxWidth);
     const y = 0;
     const w = Random.between(minWidth, maxWidth);
     const h = canvasHeight;
-    rectangles.push(createRectangle(x, y, w, h, RectangleType.Vertical));
+    rectangles.push(createRectangle(x, y, w, h, RectangleType.Vertical, hue()));
   }
   for (let i = 0; i < 3; i += 1) {
     const x = 0;
     const y = Random.between(topLeft.y, bottomRight.y - maxHeight);
     const w = canvasWidth;
     const h = Random.between(minHeight, maxHeight);
-    rectangles.push(createRectangle(x, y, w, h, RectangleType.Horizontal));
+    rectangles.push(
+      createRectangle(x, y, w, h, RectangleType.Horizontal, hue())
+    );
   }
 };
 

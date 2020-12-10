@@ -35,7 +35,8 @@ export const createRectangle = (
   y: number,
   width: number,
   height: number,
-  type: RectangleType
+  type: RectangleType,
+  hue: number
 ): Rectangle => {
   let bounds: Bounds;
   switch (type) {
@@ -46,7 +47,7 @@ export const createRectangle = (
       bounds = { x, y, width: 0, height };
       break;
   }
-  const c = chroma.lch(95, 120, Math.random() * 360).rgb();
+  const c = chroma.lch(95, 120, hue).rgb();
   return {
     bounds,
     targetBounds: { x, y, width, height },
